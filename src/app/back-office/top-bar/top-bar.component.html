@@ -1,0 +1,62 @@
+<div class="m-header premium-branding">
+  <a href="javascript:void(0)" class="mobile-menu" (click)="toggleNav()"><span></span></a>
+  <a href="/" class="b-brand">
+    <div class="logo-container">
+      <img src="logo.png" alt="AgriProtect" class="admin-logo">
+    </div>
+    <div class="brand-text-content">
+      <span class="b-title">AgriProtect</span>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+  </a>
+</div>
+<div class="collapse navbar-collapse show">
+  <ul class="navbar-nav mr-auto">
+    <li class="nav-item">
+      <div class="main-search open premium-search">
+        <div class="input-group">
+          <input type="text" id="m-search" class="form-control" placeholder="Search farms, users, or data...">
+          <div class="input-group-append">
+            <a href="javascript:void(0)" class="search-close">
+              <i class="feather icon-x"></i>
+            </a>
+            <span class="search-btn btn btn-primary">
+              <i class="feather icon-search"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <ul class="navbar-nav ml-auto">
+    <li>
+      <div class="dropdown">
+        <a href="javascript:void(0)" data-toggle="dropdown">
+          <i class="icon feather icon-bell"></i>
+        </a>
+      </div>
+    </li>
+    <li>
+      <div class="dropdown drp-user">
+        <a href="javascript:void(0)" data-toggle="dropdown">
+          <i class="feather icon-user"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right profile-notification">
+          <div class="pro-head">
+            <div class="pro-user-info">
+              <span class="pro-user-name">{{ userFullName }}</span>
+              <span class="pro-user-email">{{ userEmail }}</span>
+            </div>
+            <a href="javascript:void(0)" class="dud-logout" title="Logout">
+              <i class="feather icon-log-out"></i>
+            </a>
+          </div>
+          <ul class="pro-body">
+            <li><a href="javascript:void(0)" class="dropdown-item"><i class="feather icon-user"></i> Profile</a></li>
+          </ul>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+

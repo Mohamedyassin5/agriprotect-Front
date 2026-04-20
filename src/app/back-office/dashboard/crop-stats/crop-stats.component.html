@@ -1,0 +1,73 @@
+<div class="row">
+  <div class="col-md-6 col-xl-4">
+    <div class="card stat-card glass-morph total-crops">
+      <div class="card-block">
+        <div class="row align-items-center">
+          <div class="col-8">
+            <h6 class="text-upper muted-text mb-2">Platform Crops</h6>
+            <h3 class="f-w-600 m-b-0">{{ totalCrops() }}</h3>
+          </div>
+          <div class="col-4 text-right">
+            <div class="icon-circle bg-forest">
+              <i class="feather icon-layers"></i>
+            </div>
+          </div>
+        </div>
+        <div class="progress m-t-20" style="height: 4px;">
+          <div class="progress-bar bg-c-forest" [style.width]="'100%'"></div>
+        </div>
+        <div class="m-t-15">
+          <span class="text-c-green font-12"><i class="feather icon-map m-r-5"></i>Global Cultivation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4">
+    <div class="card stat-card glass-morph surface-area">
+      <div class="card-block">
+        <div class="row align-items-center">
+          <div class="col-8">
+            <h6 class="text-upper muted-text mb-2">Managed Surface</h6>
+            <h3 class="f-w-600 m-b-0">{{ totalSurface() }} ha</h3>
+          </div>
+          <div class="col-4 text-right">
+            <div class="icon-circle bg-wheat">
+              <i class="feather icon-maximize"></i>
+            </div>
+          </div>
+        </div>
+        <div class="progress m-t-20" style="height: 4px;">
+          <div class="progress-bar bg-c-wheat" [style.width]="'100%'"></div>
+        </div>
+        <div class="m-t-15">
+          <span class="text-c-yellow font-12"><i class="feather icon-sun m-r-5"></i>Total Hectares</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4">
+    <div class="card stat-card glass-morph variety-index">
+      <div class="card-block">
+        <div class="row align-items-center">
+          <div class="col-8">
+            <h6 class="text-upper muted-text mb-2">Crop Varieties</h6>
+            <h3 class="f-w-600 m-b-0">{{ uniqueVarieties() }}</h3>
+          </div>
+          <div class="col-4 text-right">
+            <div class="icon-circle bg-bloom">
+              <i class="feather icon-filter"></i>
+            </div>
+          </div>
+        </div>
+        <div class="progress m-t-20" style="height: 4px;">
+          <div class="progress-bar bg-c-bloom" [style.width]="'100%'"></div>
+        </div>
+        <div class="m-t-15">
+          <span class="text-c-purple font-12"><i class="feather icon-search m-r-5"></i>Diversity Index</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

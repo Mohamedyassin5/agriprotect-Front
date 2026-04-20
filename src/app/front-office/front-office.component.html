@@ -1,0 +1,11 @@
+<div class="fo-shell">
+  <app-sidebar [isCollapsed]="isCollapsed" (toggle)="toggleSidebar()"></app-sidebar>
+  
+  <div class="fo-main" [class.sidebar-collapsed]="isCollapsed">
+    <app-topbar [isSidebarCollapsed]="isCollapsed"></app-topbar>
+    
+    <div class="fo-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

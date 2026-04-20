@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-md-12 col-xl-7">
+    <div class="card chart-card glass-morph">
+      <div class="card-header border-0 bg-transparent">
+        <h5 class="m-b-0">Platform Growth Growth</h5>
+        <span class="text-muted font-12">Total users registered this year</span>
+      </div>
+      <div class="card-block">
+        <div *ngIf="userGrowthOptions">
+          <apx-chart
+            [series]="userGrowthOptions.series"
+            [chart]="userGrowthOptions.chart"
+            [xaxis]="userGrowthOptions.xaxis"
+            [stroke]="userGrowthOptions.stroke"
+            [tooltip]="userGrowthOptions.tooltip"
+            [dataLabels]="userGrowthOptions.dataLabels"
+            [fill]="userGrowthOptions.fill"
+            [colors]="userGrowthOptions.colors"
+            [yaxis]="userGrowthOptions.yaxis"
+          ></apx-chart>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12 col-xl-5">
+    <div class="card chart-card glass-morph">
+      <div class="card-header border-0 bg-transparent">
+        <h5 class="m-b-0">Crop Diversity</h5>
+        <span class="text-muted font-12">Distribution by crop type</span>
+      </div>
+      <div class="card-block text-center">
+        <div *ngIf="cropChartOptions">
+          <apx-chart
+            [series]="cropChartOptions.series"
+            [chart]="cropChartOptions.chart"
+            [labels]="cropChartOptions.labels"
+            [colors]="cropChartOptions.colors"
+            [legend]="cropChartOptions.legend"
+            [plotOptions]="cropChartOptions.plotOptions"
+            [dataLabels]="cropChartOptions.dataLabels"
+            [responsive]="cropChartOptions.responsive"
+          ></apx-chart>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

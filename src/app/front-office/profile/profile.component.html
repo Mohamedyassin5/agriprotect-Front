@@ -1,0 +1,200 @@
+<div class="profile-page-wrapper">
+  <!-- Background Decorative Elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="profile-glass-card">
+    <!-- Header Section -->
+    <header class="profile-glass-header">
+      <div class="user-meta-group">
+        <div class="avatar-circle" [style.border-color]="trustLevel().color" (click)="fileInput.click()">
+          <img *ngIf="userProfileImage()" [src]="userProfileImage()" alt="Profile" class="avatar-img">
+          <span *ngIf="!userProfileImage()" class="initials">{{ userInitials() }}</span>
+          <div class="status-indicator"></div>
+          <div class="avatar-edit-overlay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+        </div>
+        <input 
+          #fileInput 
+          type="file" 
+          (change)="onFileSelected($event)" 
+          accept="image/*" 
+          style="display: none;">
+        <div class="user-info">
+          <h1 class="user-name">{{ userProfile()?.firstName }} {{ userProfile()?.lastName }}</h1>
+          <div class="badge-row">
+            <span class="trust-badge" [style.background]="trustLevel().color + '22'" [style.color]="trustLevel().color">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              {{ trustLevel().label }} Protection
+            </span>
+            <span class="data-point">Member since 2026</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="score-display">
+          <span class="score-label">TRUST SCORE</span>
+          <span class="score-value">{{ userProfile()?.score || 0 }}%</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="profile-main-layout">
+      <!-- Navigation Sidebar -->
+      <nav class="profile-nav-sidebar">
+        <button 
+          class="nav-tab" 
+          [class.active]="activeTab() === 'personal'" 
+          (click)="setTab('personal')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Personal Info</span>
+          <div class="active-pill" *ngIf="activeTab() === 'personal'"></div>
+        </button>
+
+        <button 
+          class="nav-tab" 
+          [class.active]="activeTab() === 'security'" 
+          (click)="setTab('security')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Security</span>
+          <div class="active-pill" *ngIf="activeTab() === 'security'"></div>
+        </button>
+
+        <button 
+          class="nav-tab" 
+          [class.active]="activeTab() === 'face'" 
+          (click)="setTab('face')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 8h-6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"/><path d="M10 12h4m-2-2v4"/></svg>
+          <span>Biometric Login</span>
+          <div class="active-pill" *ngIf="activeTab() === 'face'"></div>
+        </button>
+      </nav>
+
+      <!-- Content Section -->
+      <main class="profile-content-scroll">
+        <div class="content-limit">
+          <!-- Status Alerts -->
+          <div class="feedback-toast success" *ngIf="successMsg() && activeTab() !== 'face'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            {{ successMsg() }}
+          </div>
+          <div class="feedback-toast error" *ngIf="errorMsg() && activeTab() !== 'face'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ errorMsg() }}
+          </div>
+
+          <!-- Tab 1: Personal -->
+          <div class="tab-pane" *ngIf="activeTab() === 'personal'">
+            <div class="pane-header">
+              <h2>Account Details</h2>
+              <p>Update your information to keep your insurance data accurate.</p>
+            </div>
+            
+            <form [formGroup]="personalForm" (ngSubmit)="onPersonalSubmit()" class="premium-form">
+              <div class="input-grid">
+                <div class="input-field">
+                  <label>First Name</label>
+                  <input type="text" formControlName="firstName" placeholder="Enter first name">
+                </div>
+                <div class="input-field">
+                  <label>Last Name</label>
+                  <input type="text" formControlName="lastName" placeholder="Enter last name">
+                </div>
+                <div class="input-field">
+                  <label>Phone Number</label>
+                  <input type="text" formControlName="phoneNumber" placeholder="+216 ...">
+                </div>
+                <div class="input-field">
+                  <label>Address</label>
+                  <input type="text" formControlName="address" placeholder="Physical address">
+                </div>
+              </div>
+
+              <div class="form-footer">
+                <button type="submit" class="prime-btn" [disabled]="personalForm.invalid || isLoading()">
+                  <span class="btn-shine"></span>
+                  <span class="btn-text">{{ isLoading() ? 'Processing...' : 'Sync Profile Data' }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Tab 2: Security -->
+          <div class="tab-pane" *ngIf="activeTab() === 'security'">
+            <div class="pane-header">
+              <h2>Password & Auth</h2>
+              <p>Strengthen your account security by updating your credentials.</p>
+            </div>
+
+            <form [formGroup]="securityForm" (ngSubmit)="onSecuritySubmit()" class="premium-form">
+              <div class="input-stack">
+                <div class="input-field">
+                  <label>Current Password</label>
+                  <input type="password" formControlName="oldPassword" placeholder="••••••••">
+                </div>
+                <div class="input-field">
+                  <label>New Secure Password</label>
+                  <input type="password" formControlName="newPassword" placeholder="Min. 8 chars, 1 capital, 1 symbol">
+                </div>
+                <div class="input-field">
+                  <label>Confirm Identity</label>
+                  <input type="password" formControlName="confirmNewPassword" placeholder="Repeat new password">
+                </div>
+              </div>
+
+              <div class="form-footer">
+                <button type="submit" class="prime-btn" [disabled]="securityForm.invalid || isLoading()">
+                  <span class="btn-shine"></span>
+                  <span class="btn-text">{{ isLoading() ? 'Securing...' : 'Update Credentials' }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Tab 3: Face Enrollment -->
+          <div class="tab-pane biometric-pane" *ngIf="activeTab() === 'face'">
+            <div class="pane-header central">
+              <h2>Biometric Identity</h2>
+              <p>Enroll your face for instant, secure authentication.</p>
+            </div>
+
+            <div class="biometric-container">
+              <div class="scanner-frame">
+                <div class="scanner-line"></div>
+                <div class="corner t-l"></div>
+                <div class="corner t-r"></div>
+                <div class="corner b-l"></div>
+                <div class="corner b-r"></div>
+                
+                <div class="camera-mask">
+                  <video #videoElement autoplay playsinline [muted]="true" class="scanner-video"></video>
+                  <canvas #canvasElement style="display:none;"></canvas>
+                  <div class="overlay-circle"></div>
+                </div>
+              </div>
+
+              <div class="biometric-status" [class.show]="faceSuccess() || faceError()">
+                <div class="feedback-toast" [class.success]="faceSuccess()" [class.error]="faceError()">
+                  {{ faceSuccess() || faceError() }}
+                </div>
+              </div>
+
+              <div class="biometric-actions">
+                <button type="button" class="scanner-btn" (click)="captureAndEnroll()" [disabled]="!stream || faceLoading()">
+                  <div class="btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </div>
+                  <span>{{ faceLoading() ? 'Analyzing Bio-data...' : 'Capture Biometrics' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+

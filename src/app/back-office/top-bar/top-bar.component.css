@@ -1,0 +1,170 @@
+/* Premium Branding Header Styles */
+.premium-branding {
+    background: #ffffff !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    display: flex;
+    align-items: center;
+    height: 70px;
+    width: 264px !important;
+    min-width: 264px !important;
+    padding: 0 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.b-brand {
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    gap: 12px;
+}
+
+.logo-container {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fbf9;
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: inset 0 0 0 1px rgba(45, 106, 79, 0.1);
+}
+
+.admin-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.brand-text-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.b-title {
+    color: #1b4332 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    text-transform: none !important;
+    line-height: 1.2;
+    margin: 0 !important;
+}
+
+.admin-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: #2d6a4f;
+    background: rgba(45, 106, 79, 0.08);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+    width: fit-content;
+    margin-top: 2px;
+    backdrop-filter: blur(4px);
+}
+
+/* Tablet/Mobile Adjustments */
+@media screen and (max-width: 991px) {
+    .premium-branding {
+        width: 100% !important;
+        justify-content: center;
+    }
+    
+    .mobile-menu {
+        left: 20px !important;
+    }
+}
+
+/* Premium Search Adjustments */
+.premium-search {
+    width: 350px !important;
+    transition: width 0.3s ease;
+}
+
+.premium-search .input-group {
+    background: #f8fbf9;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 2px;
+    height: 42px;
+}
+
+.premium-search input {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 14px;
+    padding-left: 15px;
+}
+
+.premium-search .input-group-append {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-right: 5px;
+}
+
+.search-close {
+    color: rgba(0, 0, 0, 0.3) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    transition: color 0.2s;
+}
+
+.search-close:hover {
+    color: #e63946 !important;
+}
+
+.premium-search .search-btn {
+    border-radius: 8px !important;
+    background: #2d6a4f !important;
+    border: none !important;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(45, 106, 79, 0.2);
+}
+
+.premium-search .search-btn i {
+    font-size: 14px;
+    color: #fff;
+}
+
+/* User Info Dropdown Sizing */
+.pro-user-info {
+    display: flex;
+    flex-direction: column;
+    margin-right: 15px;
+    min-width: 140px;
+}
+
+.pro-user-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.pro-user-email {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.pro-head {
+    display: flex !important;
+    align-items: center !important;
+    padding: 15px 20px !important;
+    background: #1b4332 !important;
+}

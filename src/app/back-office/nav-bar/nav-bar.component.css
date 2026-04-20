@@ -1,0 +1,73 @@
+/* Premium Sidebar Styles */
+.navbar-wrapper {
+    background: #1b4332 !important; /* Deep Forest Green */
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.05);
+}
+
+.pcoded-inner-navbar {
+    padding-top: 20px !important;
+}
+
+.pcoded-inner-navbar li > a {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    padding: 12px 25px !important;
+    margin: 4px 12px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.pcoded-inner-navbar li.active > a,
+.pcoded-inner-navbar li:hover > a {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+.pcoded-inner-navbar li.active > a {
+    background: linear-gradient(135deg, #2d6a4f, #40916c) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.pcoded-inner-navbar li.pcoded-menu-caption {
+    padding: 25px 30px 10px !important;
+}
+
+.pcoded-inner-navbar li.pcoded-menu-caption label {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-family: 'DM Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+}
+
+.pcoded-micon {
+    font-size: 18px !important;
+    margin-right: 15px !important;
+    transition: transform 0.3s ease !important;
+}
+
+.nav-item:hover .pcoded-micon {
+    transform: scale(1.1);
+}
+
+/* User Profile Section in Sidebar */
+.main-menu-header {
+    padding: 25px 20px !important;
+    background: rgba(0, 0, 0, 0.1) !important; /* Slightly distinct but flush */
+}
+
+.user-details span {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    display: block;
+}
+
+.user-email-label {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    margin-top: 2px;
+}

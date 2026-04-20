@@ -1,0 +1,89 @@
+<div class="management-container">
+  <header class="management-header">
+    <div class="header-text">
+      <h1>Crops Management</h1>
+      <p>Overview of all crops across the platform</p>
+      
+    </div>
+    <div class="header-actions">
+      <div class="search-box">
+        <i class="feather icon-search"></i>
+        <input type="text" placeholder="Search crop type..." (input)="onSearch($event)">
+      </div>
+    </div>
+  </header>
+
+  <div class="management-card">
+    <div class="loader-overlay" *ngIf="isLoading()">
+      <div class="spinner"></div>
+    </div>
+
+    <table class="management-table">
+      <thead>
+        <tr>
+          <th>Crop Type</th>
+          <th>Physical Data</th>
+          <th>Humidity Range</th>
+          <th>Temp Range</th>
+          <th>Cycle</th>
+          <th>Status</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let crop of filteredCrops()">
+          <td>
+            <div class="user-cell">
+              <div class="avatar-sm" style="background: #f1f3f5; color: #2D6A4F; font-size: 20px;">
+                {{ getCropIcon(crop.cropType) }}
+              </div>
+              <div class="user-meta">
+                <span class="full-name">{{ crop.cropType }}</span>
+                <span class="email">{{ crop.typeterres }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="contact-cell">
+              <span class="phone">{{ crop.surface }} Hectares</span>
+              <span class="address">Soil: {{ crop.typeterres }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="humidity-cell">
+              <span class="range">{{ crop.minHumidity }}% - {{ crop.maxHumidity }}%</span>
+              <span class="opt">Opt: {{ crop.optimalHumidity }}%</span>
+            </div>
+          </td>
+          <td>
+            <div class="temp-cell">
+              <span class="range">{{ crop.minTemperature }}°C - {{ crop.maxTemperature }}°C</span>
+              <span class="opt">Avg: {{ crop.averageTemperature }}°C</span>
+            </div>
+          </td>
+          <td>
+            <div class="cycle-cell">
+              <span class="date">{{ crop.startDate | date:'mediumDate' }}</span>
+              <i class="feather icon-arrow-right"></i>
+              <span class="date">{{ crop.endDate | date:'mediumDate' }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="role-badge" [class.harvested]="getStatus(crop) === 'Harvested'">
+              {{ getStatus(crop) }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <button class="btn-icon" title="View Map"><i class="feather icon-map"></i></button>
+            <button class="btn-icon danger" title="Delete Crop"><i class="feather icon-trash-2"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="!isLoading() && filteredCrops().length === 0">
+      <i class="feather icon-layers"></i>
+      <p>No crops found matching your search.</p>
+    </div>
+  </div>
+</div>

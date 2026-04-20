@@ -1,0 +1,59 @@
+<div class="user-summary-container wide-mode" *ngIf="!isLoading">
+  <div class="summary-card ultra-glass animate-in">
+    <!-- Decorative Background -->
+    <div class="liquid-bg"></div>
+    
+    <!-- Zone 1: Profile & Identity -->
+    <div class="zone profile-zone">
+      <div class="profile-frame">
+        <img [src]="userProfileImage()" alt="Profile" class="profile-pic">
+        <div class="status-glow"></div>
+      </div>
+      <div class="identity-text">
+        <span class="eyebrow">AGRICULTEUR COMMANDER</span>
+        <h2 class="welcome-text">Bon retour, <span class="name-gradient">{{ user()?.firstName || 'Agriculteur' }}</span></h2>
+      </div>
+    </div>
+
+    <!-- Zone 2: Mission Metrics (Middle) -->
+    <div class="zone metrics-zone">
+      <div class="metric-card">
+        <div class="icon-orb">🌱</div>
+        <div class="metric-data">
+          <span class="val">{{ cropCount }}</span>
+          <span class="lab">Cultures Actives</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone 3: Account Meta (Right) -->
+    <div class="zone meta-zone">
+      <div class="meta-item">
+        <div class="meta-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
+        <div class="meta-txt">
+          <span class="m-lab">Membre depuis</span>
+          <span class="m-val">{{ user()?.createdAt | date:'MMMM yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Skeleton for Loading state -->
+<div class="user-summary-container skeleton-container" *ngIf="isLoading">
+  <div class="summary-card glass-panel skeleton-blink">
+    <div class="user-info-section">
+      <div class="circle-skeleton"></div>
+      <div class="text-group">
+        <div class="line-skeleton width-200"></div>
+        <div class="line-skeleton width-100"></div>
+      </div>
+    </div>
+    <div class="stats-section">
+      <div class="line-skeleton width-100"></div>
+      <div class="line-skeleton width-100"></div>
+    </div>
+  </div>
+</div>

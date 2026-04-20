@@ -1,0 +1,185 @@
+<div class="crop-recommendation-card animate-in">
+  <div class="card-header">
+    <div class="header-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="22"></line>
+        <line x1="8" y1="22" x2="16" y2="22"></line>
+      </svg>
+    </div>
+    <div class="header-info">
+      <h3>IA : Recommandation de Culture</h3>
+      <p>Optimisez votre rendement grâce à l'intelligence artificielle</p>
+    </div>
+    <button class="btn-guide" (click)="showGuide = true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 1 1 4.47 4.47 3 3 0 0 0-1.56 2.53"></path>
+        <line x1="12" y1="19" x2="12.01" y2="19"></line>
+      </svg>
+      Aide & Guide
+    </button>
+  </div>
+
+  <div class="card-body">
+    <form (ngSubmit)="recommend()" #recoForm="ngForm">
+      <div class="input-grid">
+        <!-- Nutrients Section -->
+        <div class="input-section">
+          <label class="section-label">Nutriments du Sol</label>
+          <div class="fields-row">
+            <div class="field-group">
+              <label for="n">Azote (N)</label>
+              <input type="number" id="n" name="n" [(ngModel)]="formData.N" required placeholder="0-140">
+            </div>
+            <div class="field-group">
+              <label for="p">Phosphore (P)</label>
+              <input type="number" id="p" name="p" [(ngModel)]="formData.P" required placeholder="0-145">
+            </div>
+            <div class="field-group">
+              <label for="k">Potassium (K)</label>
+              <input type="number" id="k" name="k" [(ngModel)]="formData.K" required placeholder="0-205">
+            </div>
+          </div>
+        </div>
+
+        <!-- Environment Section -->
+        <div class="input-section">
+          <label class="section-label">Indicateurs Environnementaux</label>
+          <div class="fields-row">
+            <div class="field-group">
+              <label for="temp">Température (°C)</label>
+              <input type="number" id="temp" name="temp" [(ngModel)]="formData.temperature" required step="0.1">
+            </div>
+            <div class="field-group">
+              <label for="hum">Humidité (%)</label>
+              <input type="number" id="hum" name="hum" [(ngModel)]="formData.humidity" required step="0.1">
+            </div>
+            <div class="field-group">
+              <label for="ph">pH du Sol</label>
+              <input type="number" id="ph" name="ph" [(ngModel)]="formData.ph" required step="0.1" max="14">
+            </div>
+          </div>
+        </div>
+
+        <!-- Soil fertility Section -->
+        <div class="input-section">
+          <label class="section-label">Sol & Pluviométrie</label>
+          <div class="fields-row">
+            <div class="field-group full-width">
+              <label for="rainfall">Précipitations (mm)</label>
+              <input type="number" id="rainfall" name="rainfall" [(ngModel)]="formData.rainfall" required min="0">
+            </div>
+            <div class="field-group full-width">
+              <label for="sfi">Indice de Fertilité (0-1)</label>
+              <input type="number" id="sfi" name="sfi" [(ngModel)]="formData.Soil_Fertility_Index" required min="0" max="1" step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Parameters Section -->
+        <div class="input-section">
+          <label class="section-label">Paramètres de l'IA</label>
+          <div class="fields-row">
+            <div class="field-group full-width">
+              <label for="top_k">Nombre de Suggestions (1-10)</label>
+              <input type="number" id="top_k" name="top_k" [(ngModel)]="formData.top_k" required min="1" max="10" placeholder="3">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-predict" [disabled]="loading || !recoForm.form.valid">
+          <span *ngIf="!loading">Analyser & Prédire</span>
+          <div *ngIf="loading" class="loader"></div>
+        </button>
+      </div>
+    </form>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-box">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ error }}
+    </div>
+
+    <!-- Results Section -->
+    <div *ngIf="results" class="results-container animate-slide-up">
+      <div class="results-header">
+        <h4>Résultats Suggestion (AI model: {{ results.model_used }})</h4>
+      </div>
+      <div class="recommendations-list">
+        <div *ngFor="let crop of results.recommended_crops; let i = index" class="recommendation-item" [style.animation-delay]="i * 0.1 + 's'">
+          <div class="crop-icon">{{ getIconForCrop(crop) }}</div>
+          <div class="crop-details">
+            <span class="crop-rank">Recommandation #{{ i + 1 }}</span>
+            <span class="crop-name">{{ crop }}</span>
+          </div>
+          <div class="success-badge">
+            <i class="fas fa-check-circle"></i> Optimal
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Farmer's Guide Drawer -->
+<div class="guide-overlay" *ngIf="showGuide" (click)="showGuide = false"></div>
+<div class="guide-drawer" [class.open]="showGuide">
+  <div class="drawer-header">
+    <h4>Guide de l'Agriculteur</h4>
+    <button class="close-drawer" (click)="showGuide = false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+  
+  <div class="drawer-content">
+    <p class="guide-intro">Comprendre les indicateurs clés pour optimiser votre recommandation de culture par l'IA.</p>
+
+    <!-- NPK Section -->
+    <div class="guide-section">
+      <h5>Nutriments Majeurs (NPK)</h5>
+      
+      <div class="metric-info">
+        <span class="metric-title color-n">Azote (N) : Croissance</span>
+        <p>Favorise la croissance vigoureuse des tiges et des feuilles vertes. Une carence jaunit le feuillage.</p>
+        <div class="range-info">Gamme : 0 - 140</div>
+      </div>
+
+      <div class="metric-info">
+        <span class="metric-title color-p">Phosphore (P) : Racines</span>
+        <p>Crucial pour le développement des racines, la photosynthèse et la formation des fleurs/fruits.</p>
+        <div class="range-info">Gamme : 0 - 145</div>
+      </div>
+
+      <div class="metric-info">
+        <span class="metric-title color-k">Potassium (K) : Santé</span>
+        <p>Renforce la résistance aux maladies, au gel et au manque d'eau. Améliore la qualité des fruits.</p>
+        <div class="range-info">Gamme : 0 - 205</div>
+      </div>
+    </div>
+
+    <!-- Soil Section -->
+    <div class="guide-section">
+      <h5>Équilibre du Sol</h5>
+      
+      <div class="metric-info">
+        <span class="metric-title">pH du Sol</span>
+        <p>Mesure l'acidité. Un pH entre 6.0 et 7.5 est idéal pour que la plante puisse absorber les nutriments.</p>
+      </div>
+
+      <div class="metric-info">
+        <span class="metric-title">Indice de Fertilité</span>
+        <p>Score de 0 à 1 représentant la richesse organique. Plus il est élevé, plus le sol est fertile.</p>
+      </div>
+    </div>
+
+    <!-- Environment Section -->
+    <div class="guide-section">
+      <h5>Climat Local</h5>
+      <p>L'IA analyse la température et la pluviométrie pour vérifier si la culture peut s'épanouir chez vous.</p>
+    </div>
+  </div>
+</div>
