@@ -1,0 +1,64 @@
+<div class="page-header">
+  <h4 class="page-title">Gestion des Polices</h4>
+  <span class="page-subtitle">Liste complète des assurances agricoles</span>
+</div>
+
+<!-- Filtres -->
+<div class="filter-bar card">
+  <div class="card-body d-flex align-items-center gap-3 flex-wrap">
+    <label class="filter-label"><i class="feather icon-filter me-1"></i>Filtrer par statut :</label>
+    <select class="form-select filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+      <option value="">Tous les statuts</option>
+      <option *ngFor="let s of statusOptions.slice(1)" [value]="s">{{ s }}</option>
+    </select>
+    <span class="ms-auto result-count">{{ insurances.length }} résultat(s)</span>
+  </div>
+</div>
+
+<!-- Loading -->
+<div *ngIf="loading" class="loading-state">
+  <div class="spinner"></div><p>Chargement…</p>
+</div>
+
+<!-- Error -->
+<div *ngIf="error && !loading" class="alert-error">
+  <i class="feather icon-alert-circle"></i> {{ error }}
+</div>
+
+<!-- Table -->
+<div *ngIf="!loading && !error" class="card">
+  <div class="card-body p-0">
+    <div *ngIf="insurances.length === 0" class="empty-state">
+      <i class="feather icon-inbox"></i>
+      <p>Aucune police trouvée pour ce filtre.</p>
+    </div>
+    <div *ngIf="insurances.length > 0" class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>N° Police</th>
+            <th>Couverture</th>
+            <th>Montant assuré</th>
+            <th>Prime</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ins of insurances; let i = index">
+            <td class="text-muted">{{ i + 1 }}</td>
+            <td><strong class="policy-number">{{ ins.policyNumber }}</strong></td>
+            <td>{{ ins.coverageType }}</td>
+            <td>{{ ins.insuredAmount | number:'1.2-2' }} TND</td>
+            <td>{{ ins.premiumAmount | number:'1.2-2' }} TND</td>
+            <td>{{ ins.startDate | date:'dd/MM/yyyy' }}</td>
+            <td>{{ ins.endDate | date:'dd/MM/yyyy' }}</td>
+            <td><span class="status-badge" [ngClass]="getStatusClass(ins.status)">{{ ins.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

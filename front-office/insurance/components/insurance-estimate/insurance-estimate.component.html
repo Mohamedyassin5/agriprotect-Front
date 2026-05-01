@@ -1,0 +1,300 @@
+<div class="estimate-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-badge">🌿 AgriProtect IA</div>
+    <h1 class="page-title">Estimation de prime d'assurance</h1>
+    <p class="page-subtitle">Notre moteur IA analyse votre profil agricole pour vous proposer la meilleure couverture</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-card">
+
+    <div class="coverage-selector">
+      <label class="control-label">
+        <span class="label-icon">🛡️</span>
+        Choisissez votre niveau de couverture
+      </label>
+      <div class="coverage-options">
+        <button
+          *ngFor="let opt of coverageOptions"
+          [class.selected]="selectedCoverage === opt.value"
+          (click)="selectCoverage(opt.value)"
+          class="coverage-option">
+          <span class="cov-icon">{{ opt.icon }}</span>
+          <span class="cov-label">{{ opt.label }}</span>
+          <span class="cov-desc">{{ opt.desc }}</span>
+          <span class="cov-check" *ngIf="selectedCoverage === opt.value">✓</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="controls-bottom">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="useAI" class="toggle-input" />
+        <span class="toggle-switch"></span>
+        <div class="toggle-text">
+          <span class="toggle-title">Estimation IA avancée</span>
+          <span class="toggle-subtitle">Analyse intelligente de votre profil</span>
+        </div>
+      </label>
+
+      <button (click)="runEstimate()" class="btn-estimate" [disabled]="loading">
+        <span *ngIf="!loading">
+          <span class="btn-icon">⚡</span>
+          Lancer l'estimation
+        </span>
+        <span *ngIf="loading" class="btn-loading">
+          <span class="btn-spinner"></span>
+          Analyse en cours...
+        </span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-card">
+    <div class="ai-loader">
+      <div class="loader-rings">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <span class="loader-icon">🤖</span>
+      </div>
+      <h3>L'IA analyse votre profil agricole</h3>
+      <p>Évaluation des risques, des cultures et des données environnementales...</p>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-card">
+    <span class="error-icon">⚠️</span>
+    <div>
+      <strong>Erreur de calcul</strong>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="estimation && !loading" class="results-wrapper">
+
+    <!-- Summary Bar -->
+    <div class="summary-bar">
+      <div class="summary-item">
+        <span class="summary-label">Prime totale</span>
+        <span class="summary-value primary">{{ selectedFormulaDetail?.premiumAmount | number:'1.2-2' }} TND</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <span class="summary-label">Formule sélectionnée</span>
+        <span class="summary-value">{{ selectedFormula }}</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <span class="summary-label">Niveau de risque</span>
+        <span class="summary-badge" [style.background]="riskColor + '20'" [style.color]="riskColor">
+          {{ estimation.riskLevel }}
+        </span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <span class="summary-label">Score IA</span>
+        <span class="summary-value">{{ riskScorePercent }}%</span>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="results-grid">
+
+      <!-- Left Column -->
+      <div class="left-column">
+
+        <!-- Risk Gauge Card -->
+        <div class="result-card risk-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <h3>Score de risque IA</h3>
+          </div>
+
+          <div class="risk-gauge">
+            <svg viewBox="0 0 120 70" class="gauge-svg">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#22c55e"/>
+                  <stop offset="50%" style="stop-color:#f97316"/>
+                  <stop offset="100%" style="stop-color:#ef4444"/>
+                </linearGradient>
+              </defs>
+              <path d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="#f1f5f9" stroke-width="12" stroke-linecap="round"/>
+              <path d="M10,60 A50,50 0 0,1 110,60" fill="none"
+                    [attr.stroke]="riskColor"
+                    stroke-width="12"
+                    stroke-linecap="round"
+                    [attr.stroke-dasharray]="riskScorePercent * 1.57 + ' 157'"
+                    stroke-dashoffset="0"
+                    style="transition: stroke-dasharray 1s ease"/>
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-value" [style.color]="riskColor">{{ riskScorePercent }}%</span>
+              <span class="gauge-level" [style.background]="riskColor + '20'" [style.color]="riskColor">
+                {{ estimation.riskLevel }}
+              </span>
+            </div>
+          </div>
+
+          <div class="risk-details">
+            <div *ngIf="estimation.riskFactors?.length" class="risk-factors-list">
+              <p class="risk-factors-title">Facteurs identifiés :</p>
+              <ul class="risk-factors">
+                <li *ngFor="let f of estimation.riskFactors">
+                  <span class="factor-dot" [style.background]="riskColor"></span>
+                  {{ f }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Détails de la couverture sélectionnée + bouton souscrire -->
+        <div class="result-card prime-card" *ngIf="selectedFormulaDetail">
+          <div class="card-header">
+            <span class="card-icon">💰</span>
+            <h3>
+              Formule {{ selectedFormula }}
+              <span *ngIf="isSuggested(selectedFormula)" class="suggested-badge" style="font-size:0.75rem; margin-left:8px;">Recommandée</span>
+            </h3>
+          </div>
+
+          <div class="prime-display">
+            <div class="prime-amount">
+              {{ selectedFormulaDetail?.premiumAmount | number:'1.2-2' }}
+              <span class="prime-currency">TND</span>
+            </div>
+            <span class="prime-period">/ an</span>
+          </div>
+
+          <div class="prime-meta">
+            <div class="meta-row">
+              <span class="meta-label">Couverture</span>
+              <span class="meta-badge">{{ (selectedFormulaDetail?.coveragePercentage * 100) | number:'1.0-0' }}%</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Franchise</span>
+              <strong class="meta-value">{{ (selectedFormulaDetail?.franchisePercentage * 100) | number:'1.0-0' }}%</strong>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Montant assuré</span>
+              <strong class="meta-value">{{ selectedFormulaDetail?.insuredAmount | number:'1.2-2' }} TND</strong>
+            </div>
+            <div class="meta-row range-row">
+              <span class="meta-label">Fourchette</span>
+              <div class="range-bar-wrap">
+                <span class="range-val">{{ minAllowedInsuredAmount | number:'1.0-0' }}</span>
+                <div class="range-bar"><div class="range-fill"></div></div>
+               <span class="range-val">{{ maxAllowedInsuredAmount | number:'1.0-0' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <a [routerLink]="['../subscribe']" [queryParams]="{ formula: selectedFormula }" class="btn-subscribe">
+            Souscrire à {{ selectedFormula }}
+            <span>→</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-column">
+
+        <!-- Formulas Comparison -->
+        <div class="result-card formulas-card">
+          <div class="card-header">
+            <span class="card-icon">📋</span>
+            <h3>Comparaison des formules</h3>
+          </div>
+
+          <div class="formula-list">
+            <div
+              *ngFor="let f of formulaEntries"
+              [class.formula-suggested]="isSuggested(f.key)"
+              [class.formula-selected]="selectedFormula === f.key"
+              (click)="selectFormula(f.key)"
+              class="formula-item" style="cursor:pointer">
+
+              <div class="formula-top">
+                <div class="formula-title">
+                  <span class="formula-icon">
+                    {{ f.key === 'BASIC' ? '🌱' : f.key === 'STANDARD' ? '🌾' : '⭐' }}
+                  </span>
+                  <span class="formula-name">{{ f.detail.formulaName || f.key }}</span>
+                  <span *ngIf="isSuggested(f.key)" class="suggested-badge">Recommandée</span>
+                </div>
+                <span class="formula-price">{{ f.detail.premiumAmount | number:'1.2-2' }} TND</span>
+              </div>
+
+              <p class="formula-desc">{{ f.detail.shortDescription }}</p>
+
+              <div class="formula-stats">
+                <div class="fstat">
+                  <div class="fstat-bar">
+                    <div class="fstat-fill" [style.width]="f.detail.coveragePercentage * 100 + '%'"
+                         [style.background]="isSuggested(f.key) ? 'var(--primary)' : '#94a3b8'"></div>
+                  </div>
+                  <div class="fstat-labels">
+                    <span class="fstat-label">Couverture</span>
+                    <span class="fstat-value">{{ f.detail.coveragePercentage * 100 | number:'1.0-0' }}%</span>
+                  </div>
+                </div>
+                <div class="fstat">
+                  <div class="fstat-bar">
+                    <div class="fstat-fill franchise" [style.width]="f.detail.franchisePercentage * 100 + '%'"></div>
+                  </div>
+                  <div class="fstat-labels">
+                    <span class="fstat-label">Franchise</span>
+                    <span class="fstat-value">{{ f.detail.franchisePercentage * 100 | number:'1.0-0' }}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Raison de recommandation (uniquement sur la formule recommandée) -->
+              <div *ngIf="isSuggested(f.key) && recommendationText" class="recommendation-reason">
+                <div class="reason-header">
+                  <span class="reason-icon">💡</span>
+                  <strong>Pourquoi cette formule vous est recommandée</strong>
+                </div>
+                <p>{{ recommendationText }}</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Insights Card -->
+        <div *ngIf="insightsText || estimation?.recommendationReason" class="result-card insights-card">
+          <div class="card-header">
+            <span class="card-icon">🤖</span>
+            <h3>Analyse IA détaillée</h3>
+          </div>
+
+          <div *ngIf="insightsText" class="insight-block">
+            <p class="insight-text">{{ insightsText }}</p>
+          </div>
+
+          <div *ngIf="estimation?.riskFactors?.length" class="factors-detailed">
+            <h4>Facteurs de risque analysés</h4>
+            <ul>
+              <li *ngFor="let factor of estimation.riskFactors">
+                <span class="factor-icon">→</span>
+                {{ factor }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

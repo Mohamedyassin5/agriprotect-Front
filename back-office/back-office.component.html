@@ -1,0 +1,8 @@
+<app-nav-bar class="pcoded-navbar" [ngClass]="{'navbar-collapsed': navCollapsed}"></app-nav-bar>
+<app-top-bar class="navbar pcoded-header navbar-expand-lg navbar-light" (navCollapse)="toggleNav()"></app-top-bar>
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+      <router-outlet></router-outlet>
+    </div>
+</div>
+

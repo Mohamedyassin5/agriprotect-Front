@@ -1,0 +1,151 @@
+<div class="fo-crops-container">
+  <div class="fo-page-header">
+    <div class="fo-header-content">
+      <h1 class="fo-page-title">My Crops</h1>
+      <p class="fo-page-subtitle">Manage and monitor your cultivation units</p>
+    </div>
+    <button class="fo-btn fo-btn-primary" (click)="toggleAddForm()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      {{ showAddForm ? 'Cancel' : 'Add New Crop' }}
+    </button>
+  </div>
+
+  <!-- Add Crop Form Section -->
+  <div *ngIf="showAddForm" class="fo-form-card glass-panel animate-in">
+    <div class="fo-form-header">
+      <div class="header-left">
+        <h3>Register New Cultivation</h3>
+        <p>Technical specifications for your unit</p>
+      </div>
+    </div>
+    
+    <form [formGroup]="cropForm" (ngSubmit)="onSubmit()" class="fo-grid-form">
+      <!-- Section 1: Basic Identity -->
+      <div class="form-section">
+        <div class="form-group">
+          <label>Crop Type</label>
+          <input type="text" formControlName="cropType" placeholder="e.g. Wheat" class="fo-input">
+        </div>
+        <div class="form-group">
+          <label>Surface Area (Ha)</label>
+          <input type="number" formControlName="surface" step="0.01" placeholder="0.00" class="fo-input">
+        </div>
+        <div class="form-group">
+          <label>Soil Type</label>
+          <select formControlName="typeterres" class="fo-input">
+            <option value="">Select...</option>
+            <option value="Clay">Clay</option>
+            <option value="Sandy">Sandy</option>
+            <option value="Silty">Silty</option>
+            <option value="Loamy">Loamy</option>
+            <option value="Peaty">Peaty</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Section 2: Timeline -->
+      <div class="form-section">
+        <div class="form-group">
+          <label>Start date</label>
+          <input type="date" formControlName="startDate" class="fo-input">
+        </div>
+        <div class="form-group">
+          <label>Projected End</label>
+          <input type="date" formControlName="endDate" class="fo-input">
+        </div>
+        <div class="form-group">
+          <label>Target Temp (°C)</label>
+          <input type="number" formControlName="averageTemperature" class="fo-input">
+        </div>
+      </div>
+
+      <!-- Section 3: Thresholds -->
+      <div class="form-section">
+        <div class="form-group">
+          <label>Humidity (%)</label>
+          <div class="multi-row">
+            <input type="number" formControlName="minHumidity" placeholder="Min" class="fo-input mini">
+            <input type="number" formControlName="optimalHumidity" placeholder="Opt" class="fo-input mini">
+            <input type="number" formControlName="maxHumidity" placeholder="Max" class="fo-input mini">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Temp Range (°C)</label>
+          <div class="multi-row">
+            <input type="number" formControlName="minTemperature" placeholder="Min" class="fo-input mini">
+            <input type="number" formControlName="maxTemperature" placeholder="Max" class="fo-input mini">
+          </div>
+        </div>
+        <div class="form-actions-inline">
+          <button type="submit" [disabled]="cropForm.invalid || isLoading" class="fo-btn fo-btn-submit full-width">
+            {{ isLoading ? 'Processing...' : 'Save Unit' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Crops List Section -->
+  <div class="fo-crops-grid">
+    <div *ngIf="!userId" class="fo-empty-state glass-panel auth-warning">
+      <div class="empty-icon">⚠️</div>
+      <h3>Authentication Refresh</h3>
+      <p>Log out and back in to enable management.</p>
+    </div>
+
+    <div *ngIf="crops.length === 0 && userId && !isLoading" class="fo-empty-state glass-panel compact-empty">
+      <div class="empty-icon">🌱</div>
+      <h3>No crops registered</h3>
+      <p>Add your first cultivation unit above.</p>
+    </div>
+
+    <div *ngFor="let crop of crops" class="fo-crop-card glass-panel-compact animate-in">
+      <div class="crop-header">
+        <div class="crop-main-info">
+          <div class="crop-icon-box">🌿</div>
+          <div class="crop-title-group">
+            <span class="crop-name">{{ crop.cropType }}</span>
+            <span class="crop-id">ID: {{ crop.id?.substring(0,8) }}</span>
+          </div>
+        </div>
+        <button class="delete-btn-subtle" (click)="deleteCrop(crop.id!)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+      </div>
+
+      <div class="crop-specs">
+        <div class="spec-item">
+          <span class="spec-label">Area</span>
+          <span class="spec-value">{{ crop.surface }} Ha</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Soil</span>
+          <span class="spec-value">{{ crop.typeterres }}</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Ends</span>
+          <span class="spec-value highlight">{{ crop.endDate | date:'MMM d, y' }}</span>
+        </div>
+      </div>
+
+      <div class="crop-instruments">
+        <div class="instrument">
+          <div class="inst-info">
+            <span class="inst-label">Humidité</span>
+            <span class="inst-val">{{ crop.optimalHumidity }}%</span>
+          </div>
+          <div class="inst-bar"><div class="bar-fill blue" [style.width.%]="crop.optimalHumidity"></div></div>
+        </div>
+        <div class="instrument">
+          <div class="inst-info">
+            <span class="inst-label">Température</span>
+            <span class="inst-val">{{ crop.averageTemperature }}°C</span>
+          </div>
+          <div class="inst-bar"><div class="bar-fill orange" [style.width.%]="(crop.averageTemperature/50)*100"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

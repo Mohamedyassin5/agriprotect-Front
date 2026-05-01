@@ -1,0 +1,51 @@
+<div class="list-page">
+  <div class="page-header">
+    <h1 class="page-title">📋 Mes polices d'assurance</h1>
+    <a routerLink="../subscribe" class="btn btn-primary">+ Nouvelle police</a>
+  </div>
+
+  <div *ngIf="loading" class="loading-state"><div class="spinner"></div></div>
+  <div *ngIf="error" class="error-card">⚠️ {{ error }}</div>
+
+  <div *ngIf="!loading && policies.length === 0" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p>Vous n'avez aucune police d'assurance.</p>
+    <a routerLink="../subscribe" class="btn btn-primary">Souscrire maintenant</a>
+  </div>
+
+  <div *ngIf="!loading && policies.length > 0" class="policies-list">
+    <div *ngFor="let policy of policies" class="policy-card">
+      <div class="card-left">
+        <span class="policy-num">{{ policy.policyNumber }}</span>
+        <span [class]="'status-badge ' + getStatusClass(policy.status)">{{ policy.status }}</span>
+      </div>
+      <div class="card-center">
+        <div class="card-stat">
+          <span class="stat-label">Couverture</span>
+          <strong>{{ policy.coverageType }}</strong>
+        </div>
+        <div class="card-stat">
+          <span class="stat-label">Montant assuré</span>
+          <strong>{{ policy.insuredAmount | number:'1.0-0' }} TND</strong>
+        </div>
+        <div class="card-stat">
+          <span class="stat-label">Prime</span>
+          <strong>{{ policy.premiumAmount | number:'1.0-0' }} TND</strong>
+        </div>
+        <div class="card-stat">
+          <span class="stat-label">Validité</span>
+          <strong>{{ policy.endDate | date:'dd/MM/yyyy' }}</strong>
+        </div>
+      </div>
+      <div class="card-right">
+        <a [routerLink]="['../', policy.id, 'detail']" class="btn btn-outline">Détails</a>
+        <button
+          *ngIf="policy.status === 'PENDING_SIGNATURE'"
+          (click)="cancel(policy.id)"
+          class="btn btn-danger">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

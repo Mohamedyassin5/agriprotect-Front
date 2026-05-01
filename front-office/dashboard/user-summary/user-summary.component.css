@@ -1,0 +1,242 @@
+.user-summary-container {
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+/* Wide Mode Expansion */
+.wide-mode {
+  max-width: 100%;
+}
+
+.summary-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 48px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.04),
+    inset 0 0 20px rgba(255, 255, 255, 0.5);
+  transition: transform 0.4s ease;
+}
+
+/* Liquid Background Animation */
+.liquid-bg {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(82, 183, 136, 0.1) 0%, transparent 40%),
+              radial-gradient(circle at 70% 70%, rgba(45, 106, 79, 0.05) 0%, transparent 40%);
+  animation: liquid-flow 12s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes liquid-flow {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to { transform: translate(10%, 10%) rotate(5deg); }
+}
+
+.zone {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Profile Zone */
+.profile-zone {
+  gap: 24px;
+  flex: 2;
+}
+
+.profile-frame {
+  position: relative;
+  width: 84px;
+  height: 84px;
+}
+
+.profile-pic {
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.status-glow {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  background: #52b788;
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(82, 183, 136, 0.8);
+}
+
+.eyebrow {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #52b788;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+
+.welcome-text {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: #1b4332;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.name-gradient {
+  background: linear-gradient(135deg, #1b4332, #2d6a4f, #40916c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tag-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fo-pill {
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.fo-pill.active {
+  background: #d8f3dc;
+  color: #2d6a4f;
+}
+
+.fo-pill.secondary {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Metrics Zone */
+.metrics-zone {
+  flex: 1;
+  justify-content: center;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.icon-orb {
+  font-size: 28px;
+  width: 52px;
+  height: 52px;
+  background: #ffffff;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.metric-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.val {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.lab {
+  font-size: 11px;
+  color: #74c69d;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Meta Zone */
+.meta-zone {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meta-icon {
+  color: #95d5b2;
+}
+
+.meta-txt {
+  display: flex;
+  flex-direction: column;
+}
+
+.m-lab {
+  font-size: 10px;
+  color: #95d5b2;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.m-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+/* Animations */
+.animate-in {
+  animation: slideInDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-30px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 1200px) {
+  .summary-card {
+    padding: 24px 32px;
+  }
+  .welcome-text { font-size: 26px; }
+}
+
+@media (max-width: 900px) {
+  .summary-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 32px;
+  }
+  .meta-zone { justify-content: flex-start; }
+}

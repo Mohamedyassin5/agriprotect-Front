@@ -1,0 +1,129 @@
+:host {
+  --primary: #16a34a;
+  --primary-dark: #15803d;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.subscribe-page {
+  padding: 2rem;
+  max-width: 720px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.page-header { margin-bottom: 1.5rem; }
+.page-title { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; }
+.page-subtitle { color: var(--text-muted); margin: 0; }
+
+/* Success */
+.success-card {
+  text-align: center;
+  padding: 3rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+}
+.success-icon { font-size: 3rem; margin-bottom: 1rem; }
+.success-card h2 { margin: 0 0 0.5rem; color: #15803d; }
+.redirect-msg { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+/* Form */
+.form-container { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.form-section {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.section-title { font-size: 1rem; font-weight: 700; margin: 0 0 1rem; }
+
+/* Coverage cards */
+.coverage-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.coverage-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+.coverage-card:hover { border-color: var(--primary); background: #f0fdf4; }
+.coverage-card.selected { border-color: var(--primary); background: #f0fdf4; }
+
+.cov-icon { font-size: 1.5rem; }
+.cov-content { flex: 1; }
+.cov-label { font-weight: 600; display: block; }
+.cov-desc { font-size: 0.82rem; color: var(--text-muted); }
+
+.cov-check {
+  color: var(--primary);
+  font-weight: 700;
+  opacity: 0;
+  font-size: 1.1rem;
+}
+.coverage-card.selected .cov-check { opacity: 1; }
+
+/* Payment modes */
+.payment-modes { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+.payment-mode-card {
+  flex: 1;
+  min-width: 160px;
+  padding: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.payment-mode-card:hover { border-color: var(--primary); }
+.payment-mode-card.selected { border-color: var(--primary); background: #f0fdf4; }
+.payment-mode-card input { margin-top: 2px; accent-color: var(--primary); }
+
+.mode-label { font-weight: 600; display: block; font-size: 0.95rem; }
+.mode-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Error */
+.error-card {
+  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+  padding: 1rem 1.25rem; border-radius: 8px;
+}
+
+/* Submit */
+.btn-submit {
+  padding: 0.9rem 2rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+  width: 100%;
+}
+.btn-submit:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.disclaimer {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}

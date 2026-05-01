@@ -1,0 +1,87 @@
+<div class="history-page">
+
+  <div class="page-header">
+    <h1 class="page-title">💳 Historique des paiements</h1>
+    <a routerLink="/front-office/insurance/dashboard" class="btn-back">← Tableau de bord</a>
+  </div>
+
+  <div *ngIf="loading" class="loading-state"><div class="spinner"></div></div>
+  <div *ngIf="error" class="error-card">⚠️ {{ error }}</div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- Stats summary -->
+    <div class="stats-row">
+      <div class="stat-chip">
+        <span class="chip-label">Paiements</span>
+        <span class="chip-value">{{ payments.length }}</span>
+      </div>
+      <div class="stat-chip green">
+        <span class="chip-label">Total payé</span>
+        <span class="chip-value">{{ totalPaid | number:'1.2-2' }} TND</span>
+      </div>
+      <div class="stat-chip orange" *ngIf="totalPenalties > 0">
+        <span class="chip-label">Pénalités</span>
+        <span class="chip-value">{{ totalPenalties | number:'1.2-2' }} TND</span>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="payments.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <p>Aucun paiement enregistré.</p>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="payments.length > 0" class="table-card">
+      <div class="table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Référence Stripe</th>
+              <th>Mode</th>
+              <th>Prime</th>
+              <th>Pénalité</th>
+              <th>Total</th>
+              <th>Statut</th>
+              <th>Facture</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of payments" class="table-row">
+              <td class="date-cell">{{ p.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="mono small">{{ p.paymentIntentId | slice:0:20 }}...</td>
+              <td>
+                <span class="mode-tag">{{ p.paymentMode }}</span>
+              </td>
+              <td>{{ (p.amount - (p.penaltyAmount || 0)) | number:'1.2-2' }} TND</td>
+              <td>
+                <span *ngIf="p.penaltyAmount && p.penaltyAmount > 0" class="penalty-val">
+                  + {{ p.penaltyAmount | number:'1.2-2' }}
+                </span>
+                <span *ngIf="!p.penaltyAmount || p.penaltyAmount === 0" class="no-penalty">—</span>
+              </td>
+              <td class="total-cell">{{ p.amount | number:'1.2-2' }} TND</td>
+              <td>
+                <span [class]="'status-tag ' + getStatusClass(p.status)">
+                  {{ getStatusLabel(p.status) }}
+                </span>
+              </td>
+              <td>
+                <button
+                  *ngIf="p.status === 'SUCCEEDED' && p.insuranceId"
+                  (click)="downloadInvoice(p.insuranceId!, p.id)"
+                  class="invoice-btn"
+                  title="Télécharger la facture">
+                  🧾
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

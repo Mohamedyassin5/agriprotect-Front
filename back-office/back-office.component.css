@@ -1,0 +1,164 @@
+@import "../../assets/css/style-back.css";
+
+/* Global Premium Overrides */
+:host {
+    display: block;
+    background: #f8fbf9;
+    height: 100vh !important;
+    overflow: hidden !important; /* Disable main page scroll */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Fixed Sidebar with independent scroll */
+.pcoded-navbar {
+    position: fixed !important;
+    top: 0 !important;      /* Extend to the very top */
+    left: 0 !important;
+    width: 264px !important;
+    height: 100vh !important; /* Full screen height */
+    z-index: 1023 !important; /* Sit behind the Top Bar */
+    padding-top: 70px !important; /* Offset content from Top Bar */
+    overflow-y: auto !important; /* Enable independent scroll */
+    overflow-x: hidden !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Custom Scrollbar for Sidebar */
+.pcoded-navbar::-webkit-scrollbar {
+    width: 4px;
+}
+.pcoded-navbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+/* Fixed Header */
+.pcoded-header {
+    position: fixed !important;
+    top: 0;
+    z-index: 1024 !important;
+    width: 100% !important; /* Header is always full width background */
+    display: flex !important;
+    background: #ffffff !important;
+    border-bottom: none !important; /* Remove global border to prevent sidebar gap */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Header content area (search, icons) */
+.pcoded-header .navbar-collapse {
+    padding-left: 60px !important; /* Space for the toggle button */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Apply border only to content area */
+}
+
+/* Desktop Widths & Offsets */
+@media screen and (min-width: 992px) {
+    .pcoded-main-container {
+        margin-left: 264px !important;
+        height: 100vh !important;
+        overflow-y: auto !important;
+        padding-top: 70px !important;
+        background: #f8fbf9 !important;
+    }
+
+    /* Remove the visual gap between branding and sidebar */
+    .pcoded-header .premium-branding {
+        border-bottom: none !important;
+    }
+
+    /* Handle Toggle States */
+    .pcoded-navbar.navbar-collapsed {
+        width: 80px !important;
+    }
+
+    .pcoded-navbar.navbar-collapsed ~ .pcoded-main-container {
+        margin-left: 80px !important;
+    }
+
+    /* Fix branding width in header based on sidebar state */
+    .pcoded-navbar.navbar-collapsed ~ .pcoded-header .premium-branding {
+        width: 80px !important;
+        min-width: 80px !important;
+        padding: 0 10px !important;
+        justify-content: center !important;
+    }
+
+    /* Hide text when collapsed */
+    .pcoded-navbar.navbar-collapsed ~ .pcoded-header .brand-text-content {
+        display: none !important;
+    }
+
+    /* Adjust logo and toggle in collapsed mode */
+    .pcoded-navbar.navbar-collapsed ~ .pcoded-header .logo-container {
+        margin: 0 !important;
+        transform: scale(0.85);
+    }
+
+    .pcoded-navbar.navbar-collapsed ~ .pcoded-header .mobile-menu {
+        position: absolute;
+        right: -30px; /* Positioned outside branding but before search */
+        top: 22px;
+        background: #ffffff;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+}
+
+/* Page Header Spacing */
+.page-header {
+    padding: 0 10px 10px !important;
+    margin-bottom: 20px !important;
+}
+
+.pcoded-content {
+    padding: 30px !important;
+}
+
+/* Mobile Adjustments */
+@media screen and (max-width: 991px) {
+    .pcoded-header {
+        width: 100% !important;
+        margin-left: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    .pcoded-main-container {
+        margin-left: 0 !important;
+        height: 100vh !important;
+        overflow-y: auto !important;
+        padding-top: 70px !important;
+    }
+}
+
+.pcoded-content {
+    padding: 30px !important;
+}
+
+/* Premium Card Refinements */
+.card {
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+.card-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    padding: 20px 25px !important;
+}
+
+.card-header h5 {
+    color: #1b4332 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+}

@@ -1,0 +1,73 @@
+<div class="row">
+  <div class="col-md-6 col-xl-4">
+    <div class="card stat-card glass-morph user-count">
+      <div class="card-block">
+        <div class="row align-items-center">
+          <div class="col-8">
+            <h6 class="text-upper muted-text mb-2">Total Users</h6>
+            <h3 class="f-w-600 m-b-0">{{ totalUsers() }}</h3>
+          </div>
+          <div class="col-4 text-right">
+            <div class="icon-circle bg-sage">
+              <i class="feather icon-users"></i>
+            </div>
+          </div>
+        </div>
+        <div class="progress m-t-20" style="height: 4px;">
+          <div class="progress-bar bg-c-sage" [style.width]="'100%'"></div>
+        </div>
+        <div class="m-t-15">
+          <span class="text-c-green font-12"><i class="feather icon-trending-up m-r-5"></i>Platform Reach</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4">
+    <div class="card stat-card glass-morph trust-score">
+      <div class="card-block">
+        <div class="row align-items-center">
+          <div class="col-8">
+            <h6 class="text-upper muted-text mb-2">Avg Trust Score</h6>
+            <h3 class="f-w-600 m-b-0">{{ avgTrustScore() }}%</h3>
+          </div>
+          <div class="col-4 text-right">
+            <div class="icon-circle bg-earth">
+              <i class="feather icon-award"></i>
+            </div>
+          </div>
+        </div>
+        <div class="progress m-t-20" style="height: 4px;">
+          <div class="progress-bar bg-c-earth" [style.width]="avgTrustScore() + '%'"></div>
+        </div>
+        <div class="m-t-15">
+          <span class="text-c-yellow font-12"><i class="feather icon-check-circle m-r-5"></i>Community Trust</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-4">
+    <div class="card stat-card glass-morph active-status">
+      <div class="card-block">
+        <div class="row align-items-center">
+          <div class="col-8">
+            <h6 class="text-upper muted-text mb-2">Active Users</h6>
+            <h3 class="f-w-600 m-b-0">{{ activeUsers() }}</h3>
+          </div>
+          <div class="col-4 text-right">
+            <div class="icon-circle bg-sky">
+              <i class="feather icon-zap"></i>
+            </div>
+          </div>
+        </div>
+        <div class="progress m-t-20" style="height: 4px;">
+          <div class="progress-bar bg-c-sky" [style.width]="(totalUsers() > 0 ? (activeUsers() / totalUsers() * 100) : 0) + '%'"></div>
+        </div>
+        <div class="m-t-15">
+          <span class="text-c-blue font-12"><i class="feather icon-activity m-r-5"></i>Current Engagement</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

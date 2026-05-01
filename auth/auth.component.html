@@ -1,0 +1,214 @@
+<div class="auth-page">
+  <video 
+    #bgVideo
+    class="auth-bg-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+  >
+    <source src="login_back.webm" type="video/webm">
+    <source src="login_back.mp4" type="video/mp4">
+  </video>
+
+  <div class="auth-video-overlay"></div>
+
+  <!-- Logo top right -->
+  <div class="auth-logo-fixed">
+    <img src="logo.png" alt="AgriProtect" class="auth-logo-img"/>
+  </div>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <button class="close-btn" (click)="close()" aria-label="Close">×</button>
+
+      <div class="toggle-container">
+        <div 
+          class="tab" 
+          [class.active]="activeTab === 'signin'" 
+          (click)="setTab('signin')"
+        >Sign In</div>
+        <div 
+          class="tab" 
+          [class.active]="activeTab === 'signup'" 
+          (click)="setTab('signup')"
+        >Sign Up</div>
+      </div>
+
+      <!-- ── Login Form ──────────────────────────────── -->
+      @if (activeTab === 'signin') {
+        <div class="form-container">
+          <h2 class="auth-title">Welcome back</h2>
+          
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+            <div class="form-group">
+              <div class="input-wrapper">
+                <span class="input-icon">✉</span>
+                <input 
+                  type="email" 
+                  formControlName="email" 
+                  placeholder="Email address"
+                  [class.invalid]="isFieldInvalid(loginForm, 'email')"
+                >
+              </div>
+              @if (isFieldInvalid(loginForm, 'email')) {
+                <span class="error-msg">Please enter a valid email.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  formControlName="password" 
+                  placeholder="Password"
+                  [class.invalid]="isFieldInvalid(loginForm, 'password')"
+                >
+                <button type="button" class="eye-toggle" (click)="togglePassword()">
+                  {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                </button>
+              </div>
+              @if (isFieldInvalid(loginForm, 'password')) {
+                <span class="error-msg">Password is required.</span>
+              }
+            </div>
+
+            <p class="forgot-link">Forgot password?</p>
+
+            @if (loginError) {
+              <div class="error-msg form-error" style="color: #ff3333; text-align: center; margin-bottom: 10px; font-size: 14px;">
+                {{ loginError }}
+              </div>
+            }
+
+            <button type="submit" class="primary-btn">Sign in</button>
+          </form>
+        </div>
+      }
+
+      <!-- ── Register Form ───────────────────────────── -->
+      @if (activeTab === 'signup') {
+        <div class="form-container">
+          <h2 class="auth-title">Create an account</h2>
+
+          <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+            <div class="form-row">
+              <div class="form-group half">
+                <input 
+                  type="text" 
+                  formControlName="firstName" 
+                  placeholder="First Name"
+                  [class.invalid]="isFieldInvalid(registerForm, 'firstName')"
+                >
+                @if (isFieldInvalid(registerForm, 'firstName')) {
+                  <span class="error-msg">Min 2 chars.</span>
+                }
+              </div>
+              <div class="form-group half">
+                <input 
+                  type="text" 
+                  formControlName="lastName" 
+                  placeholder="Last Name"
+                  [class.invalid]="isFieldInvalid(registerForm, 'lastName')"
+                >
+                @if (isFieldInvalid(registerForm, 'lastName')) {
+                  <span class="error-msg">Min 2 chars.</span>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <span class="input-icon">✉</span>
+                <input 
+                  type="email" 
+                  formControlName="email" 
+                  placeholder="Email address"
+                  [class.invalid]="isFieldInvalid(registerForm, 'email')"
+                >
+              </div>
+              @if (isFieldInvalid(registerForm, 'email')) {
+                <span class="error-msg">Valid email required.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <span class="input-icon">🇹🇳</span>
+                <input 
+                  type="tel" 
+                  formControlName="phone" 
+                  placeholder="Phone Number"
+                  [class.invalid]="isFieldInvalid(registerForm, 'phone')"
+                >
+              </div>
+              @if (isFieldInvalid(registerForm, 'phone')) {
+                <span class="error-msg">Valid phone required.</span>
+              }
+            </div>
+
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  formControlName="password" 
+                  placeholder="Password (min 8 chars)"
+                  [class.invalid]="isFieldInvalid(registerForm, 'password')"
+                >
+                <button type="button" class="eye-toggle" (click)="togglePassword()">
+                  {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                </button>
+              </div>
+              @if (isFieldInvalid(registerForm, 'password')) {
+                <span class="error-msg">Min 8 characters required.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <div class="input-wrapper">
+                <input 
+                  [type]="showConfirmPassword ? 'text' : 'password'" 
+                  formControlName="confirmPassword" 
+                  placeholder="Confirm Password"
+                  [class.invalid]="isFieldInvalid(registerForm, 'confirmPassword')"
+                >
+                <button type="button" class="eye-toggle" (click)="toggleConfirmPassword()">
+                  {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+                </button>
+              </div>
+              @if (registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched) {
+                <span class="error-msg">Passwords do not match.</span>
+              }
+            </div>
+
+            <button type="submit" class="primary-btn">Create an account</button>
+          </form>
+        </div>
+      }
+
+      <!-- ── Social Links ────────────────────────────── -->
+      <div class="divider">
+        <div class="line"></div>
+        <span>OR CONTINUE WITH</span>
+        <div class="line"></div>
+      </div>
+
+      <div class="social-row">
+        <button class="social-btn">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="m6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4c-7.203 0-13.57 3.847-17.694 9.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C10.505 39.511 16.791 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083A19.954 19.954 0 0 1 44 24c0 1.259-.12 2.49-.344 3.682l-6.425-1.127l-1.32-3.111l6.425-1.127z"/></svg>
+          Google
+        </button>
+        <button class="social-btn">
+          <svg width="20" height="20" viewBox="0 0 384 512" fill="white"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41-84.5-44-35.3-2.4-70.5 21.8-88.7 21.8-18.5 0-48.4-20.8-77.6-20.8-38 0-73.3 21.3-92.8 54.3-39.6 67.5-10.1 167.6 28.3 222.7 18.8 26.9 41.2 57.1 70.3 56 28.5-1.2 39.1-18.4 73.7-18.4 34.3 0 44.1 18.4 73.9 17.8 30.2-.5 50.1-27.4 68.7-54.6 21.2-30.8 29.8-60.5 30.1-62.1-.7-.1-57.8-22.1-58.1-84.1M229.1 82c15.7-19.1 26.2-45.6 23.3-71.9-22.3.9-49.4 14.8-65.4 33.6-14.3 16.7-26.8 44.1-23.4 69.9 24.8 1.9 49.9-12.8 65.5-31.6z"/></svg>
+          Apple
+        </button>
+      </div>
+
+      <footer class="auth-footer">
+        By continuing, you agree to our <a>Terms of Service</a> and <a>Privacy Policy</a>
+      </footer>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="assets/logo.png" alt="AgriProtect Logo" class="auth-logo" onerror="this.style.display='none'">
+      <h1 class="auth-title">Verify Code</h1>
+      <p class="auth-subtitle">Enter the 6-digit code sent to<br>{{ email }}</p>
+    </div>
+
+    <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div formArrayName="digits" class="code-boxes-container">
+        <input 
+          *ngFor="let control of digitsArr.controls; let i = index" 
+          [formControlName]="i" 
+          #codeInputs
+          type="text" 
+          maxlength="1" 
+          class="auth-input code-box"
+          (input)="onInput($event, i)" 
+          (keydown)="onKeyDown($event, i)"
+          (paste)="onPaste($event)"
+        >
+      </div>
+
+      <div class="error-msg text-center" *ngIf="verifyForm.invalid && verifyForm.touched">
+        Please fill out all 6 digits.
+      </div>
+      
+      <div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+      <div class="form-success" *ngIf="successMessage()">{{ successMessage() }}</div>
+
+      <button type="submit" class="auth-submit-btn" [disabled]="isLoading()">
+        VERIFY CODE
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <span class="auth-footer-text">Didn't receive the code?</span>
+      <a (click)="resendCode()" class="auth-link font-bold cursor-pointer">Resend</a>
+    </div>
+  </div>
+</div>

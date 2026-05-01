@@ -1,0 +1,418 @@
+<div class="insurance-dashboard">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <span class="title-icon">🌾</span>
+        Mes Assurances Agricoles
+      </h1>
+      <p class="page-subtitle">Gérez et suivez vos polices d'assurance</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="../estimate" class="btn btn-outline">
+        <span class="btn-icon">🧮</span> Estimer ma prime
+      </a>
+      <a routerLink="../subscribe" class="btn btn-primary">
+        <span class="btn-icon">+</span> Nouvelle police
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de votre tableau de bord...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-state">
+    <span class="error-icon">⚠️</span> {{ error }}
+  </div>
+
+  <!-- Stats Cards -->
+  <div *ngIf="dashboard && !loading" class="stats-grid">
+
+    <!-- Active -->
+    <div class="stat-card stat-card--green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ dashboard['activePolicies'] ?? 0 }}</span>
+        <span class="stat-label">Polices actives</span>
+      </div>
+    </div>
+
+    <!-- Overdue → clickable -->
+    <div
+      class="stat-card stat-card--orange"
+      [class.stat-card--clickable]="(dashboard['overduePolicies'] ?? 0) > 0"
+      (click)="openOverdueModal()"
+      [attr.title]="(dashboard['overduePolicies'] ?? 0) > 0 ? 'Cliquez pour payer les polices en retard' : null">
+      <div class="stat-icon">⏰</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ dashboard['overduePolicies'] ?? 0 }}</span>
+        <span class="stat-label">En retard</span>
+      </div>
+      <div *ngIf="(dashboard['overduePolicies'] ?? 0) > 0" class="stat-action-hint">
+        <span>Payer →</span>
+      </div>
+    </div>
+
+    <!-- Suspended → clickable -->
+    <div
+      class="stat-card stat-card--red"
+      [class.stat-card--clickable]="(dashboard['suspendedPolicies'] ?? 0) > 0"
+      (click)="openSuspendedModal()"
+      [attr.title]="(dashboard['suspendedPolicies'] ?? 0) > 0 ? 'Cliquez pour régulariser les polices suspendues' : null">
+      <div class="stat-icon">🚫</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ dashboard['suspendedPolicies'] ?? 0 }}</span>
+        <span class="stat-label">Suspendues</span>
+      </div>
+      <div *ngIf="(dashboard['suspendedPolicies'] ?? 0) > 0" class="stat-action-hint">
+        <span>Régulariser →</span>
+      </div>
+    </div>
+
+    <!-- Total paid → clickable -->
+    <div
+      class="stat-card stat-card--blue stat-card--clickable"
+      (click)="openPaymentsModal()"
+      title="Cliquez pour voir l'historique des paiements">
+      <div class="stat-icon">💰</div>
+      <div class="stat-info">
+       <span class="stat-value">{{ (dashboard['totalPremiumPaid'] ?? 0) | number:'1.2-2' }} TND</span>
+        <span class="stat-label">Total payé</span>
+      </div>
+      <div class="stat-action-hint">
+        <span>Historique →</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Policies Table -->
+  <div class="section-card" *ngIf="!loading">
+    <div class="section-header">
+      <h2 class="section-title">Mes polices actives</h2>
+      <a routerLink="../my-policies" class="link-all">Voir tout →</a>
+    </div>
+
+    <div *ngIf="policies.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>Vous n'avez pas encore de police d'assurance.</p>
+      <a routerLink="../subscribe" class="btn btn-primary">Souscrire maintenant</a>
+    </div>
+
+    <div *ngIf="policies.length > 0" class="table-wrapper">
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>N° Police</th>
+            <th>Couverture</th>
+            <th>Montant assuré</th>
+            <th>Prime</th>
+            <th>Validité</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let policy of policies" class="table-row">
+            <td class="policy-number">{{ policy.policyNumber }}</td>
+            <td>
+              <span class="coverage-badge coverage-{{ policy.coverageType?.toLowerCase() }}">
+                {{ policy.coverageType }}
+              </span>
+            </td>
+            <td class="amount">{{ policy.insuredAmount | number:'1.2-2' }} TND</td>
+            <td class="amount">{{ policy.premiumAmount | number:'1.2-2' }} TND</td>
+            <td class="date-range">
+              {{ policy.startDate | date:'dd/MM/yyyy' }} →
+              {{ policy.endDate | date:'dd/MM/yyyy' }}
+            </td>
+            <td>
+              <span [class]="'status-badge ' + getStatusClass(policy.status)">
+                {{ getStatusLabel(policy.status) }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button (click)="downloadCertificate(policy.id)" class="action-btn" title="Voir le certificat">📄</button>
+              <button (click)="openInvoiceModal(policy.id)" class="action-btn" title="Voir la facture">🧾</button>
+              <a [routerLink]="['../', policy.id, 'detail']" class="action-btn" title="Détails">👁️</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALE : POLICES EN RETARD (OVERDUE)
+     ══════════════════════════════════════════════════════ -->
+<div *ngIf="activeModal === 'overdue'" class="action-modal-overlay" (click)="onModalOverlayClick($event)">
+  <div class="action-modal-container">
+    <div class="action-modal-header action-modal-header--orange">
+      <div class="action-modal-title">
+        <span class="action-modal-icon">⏰</span>
+        <div>
+          <h2>Polices en retard de paiement</h2>
+          <p>Réglez vos impayés pour éviter la suspension. Une pénalité s'applique.</p>
+        </div>
+      </div>
+      <button class="modal-close-btn" (click)="closeModal()" title="Fermer">✕</button>
+    </div>
+
+    <div class="action-modal-body">
+      <div *ngIf="modalPolicies.length === 0" class="empty-state">
+        <p>Aucune police en retard trouvée.</p>
+      </div>
+
+      <div *ngFor="let policy of modalPolicies" class="policy-action-card policy-action-card--orange">
+        <div class="pac-header">
+          <span class="pac-number">{{ policy.policyNumber }}</span>
+          <span class="coverage-badge coverage-{{ policy.coverageType?.toLowerCase() }}">{{ policy.coverageType }}</span>
+          <span class="status-badge badge-overdue">En retard</span>
+        </div>
+
+        <div class="pac-amounts">
+          <div class="pac-amount-item">
+            <span class="pac-amount-label">Prime due</span>
+            <span class="pac-amount-value">{{ policy.amountPerPayment | number:'1.2-2' }} TND</span>
+          </div>
+          <div class="pac-amount-item pac-amount-item--penalty" *ngIf="policy.penaltyAmount">
+            <span class="pac-amount-label">⚠️ Pénalité</span>
+            <span class="pac-amount-value penalty-value">+ {{ policy.penaltyAmount | number:'1.2-2' }} TND</span>
+          </div>
+          <div class="pac-amount-item pac-amount-item--total">
+            <span class="pac-amount-label">Total à payer</span>
+            <span class="pac-amount-value total-value">
+              {{ (policy.amountPerPayment + (policy.penaltyAmount ?? 0)) | number:'1.2-2' }} TND
+            </span>
+          </div>
+        </div>
+
+        <div class="pac-meta">
+          <span>📅 Échéance : <strong>{{ policy.nextPaymentDue | date:'dd/MM/yyyy' }}</strong></span>
+          <span>🔄 Paiements restants : <strong>{{ policy.remainingPayments }}</strong></span>
+        </div>
+
+        <div *ngIf="paymentSuccess[policy.id]" class="feedback feedback--success">
+          ✅ {{ paymentSuccess[policy.id] }}
+        </div>
+        <div *ngIf="paymentError[policy.id]" class="feedback feedback--error">
+          ❌ {{ paymentError[policy.id] }}
+        </div>
+
+        <button
+          class="pac-btn pac-btn--orange"
+          (click)="payOverdue(policy)"
+          [disabled]="paymentLoading[policy.id] || !!paymentSuccess[policy.id]">
+          <span *ngIf="!paymentLoading[policy.id]">💳 Payer maintenant</span>
+          <span *ngIf="paymentLoading[policy.id]" class="btn-spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALE : POLICES SUSPENDUES (REGULARIZE)
+     ══════════════════════════════════════════════════════ -->
+<div *ngIf="activeModal === 'suspended'" class="action-modal-overlay" (click)="onModalOverlayClick($event)">
+  <div class="action-modal-container">
+    <div class="action-modal-header action-modal-header--red">
+      <div class="action-modal-title">
+        <span class="action-modal-icon">🚫</span>
+        <div>
+          <h2>Polices suspendues</h2>
+          <p>Régularisez vos arriérés pour réactiver votre couverture.</p>
+        </div>
+      </div>
+      <button class="modal-close-btn" (click)="closeModal()" title="Fermer">✕</button>
+    </div>
+
+    <div class="action-modal-body">
+      <div *ngIf="modalPolicies.length === 0" class="empty-state">
+        <p>Aucune police suspendue trouvée.</p>
+      </div>
+
+      <div *ngFor="let policy of modalPolicies" class="policy-action-card policy-action-card--red">
+        <div class="pac-header">
+          <span class="pac-number">{{ policy.policyNumber }}</span>
+          <span class="coverage-badge coverage-{{ policy.coverageType?.toLowerCase() }}">{{ policy.coverageType }}</span>
+          <span class="status-badge badge-suspended">Suspendue</span>
+        </div>
+
+        <div class="pac-suspension-notice">
+          <span>🔴 Votre couverture est <strong>inactive</strong> jusqu'à régularisation complète.</span>
+        </div>
+
+        <div class="pac-amounts">
+  <!-- Nombre de mois impayés -->
+  <div class="pac-amount-item">
+    <span class="pac-amount-label">Mois impayés</span>
+    <span class="pac-amount-value">
+      {{ policy.unpaidMonths ?? 1 }} × {{ policy.amountPerPayment | number:'1.2-2' }} TND
+    </span>
+  </div>
+  <!-- Sous-total arriérés -->
+  <div class="pac-amount-item">
+    <span class="pac-amount-label">Sous-total arriérés</span>
+    <span class="pac-amount-value">
+      {{ ((policy.unpaidMonths ?? 1) * policy.amountPerPayment) | number:'1.2-2' }} TND
+    </span>
+  </div>
+  <!-- Pénalité 10% -->
+  <div class="pac-amount-item pac-amount-item--penalty">
+    <span class="pac-amount-label">⚠️ Pénalité (10%)</span>
+    <span class="pac-amount-value penalty-value">
+      + {{ ((policy.penaltyAmount && policy.penaltyAmount > 0)
+            ? policy.penaltyAmount
+            : (policy.unpaidMonths ?? 1) * policy.amountPerPayment * 0.10) | number:'1.2-2' }} TND
+    </span>
+  </div>
+  <!-- Total -->
+  <div class="pac-amount-item pac-amount-item--total">
+    <span class="pac-amount-label">Total régularisation</span>
+    <span class="pac-amount-value total-value">
+      {{ ((policy.unpaidMonths ?? 1) * policy.amountPerPayment
+          + ((policy.penaltyAmount && policy.penaltyAmount > 0)
+              ? policy.penaltyAmount
+              : (policy.unpaidMonths ?? 1) * policy.amountPerPayment * 0.10))
+         | number:'1.2-2' }} TND
+    </span>
+  </div>
+</div>
+
+        <div class="pac-meta">
+          <span>🔢 Paiements restants : <strong>{{ policy.remainingPayments }}</strong></span>
+          <span>📋 Mode : <strong>{{ policy.paymentMode }}</strong></span>
+        </div>
+
+        <div *ngIf="paymentSuccess[policy.id]" class="feedback feedback--success">
+          ✅ {{ paymentSuccess[policy.id] }}
+        </div>
+        <div *ngIf="paymentError[policy.id]" class="feedback feedback--error">
+          ❌ {{ paymentError[policy.id] }}
+        </div>
+
+        <button
+          class="pac-btn pac-btn--red"
+          (click)="regularize(policy)"
+          [disabled]="paymentLoading[policy.id] || !!paymentSuccess[policy.id]">
+          <span *ngIf="!paymentLoading[policy.id]">🔄 Régulariser et réactiver</span>
+          <span *ngIf="paymentLoading[policy.id]" class="btn-spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALE : HISTORIQUE DES PAIEMENTS
+     ══════════════════════════════════════════════════════ -->
+<div *ngIf="activeModal === 'payments'" class="action-modal-overlay" (click)="onModalOverlayClick($event)">
+  <div class="action-modal-container action-modal-container--wide">
+    <div class="action-modal-header action-modal-header--blue">
+      <div class="action-modal-title">
+        <span class="action-modal-icon">💰</span>
+        <div>
+          <h2>Historique des paiements</h2>
+          <p>Tous vos paiements effectués pour vos polices d'assurance.</p>
+        </div>
+      </div>
+      <button class="modal-close-btn" (click)="closeModal()" title="Fermer">✕</button>
+    </div>
+
+    <div class="action-modal-body">
+      <div *ngIf="paymentsLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des paiements...</p>
+      </div>
+
+      <div *ngIf="!paymentsLoading && allPayments.length === 0" class="empty-state">
+        <div class="empty-icon">💳</div>
+        <p>Aucun paiement enregistré pour le moment.</p>
+      </div>
+
+      <div *ngIf="!paymentsLoading && allPayments.length > 0" class="table-wrapper">
+        <table class="policy-table payments-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Police</th>
+              <th>Mode</th>
+              <th>Montant</th>
+              <th>Pénalité</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let payment of allPayments" class="table-row">
+              <td class="date-range">{{ payment.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="policy-number">{{ payment.insuranceId }}</td>
+              <td>
+                <span class="mode-badge">{{ payment.paymentMode }}</span>
+              </td>
+              <td class="amount">{{ payment.amount | number:'1.2-2' }} TND</td>
+              <td class="amount">
+                <span *ngIf="payment.penaltyAmount" class="penalty-value">
+                  {{ payment.penaltyAmount | number:'1.2-2' }} TND
+                </span>
+                <span *ngIf="!payment.penaltyAmount" class="text-muted">—</span>
+              </td>
+              <td>
+                <span [class]="'status-badge ' + getPaymentStatusClass(payment.status)">
+                  {{ getPaymentStatusLabel(payment.status) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALE : CERTIFICAT D'ASSURANCE
+     ══════════════════════════════════════════════════════ -->
+<div *ngIf="showCertModal" class="cert-modal-overlay" (click)="onOverlayClick($event)">
+  <div class="cert-modal-container">
+    <div class="cert-modal-topbar">
+      <span class="modal-title">📄 Certificat d'assurance</span>
+      <div class="modal-topbar-actions">
+        <button class="modal-close-btn" (click)="closeCertModal()" title="Fermer">✕</button>
+      </div>
+    </div>
+    <div class="cert-modal-body">
+      <app-insurance-certificate
+        *ngIf="selectedCertPolicy"
+        [policy]="selectedCertPolicy">
+      </app-insurance-certificate>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALE : FACTURE / QUITTANCE
+     ══════════════════════════════════════════════════════ -->
+<div *ngIf="showInvoiceModal" class="cert-modal-overlay invoice-modal-overlay" (click)="onInvoiceOverlayClick($event)">
+  <div class="cert-modal-container">
+    <div class="cert-modal-topbar">
+      <span class="modal-title">🧾 Facture / Quittance</span>
+      <div class="modal-topbar-actions">
+        <button class="modal-close-btn" (click)="closeInvoiceModal()" title="Fermer">✕</button>
+      </div>
+    </div>
+    <div class="cert-modal-body">
+      <app-insurance-invoice
+        *ngIf="selectedInvoicePolicy"
+        [policy]="selectedInvoicePolicy">
+      </app-insurance-invoice>
+    </div>
+  </div>
+</div>

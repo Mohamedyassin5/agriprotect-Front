@@ -1,0 +1,241 @@
+<div class="dashboard-wrapper">
+  <!-- Header & Top Row (KPIs, Donut, Revenue) -->
+  <div class="dash-header">
+    <div>
+      <h4 class="page-title">Gestion des Remboursements</h4>
+      <p class="page-subtitle">Validation des calculs et déblocage des fonds Stripe</p>
+    </div>
+    <div class="header-badge"><i class="feather icon-activity"></i> ADMIN LIVE</div>
+  </div>
+
+  <div *ngIf="successMessage" class="info-banner mb-3">
+    <i class="feather icon-check-circle me-2"></i> {{ successMessage }}
+  </div>
+
+  <div class="top-row" *ngIf="stats">
+    <!-- Colonnes KPI, Donut et Revenu (Identique Dashboard) -->
+    <div class="kpi-stack">
+        <div class="kpi-card kpi-blue">
+            <div class="kpi-left"><span class="kpi-value">{{ animatedStats.total }}</span><span class="kpi-label">Dossiers</span></div>
+            <div class="kpi-icon-wrap"><i class="feather icon-file-text"></i></div>
+            <div class="kpi-bar" style="--pct: 100%; --clr: #3b82f6"></div>
+        </div>
+        <div class="kpi-card kpi-success">
+            <div class="kpi-left"><span class="kpi-value">{{ animatedStats.verses }}</span><span class="kpi-label">Versés</span></div>
+            <div class="kpi-icon-wrap"><i class="feather icon-check-circle"></i></div>
+            <div class="kpi-bar" [style]="'--pct:' + (stats.total > 0 ? (stats.verses/stats.total*100) : 0) + '%; --clr: #22c55e'"></div>
+        </div>
+        <div class="kpi-card kpi-pending">
+            <div class="kpi-left"><span class="kpi-value">{{ animatedStats.enAttente }}</span><span class="kpi-label">Attente</span></div>
+            <div class="kpi-icon-wrap"><i class="feather icon-clock"></i></div>
+            <div class="kpi-bar" [style]="'--pct:' + (stats.total > 0 ? (stats.enAttente/stats.total*100) : 0) + '%; --clr: #f59e0b'"></div>
+        </div>
+    </div>
+
+    <div class="donut-card card">
+        <div class="donut-body">
+            <div class="donut-wrap">
+                <svg viewBox="0 0 120 120" class="donut-svg">
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="#f1f5f9" stroke-width="12"/>
+                    <circle *ngFor="let seg of donutSegments" cx="60" cy="60" r="54" fill="none" [attr.stroke]="seg.c" stroke-width="12" [attr.stroke-dasharray]="seg.dashArray" [attr.stroke-dashoffset]="seg.dashOffset" stroke-linecap="round" class="donut-seg" transform="rotate(-90 60 60)"/>
+                    <text x="60" y="65" text-anchor="middle" class="donut-center-value">{{ animatedStats.total }}</text>
+                </svg>
+            </div>
+            <div class="donut-legend">
+                <div *ngFor="let seg of donutSegments" class="legend-item">
+                    <span class="legend-dot" [style.background]="seg.c"></span>
+                    <span class="legend-label">{{ seg.label }}</span>
+                    <span class="legend-val">{{ seg.v }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="revenue-card card">
+        <div class="card-body revenue-body">
+            <div class="kpi-label mb-2">Total Déboursé (TND)</div>
+            <div class="revenue-amount">
+                <span class="rev-value">{{ animatedStats.montantTotalVerse | number:'1.0-0' }}</span>
+                <span class="rev-currency">TND</span>
+            </div>
+            <div class="mt-auto small text-muted">Reste en attente: <strong>{{ animatedStats.montantEnAttente | number:'1.2-2' }}</strong></div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Main Table -->
+  <div class="card card-table border-0 shadow-sm mt-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>POLICE / ID</th>
+            <th>COUVERTURE</th>
+            <th>DOMMAGES</th>
+            <th>NET À VERSER</th>
+            <th>STATUT</th>
+            <th class="text-end">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of remboursements">
+            <td><div class="fw-bold">{{ r.insurance?.policyNumber }}</div><code class="small text-muted">{{ formatId(r.id) }}</code></td>
+            <td class="small">{{ r.insurance?.coverageType }}</td>
+            <td>{{ r.montantDommagesDeclares | number:'1.2-2' }} TND</td>
+            <td><strong class="text-success">{{ r.montantFinalRembourse | number:'1.2-2' }} TND</strong></td>
+            <td><span class="status-badge" [ngClass]="r.statut === 'VERSE' ? 'badge-success' : 'badge-pending'">{{ r.statut }}</span></td>
+            <td class="text-end">
+              <button class="btn-action btn-view me-2" (click)="openDetail(r)"><i class="feather icon-eye"></i></button>
+              <button *ngIf="r.statut === 'EN_ATTENTE'" class="btn-action btn-approve" (click)="openApprove(r)"><i class="feather icon-check"></i></button>
+              <button *ngIf="r.statut === 'EN_ATTENTE'"
+            class="btn-action btn-reject"
+            title="Refuser"
+            (click)="openReject(r)">
+      <i class="feather icon-x"></i>
+    </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL APPROUVER AVEC AJUSTEMENT -->
+<ng-template #approveModal let-modal>
+  <div class="modal-header border-0 pb-0">
+    <div class="d-flex align-items-center gap-3">
+      <div class="modal-icon-wrap approve-icon-wrap"><i class="feather icon-check-circle"></i></div>
+      <div><h5 class="mb-0 fw-bold text-success">Approuver & Verser</h5><small class="text-muted">Dossier: {{ formatId(selectedRemboursement!.id) }}</small></div>
+    </div>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body">
+    <!-- RÉCAPITULATIF CALCUL -->
+    <div class="approve-summary p-3 bg-light rounded-3 mb-3">
+        <div class="detail-row"><span>Dommages déclarés</span><strong>{{ selectedRemboursement?.montantDommagesDeclares | number:'1.2-2' }} TND</strong></div>
+        <div class="detail-row"><span>Franchise déduite</span><strong class="text-danger">-{{ selectedRemboursement?.montantFranchise | number:'1.2-2' }} TND</strong></div>
+        <div class="detail-row border-0 pt-2"><span class="fw-bold">Montant estimé</span><strong class="text-success" style="font-size: 16px;">{{ selectedRemboursement?.montantFinalRembourse | number:'1.2-2' }} TND</strong></div>
+    </div>
+
+    <!-- BOUTON AJUSTEMENT -->
+    <div class="adjustment-toggle" (click)="toggleAdjustment()">
+        <i class="feather" [ngClass]="showAdjustment ? 'icon-minus-circle' : 'icon-edit'"></i>
+        <span>{{ showAdjustment ? 'Annuler l\'ajustement' : 'Ajuster le montant manuellement' }}</span>
+    </div>
+
+    <!-- FORMULAIRE AJUSTEMENT -->
+    <div *ngIf="showAdjustment" class="adjustment-panel mt-3 p-3 rounded-3 border">
+        <div class="mb-3">
+            <label class="small fw-bold mb-1">Nouveau montant (TND)</label>
+            <input type="number" class="form-control" [(ngModel)]="montantAjuste" [placeholder]="selectedRemboursement?.montantFinalRembourse">
+        </div>
+        <div>
+            <label class="small fw-bold mb-1">Motif de l'ajustement <span class="text-danger">*</span></label>
+            <textarea class="form-control" [(ngModel)]="motifAjustement" rows="2" placeholder="Ex: Expertise terrain rectifiée..."></textarea>
+        </div>
+    </div>
+
+    <!-- BANNIÈRE STRIPE -->
+    <div class="final-amount-box mt-4">
+        <span class="small fw-bold text-muted text-uppercase d-block mb-1">Virement Stripe Final</span>
+        <div class="final-amount-value">
+            {{ (montantAjuste || selectedRemboursement?.montantFinalRembourse) | number:'1.2-2' }} TND
+        </div>
+    </div>
+  </div>
+
+  <div class="modal-footer border-0">
+    <button class="btn btn-light px-4" (click)="modal.dismiss()">Annuler</button>
+    <button class="btn btn-success px-4" (click)="confirmApprove()" [disabled]="approving || (showAdjustment && (!montantAjuste || !motifAjustement))">
+        {{ approving ? 'Traitement...' : 'Confirmer le virement' }}
+    </button>
+  </div>
+</ng-template>
+<ng-template #rejectModal let-modal>
+  <div class="modal-header" style="border-bottom:1px solid #f1f5f9; padding:20px 24px;">
+    <div class="d-flex align-items-center gap-2">
+      <div class="modal-icon-wrap reject-icon-wrap">
+        <i class="feather icon-x-circle"></i>
+      </div>
+      <h5 class="modal-title mb-0" style="font-size:16px; font-weight:700; color:#be123c;">
+        Refuser le remboursement
+      </h5>
+    </div>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body" style="padding:20px 24px;" *ngIf="selectedRemboursement">
+
+    <div class="alert-warning-custom mb-3">
+      <i class="feather icon-alert-triangle"></i>
+      Cette action est irréversible. Le demandeur sera notifié du refus.
+    </div>
+
+    <div class="form-group mb-0">
+      <label class="form-label" style="font-size:13px; font-weight:600; color:#1b4332;">
+        <i class="feather icon-message-square me-1"></i>
+        Motif du refus <span class="text-danger">*</span>
+      </label>
+
+      <textarea class="form-control"
+                [(ngModel)]="rejectReason"
+                rows="4"
+                placeholder="Expliquez la raison du refus…"
+                style="border-radius:10px; font-size:14px; resize:vertical;">
+      </textarea>
+
+      <p class="form-hint mt-1">Minimum 10 caractères requis.</p>
+    </div>
+
+  </div>
+
+  <div class="modal-footer" style="border-top:1px solid #f1f5f9; padding:16px 24px; gap:10px;">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()" [disabled]="rejecting">
+      Annuler
+    </button>
+
+    <button type="button"
+            class="btn btn-reject-full"
+            (click)="confirmReject()"
+            [disabled]="rejecting || !rejectReason?.trim() || rejectReason.trim().length < 10">
+      <span *ngIf="rejecting" class="spin me-2"></span>
+      <i *ngIf="!rejecting" class="feather icon-x me-2"></i>
+      {{ rejecting ? 'Traitement…' : 'Confirmer le refus' }}
+    </button>
+  </div>
+</ng-template>
+
+<!-- MODAL DÉTAIL AVEC CALCUL COMPLET -->
+<ng-template #detailModal let-modal>
+    <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">Détails du calcul</h5>
+        <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body" *ngIf="selectedRemboursement">
+        <div class="detail-section mb-4">
+            <div class="detail-label mb-2">Informations Police</div>
+            <div class="detail-row"><span>Numéro</span><strong>{{ selectedRemboursement.insurance.policyNumber }}</strong></div>
+            <div class="detail-row"><span>Couverture</span><strong>{{ selectedRemboursement.insurance.coverageType }}</strong></div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label mb-2">Détail de l'estimation</div>
+            <div class="detail-row"><span>Dommages bruts</span><strong>{{ selectedRemboursement.montantDommagesDeclares | number:'1.2-2' }} TND</strong></div>
+            <div class="detail-row"><span>Franchise contractuelle</span><strong class="text-danger">-{{ selectedRemboursement.montantFranchise | number:'1.2-2' }} TND</strong></div>
+            <div class="detail-row"><span>Coefficient Prorata</span><strong>x {{ selectedRemboursement.coefficientProrata }}</strong></div>
+            <div class="detail-row"><span>Primes restantes dues</span><strong class="text-danger">-{{ selectedRemboursement.primesRestantesDues | number:'1.2-2' }} TND</strong></div>
+            <div class="detail-row"><span>Pénalité de résiliation</span><strong class="text-danger">-{{ selectedRemboursement.penaliteResiliation | number:'1.2-2' }} TND</strong></div>
+            
+            <div class="final-amount-box mt-3">
+                <div class="final-amount-value text-success">{{ selectedRemboursement.montantFinalRembourse | number:'1.2-2' }} TND</div>
+            </div>
+        </div>
+
+        <div *ngIf="selectedRemboursement.motifAjustement" class="warning-banner mt-3">
+            <i class="feather icon-edit-2"></i>
+            <div><strong>Ajustement Admin :</strong> {{ selectedRemboursement.motifAjustement }}</div>
+        </div>
+    </div>
+</ng-template>

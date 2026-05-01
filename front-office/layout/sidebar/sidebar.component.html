@@ -1,0 +1,270 @@
+<div class="fo-sidebar" [class.collapsed]="isCollapsed">
+  <div class="fo-sidebar-header">
+    <img src="logo.png" class="fo-logo-img">
+    <span class="fo-logo-text">AgriProtect</span>
+
+    <button class="fo-toggle-btn" (click)="onToggle()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <div class="fo-sidebar-content">
+
+    <!-- Group 1: OVERVIEW -->
+    <div class="fo-nav-group">
+      <div class="fo-nav-label">Overview</div>
+      <a routerLink="/front-office/dashboard" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Dashboard' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Dashboard</span>
+      </a>
+      <a routerLink="/front-office/profile" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'My Profile' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <span class="fo-nav-text">My Profile</span>
+      </a>
+    </div>
+
+    <!-- Group 2: FARM MANAGEMENT -->
+    <div class="fo-nav-group">
+      <div class="fo-nav-label">Farm Management</div>
+      <a routerLink="/front-office/crops" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'My Crops' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
+            <path d="M12 3v6"></path>
+            <path d="M5 21v-7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7"></path>
+            <path d="M3 9h18"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">My Crops</span>
+      </a>
+      <a routerLink="/front-office/alerts" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Risk Alerts' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <div class="fo-badge"></div>
+        </div>
+        <span class="fo-nav-text">Risk Alerts</span>
+      </a>
+      <a routerLink="/front-office/weather" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Weather' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19a3.5 3.5 0 0 0 0-7h-1.5c.1-4.4-3.6-8-8-8-3.4 0-6.4 2.1-7.6 5.2a5 5 0 0 0-1.4 9.3"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Weather</span>
+      </a>
+    </div>
+
+    <!-- Group 3: INSURANCE -->
+    <div class="fo-nav-group">
+      <div class="fo-nav-label">Insurance</div>
+
+      <!-- Dashboard assurance -->
+      <a routerLink="/front-office/insurance/dashboard" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'My Policies' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">My Policies</span>
+      </a>
+
+      <!-- Estimation IA -->
+      <a routerLink="/front-office/insurance/estimate" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'AI Estimate' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">AI Estimate</span>
+      </a>
+
+      <!-- Nouvelle souscription -->
+      <a routerLink="/front-office/insurance/subscribe" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'New Policy' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+        </div>
+        <span class="fo-nav-text">New Policy</span>
+      </a>
+
+      <!-- All Policies -->
+      <a routerLink="/front-office/insurance/my-policies" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'All Policies' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
+        </div>
+        <span class="fo-nav-text">All Policies</span>
+      </a>
+    </div>
+
+<!-- Group 4: REIMBURSEMENTS (NEW) -->
+<div class="fo-nav-group">
+  <div class="fo-nav-label">Reimbursements</div>
+  <a routerLink="/front-office/remboursement/mes-remboursements" 
+     routerLinkActive="active" 
+     class="fo-nav-item"
+     [attr.title]="isCollapsed ? 'My Reimbursements' : null">
+    <div class="fo-nav-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <path d="M9 10h.01"></path>
+        <path d="M13 10h.01"></path>
+        <path d="M17 10h.01"></path>
+      </svg>
+    </div>
+    <span class="fo-nav-text">My Reimbursements</span>
+  </a>
+</div>
+
+    <!-- Group 5: PAYMENTS -->
+    <div class="fo-nav-group">
+      <div class="fo-nav-label">Payments</div>
+      <a routerLink="/front-office/payment/history" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Payment History' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Payment History</span>
+      </a>
+    </div>
+
+    <!-- Group 6: FINANCE -->
+    <div class="fo-nav-group">
+      <div class="fo-nav-label">Finance</div>
+      <a routerLink="/front-office/savings" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Savings' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2 .2-.6 1.5-2 0-2Z"></path>
+            <path d="M7 14h.01"></path>
+            <path d="M11 14h.01"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Savings</span>
+      </a>
+      <a routerLink="/front-office/budget" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Budget' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"></path>
+            <path d="m19 9-5 5-4-4-3 3"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Budget</span>
+      </a>
+      <a routerLink="/front-office/credits" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Credits' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="22" width="18" height="2"></rect>
+            <line x1="6" y1="18" x2="6" y2="11"></line>
+            <line x1="10" y1="18" x2="10" y2="11"></line>
+            <line x1="14" y1="18" x2="14" y2="11"></line>
+            <line x1="18" y1="18" x2="18" y2="11"></line>
+            <polygon points="12 2 22 7 2 7 12 2"></polygon>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Credits</span>
+      </a>
+    </div>
+
+    <!-- Group 7: AI TOOLS -->
+    <div class="fo-nav-group">
+      <div class="fo-nav-label">AI Tools</div>
+      <a routerLink="/front-office/advisor" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Crop Advisor' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+            <path d="M5 3v4"></path>
+            <path d="M19 17v4"></path>
+            <path d="M3 5h4"></path>
+            <path d="M17 19h4"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Crop Advisor</span>
+      </a>
+      <a routerLink="/front-office/analyzer" routerLinkActive="active" class="fo-nav-item"
+         [attr.title]="isCollapsed ? 'Risk Analyzer' : null">
+        <div class="fo-nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+            <path d="M21 3v5h-5"></path>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+            <path d="M3 21v-5h5"></path>
+          </svg>
+        </div>
+        <span class="fo-nav-text">Risk Analyzer</span>
+      </a>
+    </div>
+
+  </div>
+
+  <div class="fo-sidebar-footer">
+    <a (click)="onLogout()" class="fo-nav-item fo-logout">
+      <div class="fo-nav-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </div>
+      <span class="fo-nav-text">Logout</span>
+    </a>
+    <div class="fo-version">v1.0.0</div>
+  </div>
+</div>

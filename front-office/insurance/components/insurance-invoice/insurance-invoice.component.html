@@ -1,0 +1,337 @@
+<!-- =========================================================
+     FACTURE / QUITTANCE — AgriProtect
+     Alignée sur le design du certificat
+     Multilingue : FR | EN | AR  (@print-ready)
+     ========================================================= -->
+
+<div class="invoice-page" [dir]="isRtl ? 'rtl' : 'ltr'" [class.rtl]="isRtl">
+
+  <!-- ── Loading ── -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ lang === 'AR' ? 'جارٍ التحميل...' : lang === 'EN' ? 'Loading...' : 'Chargement...' }}</p>
+  </div>
+
+  <!-- ── Error ── -->
+  <div *ngIf="error" class="error-card">⚠️ {{ error }}</div>
+
+  <ng-container *ngIf="invoice && !loading">
+
+    <!-- ── Lang switcher + Print ── -->
+    <div class="print-actions no-print">
+      <div class="lang-switcher">
+        <button (click)="switchLang('FR')" [class.active]="lang === 'FR'" class="lang-btn">🇫🇷 FR</button>
+        <button (click)="switchLang('EN')" [class.active]="lang === 'EN'" class="lang-btn">🇬🇧 EN</button>
+        <button (click)="switchLang('AR')" [class.active]="lang === 'AR'" class="lang-btn">🇹🇳 AR</button>
+      </div>
+      <button class="btn-print" (click)="print()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        {{ t['printBtn'] }}
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         DOCUMENT FACTURE
+         ══════════════════════════════════════════════════════ -->
+    <article class="invoice-document">
+
+      <!-- ── En-tête ── -->
+      <header class="invoice-header">
+        <div class="invoice-brand">
+          <div class="brand-logo">🌾</div>
+          <div class="brand-text">
+            <span class="brand-name">{{ t['brand'] }}</span>
+            <span class="brand-tagline">{{ t['tagline'] }}</span>
+          </div>
+        </div>
+        <div class="invoice-meta">
+          <h1 class="invoice-title">{{ t['invoiceTitle'] }}</h1>
+          <p class="invoice-number">N° {{ invoice.invoiceNumber }}</p>
+          <div class="invoice-dates">
+            <span class="date-issued">
+              {{ t['issuedOn'] }}
+              {{ today | date:(lang === 'EN' ? 'MMMM d, yyyy' : 'dd/MM/yyyy') }}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="invoice-divider"></div>
+
+      <!-- ════════════════════════════════════════════════════
+           BLOC 1 — Assuré  +  Détails police (2 colonnes)
+           ════════════════════════════════════════════════════ -->
+      <div class="invoice-two-cols">
+
+        <!-- Assuré -->
+        <section class="invoice-section">
+          <h2 class="section-heading">
+            <span class="heading-icon">👤</span>
+            <span>{{ t['policyHolder'] }}</span>
+          </h2>
+          <div class="info-list">
+            <div class="info-row">
+              <span class="info-label">{{ t['name'] }}</span>
+              <span class="info-value">{{ invoice.farmerName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t['email'] }}</span>
+              <span class="info-value mono">{{ invoice.farmerEmail }}</span>
+            </div>
+            <div class="info-row" *ngIf="invoice.farmerPhone">
+              <span class="info-label">{{ t['phone'] }}</span>
+              <span class="info-value">{{ invoice.farmerPhone }}</span>
+            </div>
+            <div class="info-row" *ngIf="invoice.farmerAddress">
+              <span class="info-label">{{ t['address'] }}</span>
+              <span class="info-value">{{ invoice.farmerAddress }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Détails police -->
+        <section class="invoice-section">
+          <h2 class="section-heading">
+            <span class="heading-icon">📋</span>
+            <span>{{ t['policyDetails'] }}</span>
+          </h2>
+          <div class="info-list">
+            <div class="info-row">
+              <span class="info-label">{{ t['policyNumber'] }}</span>
+              <span class="info-value mono">{{ invoice.policyNumber }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t['coverageType'] }}</span>
+              <span class="info-value">
+                <span class="coverage-pill" [class]="coverageClass(invoice.coverageType)">
+                  {{ invoice.coverageType }}
+                </span>
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t['insuredAmount'] }}</span>
+              <span class="info-value highlight">{{ invoice.insuredAmount | number:'1.2-2' }} {{ t['currency'] }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t['annualPremium'] }}</span>
+              <span class="info-value">{{ invoice.annualPremium | number:'1.2-2' }} {{ t['currency'] }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t['period'] }}</span>
+              <span class="info-value">
+                {{ invoice.policyStartDate | date:'dd/MM/yyyy' }} → {{ invoice.policyEndDate | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t['paymentMode'] }}</span>
+              <span class="info-value">{{ paymentModeLabel(invoice.paymentMode) }}</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="invoice-divider thin"></div>
+
+      <!-- ════════════════════════════════════════════════════
+           BLOC 2 — Suivi financier (NOUVEAU)
+           ════════════════════════════════════════════════════ -->
+      <section class="invoice-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">💰</span>
+          <span>{{ t['financialSummary'] }}</span>
+        </h2>
+
+        <!-- Barre de progression -->
+        <div class="progress-container">
+          <div class="progress-header">
+            <span class="progress-label">{{ t['progressLabel'] }}</span>
+            <span class="progress-pct">{{ progressPercent }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill"
+                 [style.width.%]="progressPercent"
+                 [style.background]="progressColor"></div>
+          </div>
+          <div class="progress-legend">
+            <span>{{ invoice.paymentsCompleted }} / {{ invoice.totalPayments }} {{ lang === 'AR' ? 'قسط' : (lang === 'EN' ? 'installments' : 'échéances') }}</span>
+            <span *ngIf="invoice.nextPaymentDue" class="next-due">
+              {{ t['nextDue'] }} : <strong>{{ invoice.nextPaymentDue | date:'dd/MM/yyyy' }}</strong>
+            </span>
+          </div>
+        </div>
+
+        <!-- 4 KPI cards -->
+        <div class="kpi-grid">
+          <!-- Total payé -->
+          <div class="kpi-card kpi-paid">
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-body">
+              <div class="kpi-label">{{ t['totalPaid'] }}</div>
+              <div class="kpi-value">{{ invoice.totalPaid | number:'1.2-2' }}</div>
+              <div class="kpi-currency">{{ t['currency'] }}</div>
+            </div>
+            <div class="kpi-badge kpi-badge--green">{{ t['paid'] }}</div>
+          </div>
+
+          <!-- Reste à payer ← INFO CLÉ -->
+          <div class="kpi-card kpi-remaining" [class.kpi-alert]="invoice.remainingBalance > 0">
+            <div class="kpi-icon">{{ invoice.remainingBalance > 0 ? '⏳' : '🎉' }}</div>
+            <div class="kpi-body">
+              <div class="kpi-label">{{ t['remainingBalance'] }}</div>
+              <div class="kpi-value kpi-value--big">{{ invoice.remainingBalance | number:'1.2-2' }}</div>
+              <div class="kpi-currency">{{ t['currency'] }}</div>
+            </div>
+            <div class="kpi-badge"
+                 [class.kpi-badge--orange]="invoice.remainingBalance > 0"
+                 [class.kpi-badge--green]="invoice.remainingBalance <= 0">
+              {{ invoice.remainingBalance > 0 ? t['toPay'] : t['paid'] }}
+            </div>
+          </div>
+
+          <!-- Échéances réglées -->
+          <div class="kpi-card kpi-done">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-body">
+              <div class="kpi-label">{{ t['paymentsCompleted'] }}</div>
+              <div class="kpi-value">{{ invoice.paymentsCompleted }}</div>
+              <div class="kpi-currency">/ {{ invoice.totalPayments }}</div>
+            </div>
+          </div>
+
+          <!-- Échéances restantes -->
+          <div class="kpi-card kpi-left">
+            <div class="kpi-icon">🔄</div>
+            <div class="kpi-body">
+              <div class="kpi-label">{{ t['remainingPayments'] }}</div>
+              <div class="kpi-value">{{ invoice.remainingPayments }}</div>
+              <div class="kpi-currency">{{ lang === 'AR' ? 'قسط' : (lang === 'EN' ? 'installments' : 'échéances') }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="invoice-divider thin"></div>
+
+      <!-- ════════════════════════════════════════════════════
+           BLOC 3 — Paiement courant (détail de la facture)
+           ════════════════════════════════════════════════════ -->
+      <section class="invoice-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">💳</span>
+          <span>{{ t['currentPayment'] }}</span>
+        </h2>
+
+        <div class="payment-breakdown">
+          <!-- Ligne prime de base -->
+          <div class="breakdown-row">
+            <span class="breakdown-label">{{ t['basePremium'] }}</span>
+            <span class="breakdown-amount">{{ invoice.amountPerPayment | number:'1.2-2' }} {{ t['currency'] }}</span>
+          </div>
+
+          <!-- Ligne pénalité (si applicable) -->
+          <div class="breakdown-row breakdown-row--penalty" *ngIf="invoice.penaltyAmount > 0">
+            <span class="breakdown-label">⚠️ {{ t['penalty'] }}</span>
+            <span class="breakdown-amount penalty-amount">+ {{ invoice.penaltyAmount | number:'1.2-2' }} {{ t['currency'] }}</span>
+          </div>
+
+          <div class="breakdown-divider"></div>
+
+          <!-- Total -->
+          <div class="breakdown-row breakdown-row--total">
+            <span class="breakdown-label">{{ t['total'] }}</span>
+            <span class="breakdown-amount total-amount">{{ invoice.totalDue | number:'1.2-2' }} {{ t['currency'] }}</span>
+          </div>
+        </div>
+
+        <!-- Métadonnées du paiement -->
+        <div class="payment-meta-grid" *ngIf="invoice.paymentDate || invoice.paymentIntentId">
+          <div class="meta-item" *ngIf="invoice.paymentDate">
+            <span class="meta-label">{{ t['paymentDate'] }}</span>
+            <span class="meta-value">{{ invoice.paymentDate | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="meta-item" *ngIf="invoice.paymentStatus">
+            <span class="meta-label">{{ t['paymentStatus'] }}</span>
+            <span [class]="'payment-status-badge ' + paymentStatusClass(invoice.paymentStatus)">
+              {{ paymentStatusLabel(invoice.paymentStatus) }}
+            </span>
+          </div>
+          <div class="meta-item" *ngIf="invoice.paymentIntentId">
+            <span class="meta-label">{{ t['reference'] }}</span>
+            <span class="meta-value mono small">{{ invoice.paymentIntentId }}</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="invoice-divider thin"></div>
+
+      <!-- ════════════════════════════════════════════════════
+           BLOC 4 — Historique des paiements
+           ════════════════════════════════════════════════════ -->
+      <section class="invoice-section" *ngIf="invoice.paymentHistory && invoice.paymentHistory.length > 0">
+        <h2 class="section-heading">
+          <span class="heading-icon">🕐</span>
+          <span>{{ t['paymentHistory'] }}</span>
+        </h2>
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>{{ t['date'] }}</th>
+                <th>{{ t['amount'] }}</th>
+                <th>{{ t['penaltyCol'] }}</th>
+                <th>{{ t['modeCol'] }}</th>
+                <th>{{ t['statusCol'] }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of invoice.paymentHistory">
+                <td class="mono">{{ p.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="amount-cell">{{ p.amount | number:'1.2-2' }} {{ t['currency'] }}</td>
+                <td class="amount-cell">
+                  <span *ngIf="p.penalty > 0" class="penalty-badge">+ {{ p.penalty | number:'1.2-2' }}</span>
+                  <span *ngIf="!p.penalty || p.penalty <= 0" class="text-muted">{{ t['na'] }}</span>
+                </td>
+                <td>{{ paymentModeLabel(p.mode) }}</td>
+                <td>
+                  <span [class]="'history-status ' + paymentStatusClass(p.status)">
+                    {{ paymentStatusLabel(p.status) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="invoice-divider thin"
+           *ngIf="invoice.paymentHistory && invoice.paymentHistory.length > 0"></div>
+
+      <!-- ════════════════════════════════════════════════════
+           FOOTER
+           ════════════════════════════════════════════════════ -->
+      <footer class="invoice-footer">
+        <div class="footer-left">
+          <p class="footer-company">{{ t['footerCompany'] }}</p>
+          <p class="footer-address">{{ t['footerAddress'] }}</p>
+          <p class="footer-contacts">{{ t['footerPhone'] }}</p>
+          <p class="footer-legal">{{ t['footerLegal'] }}</p>
+        </div>
+
+        <div class="footer-seal">
+          <div class="seal-ring">
+            <div class="seal-inner">
+              <span class="seal-logo">🌾</span>
+              <span class="seal-text">{{ t['certifiedLabel'] }}</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    </article>
+  </ng-container>
+</div>

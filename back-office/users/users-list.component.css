@@ -1,0 +1,217 @@
+.management-container {
+  padding: 24px;
+}
+
+.management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-text h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a3d2e;
+  margin-bottom: 4px;
+}
+
+.header-text p {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.search-box {
+  position: relative;
+  width: 300px;
+}
+
+.search-box i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #adb5bd;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #2D6A4F;
+}
+
+.management-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+  min-height: 200px;
+}
+
+.management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.management-table th {
+  text-align: left;
+  padding: 16px 24px;
+  background: #f8f9fa;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6c757d;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.management-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f3f5;
+  vertical-align: middle;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-name {
+  font-weight: 600;
+  color: #212529;
+}
+
+.email {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.contact-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.address {
+  font-size: 12px;
+  color: #8bab9d;
+}
+
+.score-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-bar {
+  width: 80px;
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.score-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.role-badge {
+  padding: 4px 10px;
+  background: #e9f5ef;
+  color: #2D6A4F;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.actions-col {
+  text-align: right;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: #f8f9fa;
+  color: #495057;
+  margin-left: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-icon:hover {
+  background: #e9ecef;
+  color: #2D6A4F;
+}
+
+.btn-icon.danger:hover {
+  background: #fff5f5;
+  color: #fa5252;
+}
+
+.empty-state {
+  padding: 48px;
+  text-align: center;
+  color: #adb5bd;
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e9ecef;
+  border-top-color: #2D6A4F;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

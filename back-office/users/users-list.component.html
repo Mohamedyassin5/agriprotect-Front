@@ -1,0 +1,74 @@
+<div class="management-container">
+  <header class="management-header">
+    <div class="header-text">
+      <h1>Users Management</h1>
+      <p>Overview of all registered users in the platform</p>
+      
+    </div>
+    <div class="header-actions">
+      <div class="search-box">
+        <i class="feather icon-search"></i>
+        <input type="text" placeholder="Search by name or email..." (input)="onSearch($event)">
+      </div>
+    </div>
+  </header>
+
+  <div class="management-card">
+    <div class="loader-overlay" *ngIf="isLoading()">
+      <div class="spinner"></div>
+    </div>
+
+    <table class="management-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Contact & Address</th>
+          <th>Trust Score</th>
+          <th>Role</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers()">
+          <td>
+            <div class="user-cell">
+              <div class="avatar-sm" [style.background]="getTrustColor(user.score || 0) + '22'" [style.color]="getTrustColor(user.score || 0)">
+                {{ getInitials(user) }}
+              </div>
+              <div class="user-meta">
+                <span class="full-name">{{ user.firstName }} {{ user.lastName }}</span>
+                <span class="email">{{ user.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="contact-cell">
+              <span class="phone">{{ user.phoneNumber || 'No phone' }}</span>
+              <span class="address">{{ user.address || 'No address' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="score-cell">
+              <div class="score-bar">
+                <div class="score-fill" [style.width]="(user.score || 0) + '%'" [style.background]="getTrustColor(user.score || 0)"></div>
+              </div>
+              <span class="score-text">{{ user.score || 0 }}%</span>
+            </div>
+          </td>
+          <td>
+            <span class="role-badge">{{ user.role || 'USER' }}</span>
+          </td>
+          <td class="actions-col">
+            <button class="btn-icon" title="View Details"><i class="feather icon-eye"></i></button>
+            <button class="btn-icon danger" title="Delete User"><i class="feather icon-trash-2"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="!isLoading() && filteredUsers().length === 0">
+      <i class="feather icon-users"></i>
+      <p>No users found matching your search.</p>
+    </div>
+  </div>
+</div>

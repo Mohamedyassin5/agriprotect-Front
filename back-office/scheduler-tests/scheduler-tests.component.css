@@ -1,0 +1,106 @@
+/* ── Warning banner ── */
+.warning-banner {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+  padding: 16px 20px; margin-bottom: 20px; color: #92400e;
+}
+.warning-banner i { font-size: 20px; margin-top: 2px; flex-shrink: 0; color: #f59e0b; }
+.warning-banner strong { font-size: 14px; display: block; margin-bottom: 3px; }
+.warning-banner p { font-size: 13px; margin: 0; opacity: 0.85; }
+
+/* ── ID Input Card ── */
+.input-card { margin-bottom: 24px; border-radius: 14px !important; border: none !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05) !important; }
+.id-input-section { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.id-input-icon { width: 44px; height: 44px; background: #f0fdf4; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #15803d; font-size: 20px; flex-shrink: 0; }
+.id-input-body { flex: 1; min-width: 200px; }
+.id-label { font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 6px; }
+.id-input { font-family: 'Courier New', monospace; font-size: 13px; border-radius: 8px; border: 1.5px solid #e5e7eb; padding: 9px 12px; }
+.id-input:focus { border-color: #2d6a4f; box-shadow: 0 0 0 3px rgba(45,106,79,0.12); outline: none; }
+.form-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; display: block; }
+.required { color: #ef4444; }
+
+.id-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; flex-shrink: 0; }
+.id-ok { background: #dcfce7; color: #15803d; }
+.id-missing { background: #f1f5f9; color: #94a3b8; }
+
+/* ── Tests Grid ── */
+.tests-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-bottom: 24px; }
+
+/* ── Test Card ── */
+.test-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  border: 1.5px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.test-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+.test-card.card-success { border-color: #bbf7d0; background: #f0fdf4; }
+.test-card.card-error   { border-color: #fecdd3; background: #fff1f2; }
+.test-card.card-loading { border-color: #bfdbfe; background: #eff6ff; }
+.test-card-scheduler    { grid-column: span 1; }
+
+.test-card-header { display: flex; align-items: flex-start; gap: 14px; }
+.test-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.test-icon-blue   { background: #dbeafe; color: #2563eb; }
+.test-icon-orange { background: #ffedd5; color: #ea580c; }
+.test-icon-red    { background: #ffe4e6; color: #be123c; }
+.test-icon-green  { background: #dcfce7; color: #15803d; }
+
+.test-title { font-size: 14px; font-weight: 700; color: #1e293b; margin: 0 0 4px; }
+.test-desc  { font-size: 12px; color: #6b7280; margin: 0; line-height: 1.5; }
+
+/* ── Badges ── */
+.test-meta { }
+.test-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; font-family: 'Courier New', monospace; }
+.badge-info    { background: #dbeafe; color: #1d4ed8; }
+.badge-warning { background: #fef9c3; color: #b45309; }
+.badge-danger  { background: #ffe4e6; color: #be123c; }
+.badge-success { background: #dcfce7; color: #15803d; }
+
+/* ── Result block ── */
+.test-result { background: rgba(0,0,0,0.03); border-radius: 10px; padding: 12px 14px; }
+.result-loading { display: flex; align-items: center; gap: 10px; color: #2563eb; font-size: 13px; }
+.spinner-sm { width: 18px; height: 18px; border: 2px solid #bfdbfe; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.7s linear infinite; }
+
+.result-success { color: #15803d; }
+.result-success i { font-size: 16px; }
+.result-error { color: #be123c; }
+.result-error i { font-size: 16px; }
+
+.result-success pre,
+.result-error pre { font-size: 12px; margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; font-family: 'Courier New', monospace; background: none; border: none; padding: 0; }
+.result-time { font-size: 11px; opacity: 0.6; display: block; margin-top: 4px; }
+
+/* ── Test Buttons ── */
+.btn-test { width: 100%; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.2s; margin-top: auto; }
+.btn-test:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-test-blue   { background: #2563eb; color: #fff; } .btn-test-blue:hover:not(:disabled)   { background: #1d4ed8; }
+.btn-test-orange { background: #ea580c; color: #fff; } .btn-test-orange:hover:not(:disabled) { background: #c2410c; }
+.btn-test-red    { background: #be123c; color: #fff; } .btn-test-red:hover:not(:disabled)    { background: #9f1239; }
+.btn-test-green  { background: #15803d; color: #fff; } .btn-test-green:hover:not(:disabled)  { background: #166534; }
+
+/* ── Workflow Card ── */
+.workflow-card { border-radius: 14px !important; border: none !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05) !important; }
+.workflow-card .card-header h5 { font-size: 14px; font-weight: 700; color: #1b4332; margin: 0; display: flex; align-items: center; }
+.workflow-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 4px 0; }
+.workflow-step { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 160px; }
+.step-num { width: 28px; height: 28px; background: #1b4332; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+.workflow-step div { font-size: 13px; color: #374151; line-height: 1.5; }
+.workflow-step a { color: #2d6a4f; font-weight: 600; text-decoration: none; }
+.workflow-step a:hover { text-decoration: underline; }
+.workflow-arrow { color: #cbd5e1; font-size: 18px; flex-shrink: 0; }
+
+/* Shared from parent */
+.page-title { font-size: 22px; font-weight: 800; color: #1b4332; margin: 0 0 4px; }
+.page-subtitle { font-size: 13px; color: #6c757d; }
+.page-header { margin-bottom: 20px; }
+.btn-cancel { background: #f9fafb; border: 1.5px solid #e5e7eb; color: #374151; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; }
+.btn-cancel:hover { background: #f3f4f6; }
+code { background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 5px; font-size: 12px; }
