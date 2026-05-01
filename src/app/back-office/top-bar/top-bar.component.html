@@ -30,24 +30,34 @@
   </ul>
   <ul class="navbar-nav ml-auto">
     <li>
-      <div class="dropdown">
-        <a href="javascript:void(0)" data-toggle="dropdown">
+      <div class="dropdown" [class.show]="showNotificationDropdown">
+        <a href="javascript:void(0)" (click)="toggleNotificationDropdown()">
           <i class="icon feather icon-bell"></i>
         </a>
+        <div class="dropdown-menu dropdown-menu-right profile-notification" [class.show]="showNotificationDropdown">
+          <div class="pro-head">
+            <span>Notifications</span>
+          </div>
+          <ul class="pro-body">
+            <li style="padding: 15px; text-align: center; color: #747d8c; font-size: 13px;">
+              Aucune nouvelle notification
+            </li>
+          </ul>
+        </div>
       </div>
     </li>
     <li>
-      <div class="dropdown drp-user">
-        <a href="javascript:void(0)" data-toggle="dropdown">
+      <div class="dropdown drp-user" [class.show]="showUserDropdown">
+        <a href="javascript:void(0)" (click)="toggleUserDropdown()">
           <i class="feather icon-user"></i>
         </a>
-        <div class="dropdown-menu dropdown-menu-right profile-notification">
+        <div class="dropdown-menu dropdown-menu-right profile-notification" [class.show]="showUserDropdown">
           <div class="pro-head">
             <div class="pro-user-info">
               <span class="pro-user-name">{{ userFullName }}</span>
               <span class="pro-user-email">{{ userEmail }}</span>
             </div>
-            <a href="javascript:void(0)" class="dud-logout" title="Logout">
+            <a href="javascript:void(0)" (click)="logout()" class="dud-logout" title="Logout">
               <i class="feather icon-log-out"></i>
             </a>
           </div>

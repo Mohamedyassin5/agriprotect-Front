@@ -48,6 +48,8 @@ export class LoginComponent {
           
           if (role === 'ADMIN') {
             this.router.navigate(['/back-office']);
+          } else if (role === 'EXPERT') {
+            this.router.navigate(['/back-office/investigations']);
           } else {
             // Default to front-office for FARMER or unknown
             this.router.navigate(['/front-office']);

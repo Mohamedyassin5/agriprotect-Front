@@ -55,7 +55,7 @@
 /* User Profile Section in Sidebar */
 .main-menu-header {
     padding: 25px 20px !important;
-    background: rgba(0, 0, 0, 0.1) !important; /* Slightly distinct but flush */
+    background: rgba(0, 0, 0, 0.1) !important;
 }
 
 .user-details span {
@@ -70,4 +70,57 @@
     font-size: 11px !important;
     font-weight: 400 !important;
     margin-top: 2px;
+}
+
+/* Scrollable Menu Area */
+.navbar-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 70px);
+}
+
+.nav-scroll-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 20px;
+}
+
+/* Custom Scrollbar for Inner Sidebar */
+.nav-scroll-area::-webkit-scrollbar {
+    width: 4px;
+}
+.nav-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+/* Sidebar Footer / Logout */
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px 0;
+    margin-top: auto;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    color: #ff4757 !important; /* Soft Red for Logout */
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 12px 25px !important;
+    margin: 4px 12px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 71, 87, 0.1) !important;
+    transform: translateX(5px);
+}
+
+.logout-btn .pcoded-micon {
+    margin-right: 15px;
+    font-size: 18px;
 }

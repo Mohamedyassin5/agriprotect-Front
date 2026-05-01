@@ -1,0 +1,142 @@
+<div class="expert-page animate-in">
+
+  <!-- HERO HEADER -->
+  <div class="expert-header">
+    <div class="expert-header-left">
+      <div class="expert-badge">🔍 Expert</div>
+      <h1>Mes Dossiers d'Investigation</h1>
+      <p>Évaluez les contestations des agriculteurs et rendez vos verdicts d'expertise terrain.</p>
+    </div>
+    <div class="expert-stats">
+      <div class="stat-chip">
+        <span class="chip-num">{{ getPendingCount() }}</span>
+        <span class="chip-label">En attente</span>
+      </div>
+      <div class="stat-chip completed">
+        <span class="chip-num">{{ getCompletedCount() }}</span>
+        <span class="chip-label">Traités</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de vos missions...</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && investigations.length === 0" class="empty-state">
+    <div class="empty-icon">✅</div>
+    <h4>Aucune mission en attente</h4>
+    <p>Vous avez traité tous vos dossiers d'investigation. Revenez plus tard.</p>
+  </div>
+
+  <!-- INVESTIGATIONS LIST -->
+  <div *ngIf="!loading && investigations.length > 0" class="inv-list">
+    <div *ngFor="let inv of investigations" class="inv-card animate-in" [class.is-pending]="inv.status === 'PENDING'">
+
+      <!-- CARD HEADER -->
+      <div class="inv-card-header">
+        <div class="type-badge" [ngClass]="inv.type === 'RECLAMATION' ? 'type-reclamation' : 'type-inquiry'">
+          {{ inv.type === 'RECLAMATION' ? '📋 Réclamation' : '🔍 Enquête' }}
+        </div>
+        <div class="inv-meta">
+          <h3>Dossier de {{ inv.farmer?.firstName }} {{ inv.farmer?.lastName }}</h3>
+          <span class="inv-date">Soumis le {{ inv.createdAt | date:'d MMM y, HH:mm' }}</span>
+        </div>
+        <div class="status-badge" [ngClass]="getStatusClass(inv.status)">
+          {{ getStatusLabel(inv.status) }}
+        </div>
+      </div>
+
+      <!-- CARD BODY -->
+      <div class="inv-card-body">
+
+        <!-- Claim Reference -->
+        <div *ngIf="inv.indemnisationRequest" class="claim-ref">
+          <div class="ref-row">
+            <span class="ref-label">Fonds concerné</span>
+            <span class="ref-val">{{ inv.indemnisationRequest?.fund?.name }}</span>
+          </div>
+          <div class="ref-row">
+            <span class="ref-label">Montant réclamé</span>
+            <span class="ref-val highlight">{{ inv.indemnisationRequest?.requestedAmount | number:'1.0-0' }} TND</span>
+          </div>
+          <div class="ref-row">
+            <span class="ref-label">Score IA initial</span>
+            <span class="ref-val" [ngClass]="inv.indemnisationRequest?.aiScore >= 70 ? 'score-good' : 'score-bad'">
+              {{ inv.indemnisationRequest?.aiScore }}%
+            </span>
+          </div>
+        </div>
+
+        <!-- Farmer's Argument -->
+        <div class="argument-box">
+          <span class="arg-label">📝 Argumentaire de l'agriculteur</span>
+          <p>{{ inv.description }}</p>
+        </div>
+
+        <!-- Decision already rendered -->
+        <div *ngIf="inv.status !== 'PENDING' && inv.decisionReason" class="verdict-box"
+             [ngClass]="inv.status === 'COMPLETED' ? 'verdict-accepted' : 'verdict-rejected'">
+          <span class="verdict-label">
+            {{ inv.status === 'COMPLETED' ? '✅ Votre verdict : Validé' : '❌ Votre verdict : Rejeté' }}
+          </span>
+          <p>{{ inv.decisionReason }}</p>
+        </div>
+
+      </div>
+
+      <!-- DECISION SECTION (only for PENDING) -->
+      <div *ngIf="inv.status === 'PENDING'" class="inv-card-footer">
+
+        <div *ngIf="processingId === inv.id" class="processing-bar">
+          <div class="spinner-sm"></div>
+          <span>Sauvegarde du rapport...</span>
+        </div>
+
+        <ng-container *ngIf="processingId !== inv.id">
+
+          <!-- Action Buttons -->
+          <div *ngIf="showDecisionFormFor !== inv.id" class="action-btns">
+            <button class="btn-validate" (click)="startDecision(inv.id, 'ACCEPT')">
+              ✅ Valider la contestation
+            </button>
+            <button class="btn-reject" (click)="startDecision(inv.id, 'REFUSE')">
+              ❌ Rejeter (Non fondé)
+            </button>
+          </div>
+
+          <!-- Report Form -->
+          <div *ngIf="showDecisionFormFor === inv.id" class="report-form animate-in">
+            <h4 [class.text-green]="decisionType === 'ACCEPT'" [class.text-red]="decisionType === 'REFUSE'">
+              {{ decisionType === 'ACCEPT' ? '✅ Rapport de Validation' : '❌ Rapport de Rejet' }}
+            </h4>
+            <p class="report-hint">
+              {{ decisionType === 'ACCEPT'
+                ? 'Expliquez pourquoi vous validez la contestation et recommandez l\'indemnisation.'
+                : 'Expliquez pourquoi vous rejetez la contestation (preuves insuffisantes, incohérences, etc.).' }}
+            </p>
+            <textarea [(ngModel)]="decisionReason"
+                      class="report-textarea"
+                      rows="5"
+                      placeholder="Rédigez votre rapport d'expertise détaillé et justifié..."></textarea>
+            <div class="report-actions">
+              <button class="btn-cancel-report" (click)="cancelDecision()">Annuler</button>
+              <button class="btn-confirm-report"
+                      [ngClass]="decisionType === 'ACCEPT' ? 'confirm-green' : 'confirm-red'"
+                      (click)="submitDecision(inv.id)"
+                      [disabled]="!decisionReason.trim()">
+                Soumettre le rapport
+              </button>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+
+    </div>
+  </div>
+
+</div>

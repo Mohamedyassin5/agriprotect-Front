@@ -23,6 +23,22 @@ export const FRONT_OFFICE_ROUTES: Routes = [
         path: 'advisor',
         loadComponent: () => import('./dashboard/crop-recommendation/crop-recommendation.component').then(m => m.CropRecommendationComponent)
       },
+      {
+        path: 'policies',
+        loadComponent: () => import('./solidarity-fund/solidarity-fund.component').then(m => m.SolidarityFundComponent)
+      },
+      {
+        path: 'claims',
+        loadComponent: () => import('./indemnisation/indemnisation.component').then(m => m.IndemnisationComponent)
+      },
+      {
+        path: 'qcm',
+        loadComponent: () => import('./qcm/qcm.component').then(m => m.QcmComponent)
+      },
+      {
+        path: 'payments',
+        loadComponent: () => import('./payments/payments.component').then(m => m.PaymentsComponent)
+      },
       // Other placeholders can follow the same pattern
     ]
   }

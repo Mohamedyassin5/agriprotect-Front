@@ -18,6 +18,22 @@ export const BACK_OFFICE_ROUTES: Routes = [
         path: 'crops', 
         loadComponent: () => import('./crops/crops-list.component').then(m => m.CropsListComponent) 
       },
+      { 
+        path: 'solidarity-funds', 
+        loadComponent: () => import('./solidarity-funds/solidarity-funds.component').then(m => m.AdminSolidarityFundsComponent) 
+      },
+      { 
+        path: 'indemnisation', 
+        loadComponent: () => import('./indemnisation/indemnisation-list.component').then(m => m.IndemnisationListComponent) 
+      },
+      { 
+        path: 'investigations', 
+        loadComponent: () => import('./investigations/investigations.component').then(m => m.InvestigationsComponent) 
+      },
+      { 
+        path: 'qcm-generator', 
+        loadComponent: () => import('./qcm-management/qcm-management.component').then(m => m.QcmManagementComponent) 
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

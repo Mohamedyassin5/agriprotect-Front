@@ -2,16 +2,96 @@
   <header class="management-header">
     <div class="header-text">
       <h1>Crops Management</h1>
-      <p>Overview of all crops across the platform</p>
-      
+      <p>Overview of all agricultural assets and harvest cycles</p>
     </div>
     <div class="header-actions">
-      <div class="search-box">
-        <i class="feather icon-search"></i>
-        <input type="text" placeholder="Search crop type..." (input)="onSearch($event)">
+      <div class="header-right">
+        <div class="search-box">
+          <i class="feather icon-search"></i>
+          <input type="text" placeholder="Search by crop type or land..." (input)="onSearch($event)">
+        </div>
+        <button class="btn-add-crop" (click)="showForm.set(!showForm())">
+          <i class="feather" [ngClass]="showForm() ? 'icon-x' : 'icon-plus'"></i>
+          {{ showForm() ? 'Annuler' : 'Nouvelle Culture' }}
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Create Crop Form -->
+  <div *ngIf="showForm()" class="crop-form-container">
+    <h3>Ajouter une Nouvelle Culture</h3>
+    <form [formGroup]="cropForm" (ngSubmit)="submitCrop()" class="form-grid">
+      <div class="input-group" style="grid-column: 1 / -1;">
+        <label>Agriculteur (Propriétaire)</label>
+        <select formControlName="userId">
+          <option value="">-- Sélectionner un agriculteur --</option>
+          <option *ngFor="let farmer of farmers()" [value]="farmer.id">
+            {{ farmer.firstName }} {{ farmer.lastName }} ({{ farmer.email }})
+          </option>
+        </select>
+      </div>
+      
+      <div class="input-group">
+        <label>Type de culture</label>
+        <input type="text" formControlName="cropType" list="cropProfiles" 
+               placeholder="Tapez ou sélectionnez un modèle..."
+               (change)="onCropTypeSelect($event)">
+        <datalist id="cropProfiles">
+          <option *ngFor="let profile of uniqueCropTypes()" [value]="profile.cropType">
+            {{ profile.cropType }} (Modèle existant)
+          </option>
+        </datalist>
+      </div>
+      <div class="input-group">
+        <label>Type de terre</label>
+        <input type="text" formControlName="typeterres" placeholder="Ex: Argileuse">
+      </div>
+      <div class="input-group">
+        <label>Surface (Hectares)</label>
+        <input type="number" formControlName="surface" step="0.1" placeholder="Ex: 5.5">
+      </div>
+      <div class="input-group">
+        <label>Humidité Optimale (%)</label>
+        <input type="number" formControlName="optimalHumidity" placeholder="Ex: 60">
+      </div>
+      <div class="input-group">
+        <label>Humidité Min (%)</label>
+        <input type="number" formControlName="minHumidity" placeholder="Ex: 40">
+      </div>
+      <div class="input-group">
+        <label>Humidité Max (%)</label>
+        <input type="number" formControlName="maxHumidity" placeholder="Ex: 80">
+      </div>
+      <div class="input-group">
+        <label>Température Moyenne (°C)</label>
+        <input type="number" formControlName="averageTemperature" placeholder="Ex: 22">
+      </div>
+      <div class="input-group">
+        <label>Température Min (°C)</label>
+        <input type="number" formControlName="minTemperature" placeholder="Ex: 10">
+      </div>
+      <div class="input-group">
+        <label>Température Max (°C)</label>
+        <input type="number" formControlName="maxTemperature" placeholder="Ex: 35">
+      </div>
+      <div class="input-group">
+        <label>Date de plantation</label>
+        <input type="date" formControlName="startDate">
+      </div>
+      <div class="input-group">
+        <label>Date de récolte prévue</label>
+        <input type="date" formControlName="endDate">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="showForm.set(false)">Annuler</button>
+        <button type="submit" class="btn-submit" [disabled]="isSubmitting() || cropForm.invalid">
+          {{ isSubmitting() ? 'Création...' : "Créer la culture" }}
+        </button>
+      </div>
+    </form>
+  </div>
 
   <div class="management-card">
     <div class="loader-overlay" *ngIf="isLoading()">
@@ -21,11 +101,9 @@
     <table class="management-table">
       <thead>
         <tr>
-          <th>Crop Type</th>
-          <th>Physical Data</th>
-          <th>Humidity Range</th>
-          <th>Temp Range</th>
-          <th>Cycle</th>
+          <th>Crop Profile</th>
+          <th>Land Type & Area</th>
+          <th>Lifecycle Dates</th>
           <th>Status</th>
           <th class="actions-col">Actions</th>
         </tr>
@@ -33,49 +111,38 @@
       <tbody>
         <tr *ngFor="let crop of filteredCrops()">
           <td>
-            <div class="user-cell">
-              <div class="avatar-sm" style="background: #f1f3f5; color: #2D6A4F; font-size: 20px;">
-                {{ getCropIcon(crop.cropType) }}
-              </div>
-              <div class="user-meta">
-                <span class="full-name">{{ crop.cropType }}</span>
-                <span class="email">{{ crop.typeterres }}</span>
+            <div class="crop-cell">
+              <div class="crop-icon-large">{{ getCropIcon(crop.cropType) }}</div>
+              <div class="crop-meta">
+                <span class="crop-name">{{ crop.cropType }}</span>
+                <span class="crop-id">ID: {{ crop.id?.substring(0,8) || 'N/A' }}</span>
               </div>
             </div>
           </td>
           <td>
-            <div class="contact-cell">
-              <span class="phone">{{ crop.surface }} Hectares</span>
-              <span class="address">Soil: {{ crop.typeterres }}</span>
+            <div class="details-cell">
+              <span class="detail-primary">{{ crop.typeterres }}</span>
+              <span class="detail-secondary">{{ crop.surface }} Hectares</span>
             </div>
           </td>
           <td>
-            <div class="humidity-cell">
-              <span class="range">{{ crop.minHumidity }}% - {{ crop.maxHumidity }}%</span>
-              <span class="opt">Opt: {{ crop.optimalHumidity }}%</span>
+            <div class="details-cell">
+              <span class="detail-primary">Start: {{ crop.startDate | date:'MMM dd, yyyy' }}</span>
+              <span class="detail-secondary">End: {{ crop.endDate | date:'MMM dd, yyyy' }}</span>
             </div>
           </td>
           <td>
-            <div class="temp-cell">
-              <span class="range">{{ crop.minTemperature }}°C - {{ crop.maxTemperature }}°C</span>
-              <span class="opt">Avg: {{ crop.averageTemperature }}°C</span>
-            </div>
-          </td>
-          <td>
-            <div class="cycle-cell">
-              <span class="date">{{ crop.startDate | date:'mediumDate' }}</span>
-              <i class="feather icon-arrow-right"></i>
-              <span class="date">{{ crop.endDate | date:'mediumDate' }}</span>
-            </div>
-          </td>
-          <td>
-            <span class="role-badge" [class.harvested]="getStatus(crop) === 'Harvested'">
+            <span class="status-badge" [ngClass]="getStatus(crop).toLowerCase()">
               {{ getStatus(crop) }}
             </span>
           </td>
           <td class="actions-col">
-            <button class="btn-icon" title="View Map"><i class="feather icon-map"></i></button>
-            <button class="btn-icon danger" title="Delete Crop"><i class="feather icon-trash-2"></i></button>
+            <button class="btn-icon" title="View Details" (click)="viewCropDetails(crop)">
+              <i class="feather icon-eye"></i>
+            </button>
+            <button class="btn-icon danger" title="Delete Crop" (click)="deleteCrop(crop.id)">
+              <i class="feather icon-trash-2"></i>
+            </button>
           </td>
         </tr>
       </tbody>
@@ -84,6 +151,74 @@
     <div class="empty-state" *ngIf="!isLoading() && filteredCrops().length === 0">
       <i class="feather icon-layers"></i>
       <p>No crops found matching your search.</p>
+    </div>
+  </div>
+
+  <!-- Crop Details Modal -->
+  <div class="modal-overlay" *ngIf="selectedCrop()" (click)="closeCropDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="header-main">
+          <div class="header-icon">{{ getCropIcon(selectedCrop()?.cropType || '') }}</div>
+          <div class="header-info">
+            <h2>{{ selectedCrop()?.cropType }}</h2>
+            <span class="crop-id">ID: {{ selectedCrop()?.id }}</span>
+          </div>
+        </div>
+        <button class="close-btn" (click)="closeCropDetails()">
+          <i class="feather icon-x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="details-section">
+          <h3>Informations Générales</h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <label>Type de Terre</label>
+              <div class="detail-value">{{ selectedCrop()?.typeterres }}</div>
+            </div>
+            <div class="detail-item">
+              <label>Surface</label>
+              <div class="detail-value">{{ selectedCrop()?.surface }} Hectares</div>
+            </div>
+            <div class="detail-item">
+              <label>Date de Plantation</label>
+              <div class="detail-value">{{ selectedCrop()?.startDate | date:'longDate' }}</div>
+            </div>
+            <div class="detail-item">
+              <label>Date de Récolte</label>
+              <div class="detail-value">{{ selectedCrop()?.endDate | date:'longDate' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section">
+          <h3>Conditions Environnementales</h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <label>Humidité Optimale</label>
+              <div class="detail-value">{{ selectedCrop()?.optimalHumidity }}%</div>
+            </div>
+            <div class="detail-item">
+              <label>Humidité Min/Max</label>
+              <div class="detail-value">{{ selectedCrop()?.minHumidity }}% - {{ selectedCrop()?.maxHumidity }}%</div>
+            </div>
+            <div class="detail-item">
+              <label>Température Moyenne</label>
+              <div class="detail-value">{{ selectedCrop()?.averageTemperature }}°C</div>
+            </div>
+            <div class="detail-item">
+              <label>Température Min/Max</label>
+              <div class="detail-value">{{ selectedCrop()?.minTemperature }}°C - {{ selectedCrop()?.maxTemperature }}°C</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-close-modal" (click)="closeCropDetails()">Fermer</button>
+      </div>
     </div>
   </div>
 </div>

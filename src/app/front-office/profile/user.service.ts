@@ -14,7 +14,16 @@ export class UserService {
 
   // Helper to load and set signal
   loadProfile() {
-    this.getMyProfile().subscribe(user => this.currentUserProfile.set(user));
+    this.getMyProfile().subscribe(user => {
+      // Also fetch balance explicitly to ensure it's up to date
+      this.getMyBalance().subscribe(balance => {
+        this.currentUserProfile.set({ ...user, accountBalance: balance });
+      });
+    });
+  }
+
+  getMyBalance(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/users/me/balance`);
   }
 
   // Backend reads the JWT and returns the current user — no email parsing needed
@@ -24,6 +33,14 @@ export class UserService {
 
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/users`);
+  }
+
+  createUser(userData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users`, userData);
+  }
+
+  deleteUser(userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/${userId}`);
   }
 
   updateProfile(id: string, data: any): Observable<any> {

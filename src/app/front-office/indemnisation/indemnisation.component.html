@@ -1,0 +1,227 @@
+<div class="fo-page animate-in">
+
+  <!-- PAGE HEADER -->
+  <div class="fo-page-header">
+    <div>
+      <h1 class="fo-page-title">Mes Réclamations</h1>
+      <p class="fo-page-subtitle">Soumettez une demande d'indemnisation et suivez l'analyse IA de vos sinistres.</p>
+    </div>
+  </div>
+
+  <!-- TAB NAV -->
+  <div class="tab-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'new'" (click)="activeTab = 'new'">
+      ➕ Nouvelle Demande
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="activeTab = 'history'">
+      📋 Historique
+      <span class="tab-badge" *ngIf="history.length > 0">{{ history.length }}</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de vos données...</p>
+  </div>
+
+  <!-- TAB 1: NEW CLAIM FORM -->
+  <div *ngIf="!loading && activeTab === 'new'" class="animate-in">
+
+    <div *ngIf="memberships.length === 0" class="no-funds-banner">
+      <div class="banner-icon">⚠️</div>
+      <div>
+        <h4>Aucun fonds actif</h4>
+        <p>Vous devez d'abord rejoindre un Fonds de Solidarité pour soumettre une réclamation.</p>
+      </div>
+    </div>
+
+    <div *ngIf="memberships.length > 0" class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">🌾</div>
+        <div>
+          <h3>Déclarer un Sinistre</h3>
+          <p>Notre IA AgriVision analysera votre déclaration et l'image fournie.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="claimForm" (ngSubmit)="submitClaim()" class="claim-form">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fonds concerné *</label>
+            <select formControlName="fundId" class="form-control">
+              <option value="" disabled selected>Sélectionnez un fonds</option>
+              <option *ngFor="let m of memberships" [value]="m.solidarityFund.id">
+                {{ m.solidarityFund.name }} — {{ m.solidarityFund.cultureType }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Montant demandé (TND) *</label>
+            <input type="number" formControlName="amount" class="form-control" placeholder="Ex: 5000">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description du sinistre *</label>
+          <textarea formControlName="reason" class="form-control" rows="4"
+            placeholder="Décrivez en détail ce qui a causé les dégâts : date, nature du sinistre, cultures touchées..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Preuve visuelle (Photo des dégâts) *</label>
+          <div class="file-drop-zone" (click)="fileInput.click()" [class.has-file]="selectedFile">
+            <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg,image/png" style="display:none">
+            <div *ngIf="!selectedFile" class="drop-placeholder">
+              <span class="drop-icon">📷</span>
+              <span>Cliquez pour ajouter une image</span>
+              <small>JPG ou PNG uniquement</small>
+            </div>
+            <div *ngIf="selectedFile" class="drop-selected">
+              <span class="drop-icon">✅</span>
+              <span>{{ selectedFile.name }}</span>
+              <small>Cliquez pour changer</small>
+            </div>
+          </div>
+          <p class="ai-hint">🤖 L'IA analysera cette image pour évaluer la véracité du sinistre et calculer un score de crédibilité.</p>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="submitting || claimForm.invalid || !selectedFile">
+          <span *ngIf="!submitting">🚀 Soumettre la réclamation</span>
+          <span *ngIf="submitting">⏳ Analyse IA en cours...</span>
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB 2: HISTORY -->
+  <div *ngIf="!loading && activeTab === 'history'" class="animate-in">
+
+    <div *ngIf="history.length === 0" class="empty-state">
+      <div class="empty-icon">📁</div>
+      <h4>Aucune réclamation</h4>
+      <p>Vous n'avez pas encore soumis de demande d'indemnisation.</p>
+      <button class="btn-new-claim" (click)="activeTab = 'new'">Faire une demande →</button>
+    </div>
+
+    <div *ngIf="history.length > 0" class="history-list">
+      <div *ngFor="let req of history" class="claim-card animate-in">
+
+        <div class="claim-card-header" [ngClass]="getHeaderClass(req.status)">
+          <div class="claim-card-title">
+            <span class="claim-fund-name">{{ req.fund?.name }}</span>
+            <span class="claim-date">{{ req.requestDate | date:'d MMM y, HH:mm' }}</span>
+          </div>
+          <div class="status-badge" [ngClass]="getStatusClass(req.status)">
+            {{ getStatusLabel(req.status) }}
+          </div>
+        </div>
+
+        <div class="claim-card-body">
+          <div class="claim-stats">
+            <div class="claim-stat">
+              <span class="cs-label">Montant demandé</span>
+              <span class="cs-val amount">{{ req.requestedAmount | number:'1.0-0' }} TND</span>
+            </div>
+            <div class="claim-stat full">
+              <span class="cs-label">Motif du sinistre</span>
+              <span class="cs-val">{{ req.requestReason }}</span>
+            </div>
+          </div>
+
+          <!-- AI Analysis Box -->
+          <div *ngIf="req.aiScore !== null && req.aiScore !== undefined" class="ai-box" [ngClass]="getScoreClass(req.aiScore!)">
+            <div class="ai-box-header">
+              <span class="ai-label">🤖 Analyse IA AgriVision</span>
+              <div class="ai-score-display">
+                <div class="score-ring">
+                  <span class="score-num">{{ req.aiScore }}%</span>
+                </div>
+                <span class="score-text">Véracité</span>
+              </div>
+            </div>
+            <p class="ai-analysis-text">{{ req.aiAnalysis }}</p>
+          </div>
+
+          <!-- Refusal Reason -->
+          <div *ngIf="req.status === 'REFUSED' && req.decisionReason" class="refusal-box">
+            <span class="refusal-label">❌ Raison du refus :</span>
+            <p>{{ req.decisionReason }}</p>
+          </div>
+
+          <!-- Contest Button -->
+          <div *ngIf="req.status === 'REFUSED'" class="contest-zone">
+            <p class="contest-hint">Vous estimez que cette décision est injuste ?</p>
+            <button class="btn-contest" (click)="openAppeal(req.id, req.fund?.name)">
+              ⚖️ Contester la décision
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!--                   APPEAL MODAL OVERLAY                       -->
+<!-- ============================================================ -->
+<div class="modal-overlay" *ngIf="appealModal.visible" (click)="closeAppeal()">
+  <div class="appeal-modal" (click)="$event.stopPropagation()" [formGroup]="appealForm">
+
+    <div class="modal-header">
+      <div class="modal-icon">⚖️</div>
+      <div>
+        <h3>Contester une Décision</h3>
+        <p>Fonds concerné : <strong>{{ appealModal.requestName }}</strong></p>
+      </div>
+      <button class="modal-close" (click)="closeAppeal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Type de contestation</label>
+        <div class="type-selector">
+          <label class="type-option" [class.selected]="appealForm.get('type')?.value === 'RECLAMATION'">
+            <input type="radio" formControlName="type" value="RECLAMATION">
+            <span class="type-icon">📋</span>
+            <div>
+              <strong>Réclamation</strong>
+              <small>Je conteste la décision de refus et demande une révision.</small>
+            </div>
+          </label>
+          <label class="type-option" [class.selected]="appealForm.get('type')?.value === 'INQUIRY'">
+            <input type="radio" formControlName="type" value="INQUIRY">
+            <span class="type-icon">🔍</span>
+            <div>
+              <strong>Enquête</strong>
+              <small>Je demande une investigation de terrain sur mon cas.</small>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Votre argumentaire <small>(minimum 20 caractères)</small></label>
+        <textarea formControlName="description" class="form-control" rows="5"
+          placeholder="Expliquez pourquoi vous contestez cette décision. Fournissez des détails précis sur la situation (dates, témoins, circonstances particulières)..."></textarea>
+        <small class="char-count" [class.valid]="(appealForm.get('description')?.value?.length || 0) >= 20">
+          {{ appealForm.get('description')?.value?.length || 0 }} / 20 caractères minimum
+        </small>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel-modal" (click)="closeAppeal()" [disabled]="submittingAppeal">Annuler</button>
+      <button class="btn-submit-appeal" (click)="submitAppeal()" [disabled]="appealForm.invalid || submittingAppeal">
+        <span *ngIf="!submittingAppeal">⚖️ Soumettre ma contestation</span>
+        <span *ngIf="submittingAppeal">⏳ Envoi en cours...</span>
+      </button>
+    </div>
+
+  </div>
+</div>

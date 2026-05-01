@@ -21,7 +21,28 @@
         <div class="icon-orb">🌱</div>
         <div class="metric-data">
           <span class="val">{{ cropCount }}</span>
-          <span class="lab">Cultures Actives</span>
+          <span class="lab">Cultures</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="icon-orb" style="background: #e1b12c; color: white;">⭐</div>
+        <div class="metric-data">
+          <span class="val">{{ user()?.score || 0 }}%</span>
+          <span class="lab">Trust Score</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="icon-orb" style="background: #4834d4; color: white;">🛡️</div>
+        <div class="metric-data">
+          <span class="val">{{ membershipCount }}</span>
+          <span class="lab">Fonds Adhérents</span>
+        </div>
+      </div>
+      <div class="metric-card" *ngIf="availableTestsCount > 0">
+        <div class="icon-orb" style="background: #eb4d4b; color: white;">📝</div>
+        <div class="metric-data">
+          <span class="val">{{ availableTestsCount }}</span>
+          <span class="lab">QCM Disponibles</span>
         </div>
       </div>
     </div>

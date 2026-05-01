@@ -1,0 +1,164 @@
+<div class="admin-container animate-in">
+  <header class="header-section">
+    <div class="header-left">
+      <h1 class="page-title">Gestion des Fonds de Solidarité</h1>
+      <p class="page-subtitle">Créez et gérez les fonds mutuels disponibles pour les agriculteurs.</p>
+    </div>
+    <button class="btn-primary" (click)="toggleForm()">
+      <i class="feather" [ngClass]="showForm ? 'icon-x' : 'icon-plus'"></i>
+      {{ showForm ? 'Fermer' : 'Nouveau Fonds' }}
+    </button>
+  </header>
+
+  <div *ngIf="showForm" class="form-card animate-in">
+    <div class="logic-hint">
+      <i class="feather icon-shield"></i>
+      <div class="hint-text">
+        <strong>Conditions de Validation:</strong>
+        <ul>
+          <li>Un minimum de <strong>2 agriculteurs éligibles</strong> est requis pour activer le fonds.</li>
+          <li>L'éligibilité est basée sur le <strong>Score IA</strong> et le <strong>Type de Culture</strong>.</li>
+          <li>L'enrôlement des agriculteurs correspondants est <strong>automatique</strong> à la création.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Nouveau Fonds de Solidarité</h3>
+    <!-- Global Success Message -->
+    <div *ngIf="successMessage" class="global-success-box animate-in">
+      <i class="feather icon-check-circle"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- Global Error Message -->
+    <div *ngIf="backendError" class="global-error-box animate-in" style="margin-bottom: 20px;">
+      <i class="feather icon-alert-circle"></i>
+      <span>{{ backendError }}</span>
+    </div>
+
+    <form [formGroup]="fundForm" (ngSubmit)="submitFund()" class="grid-form">
+
+      <div class="form-group">
+        <label>Nom du Fonds</label>
+        <input type="text" formControlName="name" class="form-control" 
+               [ngClass]="{'is-invalid': fundForm.get('name')?.invalid && fundForm.get('name')?.touched}"
+               placeholder="Ex: Fonds Blé Nord">
+        <span class="error-msg" *ngIf="fundForm.get('name')?.invalid && fundForm.get('name')?.touched">
+          Le nom du fonds est requis.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Numéro de Registre</label>
+        <input type="text" formControlName="numeroFond" class="form-control" 
+               [ngClass]="{'is-invalid': fundForm.get('numeroFond')?.invalid && fundForm.get('numeroFond')?.touched}"
+               placeholder="Ex: FND-2026-001">
+        <span class="error-msg" *ngIf="fundForm.get('numeroFond')?.invalid && fundForm.get('numeroFond')?.touched">
+          Le numéro de registre est obligatoire.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Type de Culture</label>
+        <select formControlName="cultureType" class="form-control"
+                [ngClass]="{'is-invalid': fundForm.get('cultureType')?.invalid && fundForm.get('cultureType')?.touched}">
+          <option value="" disabled selected>Culture ciblée</option>
+          <option *ngFor="let type of availableCultures" [value]="type">
+            {{ type }}
+          </option>
+          <option *ngIf="availableCultures.length === 0" disabled>Aucune culture trouvée dans le système</option>
+        </select>
+        <span class="error-msg" *ngIf="fundForm.get('cultureType')?.invalid && fundForm.get('cultureType')?.touched">
+          Veuillez sélectionner une culture.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Score IA Min (%)</label>
+        <input type="number" formControlName="minScore" class="form-control"
+               [ngClass]="{'is-invalid': fundForm.get('minScore')?.invalid && fundForm.get('minScore')?.touched}">
+        <span class="error-msg" *ngIf="fundForm.get('minScore')?.invalid && fundForm.get('minScore')?.touched">
+          Le score doit être entre 0 et 100.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Prime Mensuelle (TND)</label>
+        <input type="number" formControlName="primeAmount" class="form-control"
+               [ngClass]="{'is-invalid': fundForm.get('primeAmount')?.invalid && fundForm.get('primeAmount')?.touched}">
+        <span class="error-msg" *ngIf="fundForm.get('primeAmount')?.invalid && fundForm.get('primeAmount')?.touched">
+          La prime doit être d'au moins 1 TND.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Solde Initial (TND)</label>
+        <input type="number" formControlName="currentBalance" class="form-control"
+               [ngClass]="{'is-invalid': fundForm.get('currentBalance')?.invalid && fundForm.get('currentBalance')?.touched}">
+        <span class="error-msg" *ngIf="fundForm.get('currentBalance')?.invalid && fundForm.get('currentBalance')?.touched">
+          Le solde ne peut pas être négatif.
+        </span>
+      </div>
+      
+      <div class="form-actions" style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
+        <button type="button" class="btn-primary" style="background: #94a3b8;" (click)="toggleForm()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="submitting || fundForm.invalid">
+          {{ submitting ? 'Création...' : 'Confirmer la création' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Nom du Fonds</th>
+          <th>N° Registre</th>
+          <th>Culture</th>
+          <th>Score Min</th>
+          <th>Prime Mensuelle</th>
+          <th>Solde Actuel</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let fund of funds" class="animate-in">
+          <td class="fund-name-cell">{{ fund.name }}</td>
+          <td><code>{{ fund.numeroFond }}</code></td>
+          <td>
+            <span class="badge-culture">
+              {{ fund.cultureType || 'N/A' }}
+            </span>
+          </td>
+          <td class="score-cell">{{ fund.minScore ? fund.minScore + '%' : '40%' }}</td>
+          <td class="amount-cell">{{ fund.primeAmount | number:'1.0-2' }} TND</td>
+          <td class="amount-cell" style="color: #059669;">{{ fund.currentBalance | number:'1.0-2' }} TND</td>
+          <td>
+            <div style="display: flex; justify-content: flex-end;">
+              <button class="btn-icon btn-delete" (click)="deleteFund(fund.id!)" title="Supprimer">
+                <i class="feather icon-trash-2"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="funds.length === 0 && !loading">
+          <td colspan="7">
+            <div class="empty-state">
+              <i class="feather icon-info"></i>
+              <p>Aucun fonds de solidarité n'est disponible.</p>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="loading">
+          <td colspan="7">
+            <div class="empty-state">
+              <div class="spinner" style="margin: 0 auto 16px;"></div>
+              <p>Chargement des fonds...</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

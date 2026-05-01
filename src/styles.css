@@ -1190,6 +1190,52 @@ section {
   letter-spacing: 0.02em !important;
 }
 
+/* --- Wallet Chip --- */
+.fo-wallet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0f7f4; /* Light green-ish */
+  padding: 6px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(45, 106, 79, 0.1);
+  transition: all 0.3s var(--fo-transition);
+  cursor: pointer;
+}
+
+.fo-wallet:hover {
+  background: #2D6A4F;
+  border-color: #2D6A4F;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.15);
+}
+
+.fo-wallet:hover .fo-wallet-icon,
+.fo-wallet:hover .fo-wallet-amount {
+  color: white;
+}
+
+.fo-wallet-icon {
+  color: #2D6A4F;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s;
+}
+
+.fo-wallet-amount {
+  font-family: var(--fo-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a3d1a;
+  transition: color 0.3s;
+}
+
+.fo-wallet-amount small {
+  font-size: 9px;
+  opacity: 0.6;
+  margin-left: 1px;
+}
+
 .fo-divider-v,
 .fo-topbar-divider {
   background: rgba(0,0,0,0.08) !important;

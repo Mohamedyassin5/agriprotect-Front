@@ -1,0 +1,107 @@
+<div class="admin-container animate-in">
+  <div class="header-section">
+    <div class="header-left">
+      <h1 class="page-title">Générateur de QCM IA</h1>
+      <p class="page-subtitle">Créez automatiquement des tests d'évaluation pertinents pour chaque type de culture grâce à AgriVision IA.</p>
+    </div>
+  </div>
+
+  <div class="generator-card animate-in">
+    <div class="generator-content">
+      <div class="ai-icon-large">🧠✨</div>
+      <div class="generator-form">
+        <h3>Générer un nouveau test pour un fonds</h3>
+        <p>L'IA va analyser le type de culture du fonds sélectionné et générer un test QCM unique de 5 questions.</p>
+        
+        <div class="input-group">
+          <select [(ngModel)]="selectedFundId" class="form-control" [disabled]="loading || generatingId !== null">
+            <option value="" disabled selected>-- Sélectionnez un Fonds de Solidarité --</option>
+            <option *ngFor="let fund of funds" [value]="fund.id">
+              {{ fund.name }} (Culture: {{ fund.cultureType }})
+            </option>
+          </select>
+          
+          <button class="btn-generate" [disabled]="!selectedFundId || generatingId !== null" (click)="generateAiTest()">
+            <span *ngIf="generatingId === null">🪄 Générer le Test IA</span>
+            <span *ngIf="generatingId !== null">⚙️ Génération en cours...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">Chargement des données...</div>
+
+  <div *ngIf="!loading && activeTests.length > 0" class="active-tests-section">
+    <h3 class="section-title">Tests Actifs en Cours</h3>
+    
+    <div class="tests-grid">
+      <div *ngFor="let test of activeTests" class="test-card">
+        <div class="test-header">
+          <span class="badge-active">En cours</span>
+          <h4>{{ test.title }}</h4>
+        </div>
+        
+        <div class="test-body">
+          <div class="stat-row">
+            <span class="label">Date de fin prévue</span>
+            <span class="value">{{ test.endDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="label">Score Minimum</span>
+            <span class="value">{{ test.requiredScore }}%</span>
+          </div>
+          <div class="stat-row">
+            <span class="label">Récompense (Réduction Prime)</span>
+            <span class="value text-green">-{{ test.discountPercentage }}%</span>
+          </div>
+          <div class="stat-row">
+            <span class="label">Nombre de questions</span>
+            <span class="value">{{ test.questions ? test.questions.length : 0 }}</span>
+          </div>
+        </div>
+        <div class="test-footer" style="padding: 20px; border-top: 1px solid #f1f2f6;">
+          <button class="btn-secondary" (click)="selectedTest = test">
+            👁️ Voir les détails du test
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QCM Details Modal -->
+  <div class="modal-overlay" *ngIf="selectedTest" (click)="selectedTest = null">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="header-info">
+          <h2>{{ selectedTest.title }}</h2>
+          <span class="subtitle">Aperçu détaillé des questions générées par l'IA</span>
+        </div>
+        <button class="close-btn" (click)="selectedTest = null">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="question-list">
+          <div *ngFor="let q of selectedTest.questions; let i = index" class="question-box">
+            <div class="question-header">
+              <span class="q-number">Question {{i+1}}</span>
+              <p class="q-text">{{ q.text }}</p>
+            </div>
+            
+            <div class="options-grid">
+              <div *ngFor="let opt of q.options" class="option-item" 
+                   [class.is-correct]="opt === q.correctAnswer">
+                <span class="opt-label">{{ opt }}</span>
+                <span *ngIf="opt === q.correctAnswer" class="correct-tag">Correcte</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-close-modal" (click)="selectedTest = null">Fermer l'aperçu</button>
+      </div>
+    </div>
+  </div>
+</div>

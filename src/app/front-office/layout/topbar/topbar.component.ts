@@ -29,9 +29,16 @@ export class TopbarComponent implements OnInit {
     return `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase();
   });
 
+  userBalance = computed(() => {
+    const profile = this.userProfile();
+    // Comprehensive check for all possible naming variations
+    return profile?.accountBalance ?? 
+           profile?.account_balance ?? 
+           profile?.balance ?? 
+           0;
+  });
+
   ngOnInit() {
-    if (!this.userProfile()) {
-      this.userService.loadProfile();
-    }
+    this.userService.loadProfile();
   }
 }

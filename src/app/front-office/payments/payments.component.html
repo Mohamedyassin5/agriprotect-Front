@@ -1,0 +1,109 @@
+<div class="checkout-page animate-in">
+  <div class="checkout-container">
+    
+    <!-- LEFT SIDE: ORDER SUMMARY -->
+    <div class="order-summary">
+      <div class="summary-header">
+        <button class="back-btn" (click)="success ? null : router.navigate(['/front-office/policies'])">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Retour
+        </button>
+        <h2>Récapitulatif</h2>
+      </div>
+
+      <div class="order-card">
+        <div class="order-icon">🛡️</div>
+        <div class="order-details">
+          <h3>{{ fundName }}</h3>
+          <p>Prime de solidarité mensuelle</p>
+        </div>
+      </div>
+
+      <div class="pricing-table">
+        <div class="price-row">
+          <span>Sous-total</span>
+          <span>{{ amount }} TND</span>
+        </div>
+        <div class="price-row">
+          <span>Frais de service (Stripe)</span>
+          <span>0.500 TND</span>
+        </div>
+        <div class="price-divider"></div>
+        <div class="price-total">
+          <span>Total à payer</span>
+          <span>{{ amount + 0.5 }} TND</span>
+        </div>
+      </div>
+
+      <div class="security-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Paiement 100% sécurisé via Stripe SSL</span>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: PAYMENT FORM -->
+    <div class="payment-form-area">
+      <div *ngIf="!success" class="form-content">
+        <h2>Paiement par Carte</h2>
+        <p class="subtitle">Saisissez vos informations de paiement ci-dessous.</p>
+
+        <form (ngSubmit)="processPayment()" #paymentForm="ngForm">
+          <div class="form-group">
+            <label>Titulaire de la carte</label>
+            <input type="text" [(ngModel)]="cardHolder" name="cardHolder" placeholder="Ex: Mohamed Yassin" required>
+          </div>
+
+          <div class="form-group">
+            <label>Numéro de carte</label>
+            <div class="input-with-icon">
+              <input type="text" [(ngModel)]="cardNumber" name="cardNumber" (input)="formatCardNumber()" maxlength="19" placeholder="0000 0000 0000 0000" required>
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" class="card-brand">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group half">
+              <label>Date d'expiration</label>
+              <input type="text" [(ngModel)]="expiryDate" name="expiryDate" (input)="formatExpiry()" maxlength="5" placeholder="MM/YY" required>
+            </div>
+            <div class="form-group half">
+              <label>CVV</label>
+              <input type="password" [(ngModel)]="cvv" name="cvv" maxlength="3" placeholder="***" required>
+            </div>
+          </div>
+
+          <button type="submit" class="pay-btn" [disabled]="paymentForm.invalid || processing">
+            <span *ngIf="!processing">Payer {{ amount + 0.5 }} TND</span>
+            <div *ngIf="processing" class="spinner-white"></div>
+            <span *ngIf="processing">Traitement...</span>
+          </button>
+        </form>
+
+        <div class="stripe-footer">
+          Powered by <strong>stripe</strong>
+        </div>
+      </div>
+
+      <!-- SUCCESS STATE -->
+      <div *ngIf="success" class="success-state animate-in">
+        <div class="success-icon">✨</div>
+        <h2>Paiement Réussi !</h2>
+        <p>Votre prime a été réglée avec succès. Votre couverture est maintenant active pour ce mois.</p>
+        <div class="success-details">
+          <div class="sd-row">
+            <span>Transaction ID</span>
+            <span>#STR-{{ fundId?.substring(0,8) }}</span>
+          </div>
+          <div class="sd-row">
+            <span>Montant</span>
+            <span>{{ amount + 0.5 }} TND</span>
+          </div>
+        </div>
+        <button class="btn-done" (click)="router.navigate(['/front-office/policies'])">
+          Retour aux polices
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

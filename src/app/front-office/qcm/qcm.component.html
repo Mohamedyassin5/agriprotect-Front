@@ -1,0 +1,113 @@
+<div class="qcm-container animate-in">
+  <div class="header-section">
+    <h1 class="page-title">Évaluations de Connaissances (QCM)</h1>
+    <p class="page-subtitle">Prouvez votre expertise sur vos cultures pour obtenir des réductions exclusives sur vos primes d'assurance.</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">Chargement en cours...</div>
+
+  <!-- LIST OF AVAILABLE TESTS -->
+  <div *ngIf="!loading && !activeTest" class="tests-grid">
+    <div *ngIf="availableTests.length === 0" class="empty-state">
+      <div class="empty-icon">📝</div>
+      <h4>Aucun test disponible</h4>
+      <p>Il n'y a pas de QCM disponible pour le moment.</p>
+    </div>
+
+    <div *ngFor="let test of availableTests" class="test-card">
+      <div class="test-header">
+        <div class="test-icon">🧠</div>
+        <div class="test-title-box">
+          <h3 class="test-name">{{ test.title }}</h3>
+        </div>
+        <div class="badge-discount">-{{ test.discountPercentage }}% Prime</div>
+      </div>
+
+      <div class="test-body">
+        <div class="stat-row">
+          <span class="stat-label">Date de fin</span>
+          <span class="stat-value">{{ test.endDate | date:'shortDate' }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Score requis</span>
+          <span class="stat-value">{{ test.requiredScore }}%</span>
+        </div>
+      </div>
+
+        <div class="test-footer">
+          <div *ngIf="isTestPassed(test.id)" class="passed-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Test Réussi
+          </div>
+          
+          <button *ngIf="!isTestPassed(test.id)" class="btn-start" (click)='startTest(test)'>
+            Commencer le Test
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE TEST INTERFACE -->
+  <div *ngIf="!loading && activeTest && !testResult" class="active-test-section animate-in">
+    <div class="test-sticky-header">
+      <div class="header-top">
+        <button class="btn-back" (click)="backToList()">← Quitter le test</button>
+        <h2>{{ activeTest.title }}</h2>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar-wrapper">
+          <div class="progress-bar-fill" [style.width.%]="progressPercentage"></div>
+        </div>
+        <div class="progress-stats">
+          <span>Complétion: {{ progressPercentage | number:'1.0-0' }}%</span>
+          <span>{{ (answers | keyvalue).length }} sur {{ questions.length }} questions</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="questions-list">
+      <div *ngFor="let q of questions; let i = index" class="question-card" [class.answered]="answers[q.id]">
+        <div class="question-header">
+          <span class="q-badge">Question {{ i + 1 }}</span>
+          <h4 class="question-text">{{ q.text }}</h4>
+        </div>
+        
+        <div class="options-grid">
+          <div *ngFor="let option of q.options" 
+               class="option-card" 
+               [class.selected]="isOptionSelected(q.id, option)"
+               (click)="selectOption(q.id, option)">
+            <div class="check-indicator">
+              <div class="check-inner"></div>
+            </div>
+            <span class="option-text">{{ option }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-section">
+      <button class="btn-submit-main" [disabled]="!canSubmit() || submitting" (click)="submitTest()">
+        <span *ngIf="!submitting">🚀 Soumettre mon évaluation</span>
+        <span *ngIf="submitting">⚙️ Correction en cours...</span>
+      </button>
+      <p *ngIf="!canSubmit()" class="warning-hint">Veuillez répondre à toutes les questions pour valider votre score.</p>
+    </div>
+  </div>
+
+  <!-- RESULT INTERFACE -->
+  <div *ngIf="testResult" class="result-section animate-in">
+    <div class="result-card-premium" [class.success]="testResult.includes('réussi')">
+      <div class="result-aura"></div>
+      <div class="result-content">
+        <div class="result-icon-large">{{ testResult.includes('réussi') ? '🏆' : '📚' }}</div>
+        <h2>Résultat Final</h2>
+        <p class="result-description">{{ testResult }}</p>
+        <button class="btn-finish" (click)="backToList()">Retour au tableau de bord</button>
+      </div>
+    </div>
+  </div>
+
+</div>
