@@ -1,0 +1,733 @@
+<div class="sv-page">
+
+  <!-- Page Header -->
+  <div class="sv-header">
+    <div>
+      <div class="sv-breadcrumb">Tableau de bord / Épargne</div>
+      <h1 class="sv-title">Gestion de l'Épargne</h1>
+    </div>
+  </div>
+
+  <!-- Global Error Banner -->
+  <div class="sv-error-banner" *ngIf="apiError">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {{ apiError }}
+    <button class="sv-error-close" (click)="apiError=''">×</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="sv-loading" *ngIf="isLoading">
+    <div class="sv-dot"></div><div class="sv-dot"></div><div class="sv-dot"></div>
+  </div>
+
+  <!-- No Account -->
+  <div class="sv-no-account" *ngIf="!isLoading && !hasAccount && !apiError">
+    <div class="sv-no-account-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#40916c" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
+    <h3>Créez votre compte épargne</h3>
+    <p>Commencez à épargner intelligemment pour votre exploitation agricole.</p>
+    <form [formGroup]="accountForm" (ngSubmit)="createAccount()" class="sv-create-form">
+      <div class="sv-field">
+        <label class="sv-label">Nom du compte</label>
+        <input class="sv-input" formControlName="accountName" placeholder="Ex: Épargne exploitation agricole">
+      </div>
+      <div class="sv-field">
+        <label class="sv-label">Objectif mensuel (TND)</label>
+        <input class="sv-input" type="number" formControlName="monthlySavingsTarget" placeholder="500">
+      </div>
+      <button class="sv-btn sv-btn-primary sv-btn-full" type="submit" [disabled]="accountForm.invalid || isLoading">
+        Créer mon compte épargne
+      </button>
+    </form>
+  </div>
+
+  <!-- Account Exists -->
+  <ng-container *ngIf="!isLoading && hasAccount">
+
+    <!-- Tabs -->
+    <div class="sv-tabs">
+      <button class="sv-tab" [class.sv-tab-active]="activeTab==='compte'" (click)="setTab('compte')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Compte
+      </button>
+      <button class="sv-tab" [class.sv-tab-active]="activeTab==='transactions'" (click)="setTab('transactions')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        Transactions
+      </button>
+      <button class="sv-tab" [class.sv-tab-active]="activeTab==='objectifs'" (click)="setTab('objectifs')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Objectifs
+      </button>
+      <button class="sv-tab" [class.sv-tab-active]="activeTab==='analytiques'" (click)="setTab('analytiques')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytiques
+      </button>
+      <button class="sv-tab" [class.sv-tab-active]="activeTab==='ia'" (click)="setTab('ia')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10A10 10 0 0 1 2 12 10 10 0 0 1 12 2m0 4a6 6 0 0 0-6 6 6 6 0 0 0 6 6 6 6 0 0 0 6-6 6 6 0 0 0-6-6"/></svg>
+        Intelligence IA
+      </button>
+    </div>
+
+    <!-- ══ TAB: COMPTE ══ -->
+    <div *ngIf="activeTab === 'compte' && account">
+
+      <!-- Balance Hero -->
+      <div class="sv-balance-hero">
+        <div class="sv-balance-left">
+          <div class="sv-balance-label">Solde disponible</div>
+          <div class="sv-balance-amount">{{ account.currentBalance | number:'1.2-2' }} <span class="sv-balance-currency">TND</span></div>
+          <div class="sv-balance-sub">
+            <span class="sv-account-name">{{ account.accountName }}</span>
+            <span class="sv-status-pill"
+              [class.sv-status-active]="account.status==='ACTIVE'"
+              [class.sv-status-frozen]="account.status==='FROZEN'"
+              [class.sv-status-closed]="account.status==='CLOSED'">
+              {{ account.status === 'ACTIVE' ? 'Actif' : account.status === 'FROZEN' ? 'Gelé' : 'Fermé' }}
+            </span>
+          </div>
+        </div>
+        <div class="sv-balance-right">
+          <div class="sv-balance-stat">
+            <div class="sv-balance-stat-value">{{ account.monthlySavingsTarget | number:'1.0-0' }}</div>
+            <div class="sv-balance-stat-label">Cible / mois (TND)</div>
+          </div>
+          <div class="sv-balance-stat">
+            <div class="sv-balance-stat-value">{{ goals.length }}</div>
+            <div class="sv-balance-stat-label">Objectifs actifs</div>
+          </div>
+          <div class="sv-balance-stat">
+            <div class="sv-balance-stat-value">{{ achievedGoalsCount }}</div>
+            <div class="sv-balance-stat-label">Objectifs atteints</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal Progress (if any) -->
+      <div class="sv-card" *ngIf="account.goalAmount && account.goalAmount > 0" style="margin-bottom:16px">
+        <div class="sv-card-header">
+          <span class="sv-card-title">Progression vers l'objectif principal</span>
+          <span class="sv-card-subtitle">{{ account.goalTitle }}</span>
+        </div>
+        <div class="sv-progress-row">
+          <div class="sv-progress-meta">
+            <span>{{ account.currentBalance | number:'1.0-0' }} TND</span>
+            <span>{{ ((account.currentBalance / account.goalAmount) * 100) | number:'1.0-0' }}%</span>
+            <span>{{ account.goalAmount | number:'1.0-0' }} TND</span>
+          </div>
+          <div class="sv-progress-track">
+            <div class="sv-progress-fill"
+              [style.width.%]="(account.currentBalance / account.goalAmount) * 100"
+              [style.background]="getProgressColor((account.currentBalance / account.goalAmount) * 100)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Settings -->
+      <div class="sv-card">
+        <div class="sv-card-header">
+          <span class="sv-card-title">Paramètres du compte</span>
+          <div class="sv-btn-group">
+            <button class="sv-btn sv-btn-ghost sv-btn-sm" (click)="showEditAccount = !showEditAccount">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              {{ showEditAccount ? 'Annuler' : 'Modifier' }}
+            </button>
+            <button class="sv-btn sv-btn-sm"
+              [class.sv-btn-ghost]="account.status==='FROZEN'"
+              [class.sv-btn-danger]="account.status==='ACTIVE'"
+              (click)="toggleAccountStatus()">
+              {{ account.status === 'ACTIVE' ? 'Geler le compte' : 'Réactiver' }}
+            </button>
+          </div>
+        </div>
+        <div class="sv-account-info" *ngIf="!showEditAccount">
+          <div class="sv-info-row"><span class="sv-info-label">Créé le</span><span class="sv-info-value">{{ account.createdAt | date:'dd MMMM yyyy' }}</span></div>
+          <div class="sv-info-row"><span class="sv-info-label">Dernière mise à jour</span><span class="sv-info-value">{{ account.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span></div>
+          <div class="sv-info-row"><span class="sv-info-label">Cible mensuelle</span><span class="sv-info-value">{{ account.monthlySavingsTarget | number:'1.0-0' }} TND</span></div>
+        </div>
+        <div class="sv-edit-form" *ngIf="showEditAccount">
+          <div class="sv-form-grid">
+            <div class="sv-field">
+              <label class="sv-label">Nom du compte</label>
+              <input class="sv-input" [(ngModel)]="account.accountName">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Cible mensuelle (TND)</label>
+              <input class="sv-input" type="number" [(ngModel)]="account.monthlySavingsTarget">
+            </div>
+          </div>
+          <div class="sv-form-actions">
+            <button class="sv-btn sv-btn-primary sv-btn-sm" (click)="saveAccountEdit()">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: TRANSACTIONS ══ -->
+    <div *ngIf="activeTab === 'transactions'">
+
+      <!-- Toolbar -->
+      <div class="sv-toolbar">
+        <div class="sv-filter-pills">
+          <button class="sv-pill" [class.sv-pill-active]="txFilter===''" (click)="applyTxFilter('')">Toutes</button>
+          <button class="sv-pill" [class.sv-pill-active]="txFilter==='DEPOSIT'" (click)="applyTxFilter('DEPOSIT')">Dépôts</button>
+          <button class="sv-pill" [class.sv-pill-active]="txFilter==='WITHDRAWAL'" (click)="applyTxFilter('WITHDRAWAL')">Retraits</button>
+        </div>
+        <button class="sv-btn sv-btn-primary sv-btn-sm" (click)="showTxForm = !showTxForm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          {{ showTxForm ? 'Annuler' : 'Nouvelle transaction' }}
+        </button>
+      </div>
+
+      <!-- TX Error -->
+      <div class="sv-error-banner" *ngIf="txError">{{ txError }}</div>
+
+      <!-- New Transaction Form -->
+      <div class="sv-form-panel" *ngIf="showTxForm">
+        <div class="sv-form-panel-title">Enregistrer une transaction</div>
+        <form [formGroup]="txForm" (ngSubmit)="submitTransaction()">
+          <div class="sv-form-grid">
+            <div class="sv-field">
+              <label class="sv-label">Type</label>
+              <select class="sv-input" formControlName="type">
+                <option value="DEPOSIT">Dépôt</option>
+                <option value="WITHDRAWAL">Retrait</option>
+              </select>
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Montant (TND)</label>
+              <input class="sv-input" type="number" formControlName="amount" placeholder="0.00">
+            </div>
+            <div class="sv-field sv-field-full">
+              <label class="sv-label">Description</label>
+              <input class="sv-input" formControlName="description" placeholder="Ex: Épargne mensuelle récolte">
+            </div>
+          </div>
+          <div class="sv-form-actions">
+            <button class="sv-btn sv-btn-ghost sv-btn-sm" type="button" (click)="showTxForm=false">Annuler</button>
+            <button class="sv-btn sv-btn-primary sv-btn-sm" type="submit" [disabled]="txForm.invalid || txLoading">
+              {{ txLoading ? 'En cours…' : 'Valider la transaction' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- KPI Strip -->
+      <div class="sv-kpi-strip">
+        <div class="sv-kpi-card sv-kpi-card--deposit">
+          <div class="sv-kpi-card-icon">&#8593;</div>
+          <div class="sv-kpi-body">
+            <div class="sv-kpi-label">Total dépôts</div>
+            <div class="sv-kpi-value">+{{ totalDeposits | number:'1.0-0' }} TND</div>
+          </div>
+        </div>
+        <div class="sv-kpi-card sv-kpi-card--withdrawal">
+          <div class="sv-kpi-card-icon">&#8595;</div>
+          <div class="sv-kpi-body">
+            <div class="sv-kpi-label">Total retraits</div>
+            <div class="sv-kpi-value">-{{ totalWithdrawals | number:'1.0-0' }} TND</div>
+          </div>
+        </div>
+        <div class="sv-kpi-card sv-kpi-card--balance" [class.sv-kpi-card--balance-neg]="(totalDeposits - totalWithdrawals) < 0">
+          <div class="sv-kpi-card-icon">&#8652;</div>
+          <div class="sv-kpi-body">
+            <div class="sv-kpi-label">Solde net (liste)</div>
+            <div class="sv-kpi-value">
+              {{ (totalDeposits - totalWithdrawals) | number:'1.0-0' }} TND
+            </div>
+          </div>
+        </div>
+        <div class="sv-kpi-card sv-kpi-card--count">
+          <div class="sv-kpi-card-icon">&#9776;</div>
+          <div class="sv-kpi-body">
+            <div class="sv-kpi-label">Nombre d'opérations</div>
+            <div class="sv-kpi-value">{{ transactions.length }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="sv-card sv-table-wrap" *ngIf="transactions.length > 0">
+        <table class="sv-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th class="sv-col-right">Montant</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tx of transactions" class="sv-data-row">
+              <td class="sv-cell-muted">{{ tx.occurredAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <span class="sv-type-tag" [class.sv-tag-deposit]="tx.type==='DEPOSIT'" [class.sv-tag-withdrawal]="tx.type==='WITHDRAWAL'">
+                  {{ tx.type === 'DEPOSIT' ? 'Dépôt' : 'Retrait' }}
+                </span>
+              </td>
+              <td>{{ tx.description }}</td>
+              <td class="sv-col-right sv-amount-cell"
+                [class.sv-amount-deposit]="tx.type==='DEPOSIT'"
+                [class.sv-amount-withdrawal]="tx.type==='WITHDRAWAL'">
+                {{ tx.type === 'DEPOSIT' ? '+' : '-' }}{{ tx.amount | number:'1.2-2' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sv-empty" *ngIf="transactions.length === 0">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#74c69d" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <div>Aucune transaction enregistrée</div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: OBJECTIFS ══ -->
+    <div *ngIf="activeTab === 'objectifs'">
+
+      <!-- Toolbar -->
+      <div class="sv-toolbar">
+        <span class="sv-section-title">Mes objectifs d'épargne</span>
+        <div class="sv-btn-group">
+          <button class="sv-btn sv-btn-ghost sv-btn-sm" (click)="loadArchivedGoals()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            Archives
+          </button>
+          <button class="sv-btn sv-btn-primary sv-btn-sm" (click)="showGoalForm ? cancelGoalForm() : (showGoalForm = true)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            {{ showGoalForm && !editingGoalId ? 'Annuler' : 'Nouvel objectif' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Goal Form -->
+      <div class="sv-form-panel" *ngIf="showGoalForm">
+        <div class="sv-form-panel-title">{{ editingGoalId ? "Modifier l'objectif" : 'Créer un objectif' }}</div>
+        <form [formGroup]="goalForm" (ngSubmit)="submitGoal()">
+          <div class="sv-form-grid">
+            <div class="sv-field">
+              <label class="sv-label">Nom de l'objectif</label>
+              <input class="sv-input" formControlName="goalName" placeholder="Ex: Achat tracteur">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Montant cible (TND)</label>
+              <input class="sv-input" type="number" formControlName="targetAmount" placeholder="0">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Date cible</label>
+              <input class="sv-input" type="date" formControlName="targetDate">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Description (optionnel)</label>
+              <input class="sv-input" formControlName="description" placeholder="Notes…">
+            </div>
+          </div>
+          <div class="sv-form-actions">
+            <button class="sv-btn sv-btn-ghost sv-btn-sm" type="button" (click)="cancelGoalForm()">Annuler</button>
+            <button class="sv-btn sv-btn-primary sv-btn-sm" type="submit" [disabled]="goalForm.invalid || goalLoading">
+              {{ goalLoading ? 'En cours…' : (editingGoalId ? 'Enregistrer' : 'Créer l\'objectif') }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Goals Grid -->
+      <div class="sv-goals-grid" *ngIf="goals.length > 0">
+        <div class="sv-goal-card" *ngFor="let goal of goals" [class.sv-goal-achieved]="goal.achieved">
+          <div class="sv-goal-top">
+            <div class="sv-goal-name">{{ goal.goalName }}</div>
+            <span class="sv-goal-badge" *ngIf="goal.achieved">Atteint</span>
+            <div class="sv-goal-actions">
+              <button class="sv-icon-btn" (click)="editGoal(goal)" title="Modifier">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="sv-icon-btn" (click)="setGoalPriority(goal.id, 1)" title="Priorité haute">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+              </button>
+              <button class="sv-icon-btn sv-icon-collect" *ngIf="goal.achieved" (click)="collectGoal(goal)" title="Collecter">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/></svg>
+              </button>
+              <button class="sv-icon-btn sv-icon-danger" (click)="deleteGoal(goal.id)" title="Supprimer">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="sv-goal-amounts">
+            <span class="sv-goal-current">{{ goal.currentAmount | number:'1.0-0' }} TND</span>
+            <span class="sv-goal-target">/ {{ goal.targetAmount | number:'1.0-0' }} TND</span>
+          </div>
+          <div class="sv-progress-track" style="height:8px;margin:10px 0">
+            <div class="sv-progress-fill"
+              [style.width.%]="goal.progressPercentage"
+              [style.background]="getProgressColor(goal.progressPercentage)">
+            </div>
+          </div>
+          <div class="sv-goal-footer">
+            <span class="sv-goal-pct">{{ goal.progressPercentage | number:'1.0-0' }}% atteint</span>
+            <span class="sv-goal-remain">Reste: {{ goal.remainingAmount | number:'1.0-0' }} TND</span>
+            <span class="sv-goal-date">{{ goal.targetDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="sv-goal-meta">Mode: {{ goal.allocationMode }} · Priorité {{ goal.priority }}</div>
+        </div>
+      </div>
+
+      <div class="sv-empty" *ngIf="goals.length === 0 && !showGoalForm">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#74c69d" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <div>Aucun objectif défini. Commencez par en créer un !</div>
+      </div>
+
+      <!-- Archived Goals -->
+      <div class="sv-archived-section" *ngIf="showArchived">
+        <div class="sv-archived-title">Objectifs archivés</div>
+        <div class="sv-goals-grid" *ngIf="archivedGoals.length > 0">
+          <div class="sv-goal-card sv-goal-archived" *ngFor="let goal of archivedGoals">
+            <div class="sv-goal-top">
+              <div class="sv-goal-name">{{ goal.goalName }}</div>
+              <span class="sv-goal-badge sv-badge-archived">Collecté</span>
+            </div>
+            <div class="sv-goal-amounts">
+              <span class="sv-goal-target">{{ goal.targetAmount | number:'1.0-0' }} TND</span>
+            </div>
+            <div class="sv-goal-date" style="margin-top:8px">{{ goal.targetDate | date:'dd/MM/yyyy' }}</div>
+          </div>
+        </div>
+        <div class="sv-empty" *ngIf="archivedGoals.length === 0">Aucun objectif archivé.</div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: ANALYTIQUES ══ -->
+    <div *ngIf="activeTab === 'analytiques'">
+
+      <div class="sv-loading" *ngIf="analyticsLoading">
+        <div class="sv-dot"></div><div class="sv-dot"></div><div class="sv-dot"></div>
+      </div>
+
+      <div *ngIf="!analyticsLoading">
+
+        <!-- Monthly Summary -->
+        <div class="sv-section-card" *ngIf="monthlySummary">
+          <div class="sv-section-card-header">Résumé mensuel — 6 derniers mois</div>
+          <div class="sv-kpi-strip">
+            <div class="sv-kpi-card">
+              <div class="sv-kpi-label">Total dépôts</div>
+              <div class="sv-kpi-value sv-kpi-income">+{{ monthlySummary.totalDeposits | number:'1.0-0' }} TND</div>
+            </div>
+            <div class="sv-kpi-card">
+              <div class="sv-kpi-label">Total retraits</div>
+              <div class="sv-kpi-value sv-kpi-expense">-{{ monthlySummary.totalWithdrawals | number:'1.0-0' }} TND</div>
+            </div>
+            <div class="sv-kpi-card">
+              <div class="sv-kpi-label">Variation nette</div>
+              <div class="sv-kpi-value" [class.sv-kpi-income]="monthlySummary.netChange >= 0" [class.sv-kpi-expense]="monthlySummary.netChange < 0">
+                {{ monthlySummary.netChange | number:'1.0-0' }} TND
+              </div>
+            </div>
+          </div>
+          <div class="sv-table-wrap" *ngIf="monthlySummary.monthlyData">
+            <table class="sv-table">
+              <thead><tr><th>Mois</th><th class="sv-col-right">Dépôts</th><th class="sv-col-right">Retraits</th><th class="sv-col-right">Net</th><th class="sv-col-right">Solde</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let m of monthlySummary.monthlyData" class="sv-data-row">
+                  <td>{{ m.month }}</td>
+                  <td class="sv-col-right sv-amount-deposit">+{{ m.deposits | number:'1.0-0' }}</td>
+                  <td class="sv-col-right sv-amount-withdrawal">-{{ m.withdrawals | number:'1.0-0' }}</td>
+                  <td class="sv-col-right" [class.sv-amount-deposit]="m.netChange >= 0" [class.sv-amount-withdrawal]="m.netChange < 0">{{ m.netChange | number:'1.0-0' }}</td>
+                  <td class="sv-col-right" style="font-weight:600">{{ m.balance | number:'1.0-0' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="sv-section-card" *ngIf="alerts">
+          <div class="sv-section-card-header">Alertes <span class="sv-alert-count" *ngIf="alerts.totalAlerts > 0">{{ alerts.totalAlerts }}</span></div>
+          <div class="sv-alert-ok" *ngIf="alerts.totalAlerts === 0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#40916c" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Aucune alerte — tout est en ordre !
+          </div>
+          <div *ngFor="let a of alerts.alerts">
+            <div class="sv-alert-item" [class]="getSeverityClass(a.severity)">
+              <strong>{{ a.type }}</strong> — {{ a.message }}
+              <span *ngIf="a.value"> ({{ a.value | number:'1.2-2' }} TND)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendation -->
+        <div class="sv-section-card" *ngIf="recommendation">
+          <div class="sv-section-card-header">Recommandations d'épargne</div>
+          <div class="sv-kpi-strip" style="margin-bottom:16px">
+            <div class="sv-kpi-card">
+              <div class="sv-kpi-label">Revenu moy/mois</div>
+              <div class="sv-kpi-value">{{ recommendation.monthlyIncome | number:'1.0-0' }} TND</div>
+            </div>
+            <div class="sv-kpi-card">
+              <div class="sv-kpi-label">Dépenses moy/mois</div>
+              <div class="sv-kpi-value">{{ recommendation.monthlyExpenses | number:'1.0-0' }} TND</div>
+            </div>
+            <div class="sv-kpi-card">
+              <div class="sv-kpi-label">Épargne recommandée</div>
+              <div class="sv-kpi-value sv-kpi-income">{{ recommendation.recommendedMonthlySavings | number:'1.0-0' }} TND</div>
+            </div>
+          </div>
+          <div *ngFor="let r of recommendation.recommendations">
+            <div class="sv-alert-item" [class]="getSeverityClass(r.priority)">
+              <strong>{{ r.recommendation }}</strong>
+              <div *ngIf="r.potentialSavings" class="sv-rec-saving">Économie potentielle: {{ r.potentialSavings | number:'1.0-0' }} TND</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulateur de retrait -->
+        <div class="sv-section-card">
+          <div class="sv-section-card-header">Simulateur de retrait</div>
+          <div class="sv-sim-row">
+            <div class="sv-field" style="flex:1;margin-bottom:0">
+              <label class="sv-label">Montant à simuler (TND)</label>
+              <input class="sv-input" type="number" [(ngModel)]="simulateAmount" placeholder="0">
+            </div>
+            <button class="sv-btn sv-btn-primary sv-btn-sm" (click)="simulate()">Simuler</button>
+          </div>
+          <div class="sv-sim-result sv-sim-ok" *ngIf="simulateResult?.isAllowed">
+            <strong>Retrait possible</strong> — {{ simulateResult.message }}<br>
+            Solde après retrait: <strong>{{ simulateResult.balanceAfterWithdrawal | number:'1.2-2' }} TND</strong>
+          </div>
+          <div class="sv-sim-result sv-sim-deny" *ngIf="simulateResult && !simulateResult.isAllowed">
+            <strong>Retrait refusé</strong> — {{ simulateResult.message }}<br>
+            Solde après retrait: <strong>{{ simulateResult.balanceAfterWithdrawal | number:'1.2-2' }} TND</strong>
+          </div>
+        </div>
+
+        <!-- Relevé de compte -->
+        <div class="sv-section-card">
+          <div class="sv-section-card-header">Relevé de compte</div>
+          <div class="sv-form-grid" style="margin-bottom:12px">
+            <div class="sv-field">
+              <label class="sv-label">Du</label>
+              <input class="sv-input" type="date" [(ngModel)]="statementFrom">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Au</label>
+              <input class="sv-input" type="date" [(ngModel)]="statementTo">
+            </div>
+          </div>
+          <button class="sv-btn sv-btn-ghost sv-btn-sm" (click)="loadStatement()">Générer le relevé</button>
+          <div *ngIf="statement" style="margin-top:20px">
+            <div class="sv-kpi-strip" style="margin-bottom:16px">
+              <div class="sv-kpi-card"><div class="sv-kpi-label">Solde ouverture</div><div class="sv-kpi-value">{{ statement.openingBalance | number:'1.0-0' }}</div></div>
+              <div class="sv-kpi-card"><div class="sv-kpi-label">Solde clôture</div><div class="sv-kpi-value">{{ statement.closingBalance | number:'1.0-0' }}</div></div>
+              <div class="sv-kpi-card"><div class="sv-kpi-label">Dépôts</div><div class="sv-kpi-value sv-kpi-income">{{ statement.totalDeposits | number:'1.0-0' }}</div></div>
+              <div class="sv-kpi-card"><div class="sv-kpi-label">Retraits</div><div class="sv-kpi-value sv-kpi-expense">{{ statement.totalWithdrawals | number:'1.0-0' }}</div></div>
+            </div>
+            <div class="sv-table-wrap" *ngIf="statement.transactions?.length">
+              <table class="sv-table">
+                <thead><tr><th>Date</th><th>Type</th><th>Description</th><th class="sv-col-right">Montant</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let t of statement.transactions" class="sv-data-row">
+                    <td class="sv-cell-muted">{{ t.occurredAt | date:'dd/MM/yy' }}</td>
+                    <td><span class="sv-type-tag" [class.sv-tag-deposit]="t.type==='DEPOSIT'" [class.sv-tag-withdrawal]="t.type==='WITHDRAWAL'">{{ t.type === 'DEPOSIT' ? 'Dépôt' : 'Retrait' }}</span></td>
+                    <td>{{ t.description }}</td>
+                    <td class="sv-col-right" [class.sv-amount-deposit]="t.type==='DEPOSIT'" [class.sv-amount-withdrawal]="t.type==='WITHDRAWAL'">
+                      {{ t.type==='DEPOSIT' ? '+' : '-' }}{{ t.amount | number:'1.2-2' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ TAB: IA ══ -->
+    <div *ngIf="activeTab === 'ia'">
+
+      <div class="sv-loading" *ngIf="aiLoading">
+        <div class="sv-dot"></div><div class="sv-dot"></div><div class="sv-dot"></div>
+      </div>
+
+      <div class="sv-ai-grid" *ngIf="!aiLoading">
+
+        <!-- Goal Achievement Prediction (full width) -->
+        <div class="sv-ai-card sv-ai-full" *ngIf="aiGoalPrediction">
+          <div class="sv-ai-title">Prédiction d'atteinte des objectifs</div>
+          <div class="sv-ai-meta">
+            Épargne mensuelle moy: <strong>{{ aiGoalPrediction.averageMonthlySavings | number:'1.0-0' }} TND</strong>
+            &nbsp;·&nbsp; Mois analysés: <strong>{{ aiGoalPrediction.monthsAnalyzed }}</strong>
+          </div>
+          <div *ngFor="let p of aiGoalPrediction.goalPredictions" class="sv-prediction-row">
+            <div class="sv-prediction-header">
+              <strong class="sv-prediction-name">{{ p.goalName }}</strong>
+              <span class="sv-pred-status" [style.background]="getStatusColor(p.status)">{{ getStatusLabel(p.status) }}</span>
+            </div>
+            <div class="sv-progress-track" style="height:6px;margin:8px 0">
+              <div class="sv-progress-fill" [style.width.%]="p.progressPercentage" [style.background]="getProgressColor(p.progressPercentage)"></div>
+            </div>
+            <div class="sv-prediction-stats">
+              <span>{{ p.progressPercentage | number:'1.0-0' }}% · Reste: {{ p.remaining | number:'1.0-0' }} TND</span>
+              <span>Complétion estimée: {{ p.estimatedCompletionDate | date:'MMM yyyy' }}</span>
+              <span>Probabilité: {{ p.probability | number:'1.0-0' }}%</span>
+            </div>
+            <div class="sv-prediction-detail">{{ p.statusDetail }}</div>
+          </div>
+          <div class="sv-scenarios" *ngIf="aiGoalPrediction.scenarios?.length">
+            <div class="sv-scenarios-title">Scénarios</div>
+            <div *ngFor="let s of aiGoalPrediction.scenarios" class="sv-scenario-row">
+              <span class="sv-scenario-name">{{ s.name }}</span>
+              <span>{{ s.monthlySavings | number:'1.0-0' }} TND/mois → {{ s.achievementDate | date:'MMM yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Smart Savings Plan -->
+        <div class="sv-ai-card" *ngIf="aiSmartPlan">
+          <div class="sv-ai-title">Plan d'épargne intelligent</div>
+          <div class="sv-ai-meta">
+            Recommandé: <strong>{{ aiSmartPlan.recommendedMonthlySavings | number:'1.0-0' }} TND/mois</strong>
+            &nbsp;·&nbsp; Durée: <strong>{{ aiSmartPlan.planDurationMonths }} mois</strong>
+          </div>
+          <div *ngFor="let m of aiSmartPlan.monthlyPlan?.slice(0, 6)" class="sv-plan-row">
+            <div>
+              <div class="sv-plan-month">{{ m.month }}</div>
+              <div class="sv-plan-note">{{ m.seasonalNote }}</div>
+            </div>
+            <div class="sv-plan-right">
+              <div class="sv-plan-amount">{{ m.recommendedSavings | number:'1.0-0' }} TND</div>
+              <div class="sv-plan-pct">{{ m.progressPercentage | number:'1.0-0' }}%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Fund -->
+        <div class="sv-ai-card" *ngIf="aiEmergencyFund">
+          <div class="sv-ai-title">Fonds d'urgence</div>
+          <div class="sv-emergency-score" [style.color]="getProtectionColor(aiEmergencyFund.protectionLevel)">
+            {{ aiEmergencyFund.coverageMonths | number:'1.1-1' }}
+            <span class="sv-emergency-unit">mois couverts</span>
+          </div>
+          <div class="sv-protection-badge" [style.background]="getProtectionColor(aiEmergencyFund.protectionLevel)">
+            {{ aiEmergencyFund.protectionLevel }}
+          </div>
+          <div class="sv-emergency-rows">
+            <div class="sv-emergency-row"><span>Dépenses moy/mois</span><strong>{{ aiEmergencyFund.averageMonthlyExpenses | number:'1.0-0' }} TND</strong></div>
+            <div class="sv-emergency-row"><span>Minimum recommandé (3 mois)</span><strong>{{ aiEmergencyFund.recommendedMinimum | number:'1.0-0' }} TND</strong></div>
+            <div class="sv-emergency-row"><span>Optimal (6 mois)</span><strong>{{ aiEmergencyFund.recommendedOptimal | number:'1.0-0' }} TND</strong></div>
+          </div>
+          <div class="sv-alert-item" [class]="getSeverityClass(aiEmergencyFund.protectionLevel === 'GOOD' || aiEmergencyFund.protectionLevel === 'EXCELLENT' ? 'LOW' : 'HIGH')" style="font-size:12px;margin-top:12px">
+            {{ aiEmergencyFund.recommendation }}
+          </div>
+        </div>
+
+        <!-- ML Savings Alert Prediction (Notebook Module 3) -->
+        <div class="sv-ai-card sv-ai-full">
+          <div class="sv-ai-title">🤖 Analyse de Capacité d'Épargne (IA Notebook)</div>
+          <p style="font-size:12px;color:#6b7280;margin:0 0 10px">
+            Modèle ML entraîné sur données AgriRiskFin — évalue votre capacité d'épargne (Insufficient / Moderate / Good).
+          </p>
+          <button class="sv-btn sv-btn-ghost sv-btn-sm" style="margin-bottom:10px" (click)="autoFillAlertForm()" [disabled]="totalDeposits===0 && totalWithdrawals===0">
+            ↩ Pré-remplir depuis mes transactions
+          </button>
+          <form [formGroup]="mlAlertForm" (ngSubmit)="runMLSavingsAlert()" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="sv-field">
+              <label class="sv-label">Revenus annuels (TND)</label>
+              <input class="sv-input" type="number" formControlName="revenue" placeholder="Ex: 25000">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Dépenses annuelles (TND)</label>
+              <input class="sv-input" type="number" formControlName="expenses" placeholder="Ex: 18000">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Montant des prêts (TND)</label>
+              <input class="sv-input" type="number" formControlName="loanAmount" placeholder="0">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Indice sécheresse (0–10)</label>
+              <input class="sv-input" type="number" step="0.1" formControlName="droughtIndex" placeholder="3">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Score risque inondation (0–10)</label>
+              <input class="sv-input" type="number" step="0.1" formControlName="floodRiskScore" placeholder="2">
+            </div>
+            <div class="sv-field">
+              <label class="sv-label">Score soutien politique (0–10)</label>
+              <input class="sv-input" type="number" step="0.1" formControlName="policySupportScore" placeholder="5">
+            </div>
+            <div style="grid-column:1/-1">
+              <button class="sv-btn sv-btn-primary" type="submit" [disabled]="mlAlertForm.invalid || mlAlertLoading" style="width:100%">
+                {{ mlAlertLoading ? 'Analyse en cours…' : '🔍 Prédire ma capacité d\'épargne' }}
+              </button>
+            </div>
+          </form>
+          <div class="sv-error-banner" *ngIf="mlAlertError" style="margin-top:10px">{{ mlAlertError }}</div>
+          <div *ngIf="mlAlertResult" style="margin-top:16px">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+              <div style="font-size:28px;font-weight:700" [style.color]="mlAlertResult.alertColor">
+                {{ mlAlertResult.alertStatus }}
+              </div>
+              <div>
+                <div style="font-size:12px;color:#6b7280">Confiance du modèle</div>
+                <div style="font-size:20px;font-weight:600" [style.color]="mlAlertResult.alertColor">{{ mlAlertResult.confidence }}%</div>
+              </div>
+            </div>
+            <div style="border-left:4px solid;padding:10px 12px;background:#f9fafb;border-radius:6px;font-size:13px;margin-bottom:12px"
+                 [style.border-left-color]="mlAlertResult.alertColor">
+              {{ mlAlertResult.interpretation }}
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+              <div style="background:#f3f4f6;border-radius:6px;padding:8px;text-align:center">
+                <div style="font-size:11px;color:#6b7280">Épargne recommandée</div>
+                <div style="font-weight:600;color:#1b4332">{{ mlAlertResult.recommendedSavings | number:'1.0-0' }} TND</div>
+              </div>
+              <div style="background:#f3f4f6;border-radius:6px;padding:8px;text-align:center">
+                <div style="font-size:11px;color:#6b7280">Capacité réelle</div>
+                <div style="font-weight:600" [style.color]="mlAlertResult.alertColor">{{ mlAlertResult.savingCapacity | number:'1.0-0' }} TND</div>
+              </div>
+              <div style="background:#f3f4f6;border-radius:6px;padding:8px;text-align:center">
+                <div style="font-size:11px;color:#6b7280">Ratio cap./recommandé</div>
+                <div style="font-weight:600">{{ mlAlertResult.capacityRatio | number:'1.2-2' }}</div>
+              </div>
+            </div>
+            <div *ngIf="mlAlertResult.probabilities" style="display:flex;gap:8px;flex-wrap:wrap">
+              <div *ngFor="let entry of mlAlertResult.probabilities | keyvalue"
+                   style="background:#f3f4f6;border-radius:6px;padding:6px 12px;font-size:12px">
+                <span style="font-weight:600">{{ entry.key }}</span>: {{ entry.value }}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Withdrawal Risk Assessment -->
+        <div class="sv-ai-card">
+          <div class="sv-ai-title">Score de risque de retrait</div>
+          <div class="sv-field" style="margin-bottom:12px">
+            <label class="sv-label">Montant à évaluer (TND)</label>
+            <div class="sv-sim-row">
+              <input class="sv-input" type="number" [(ngModel)]="aiRiskAmount" placeholder="0" style="flex:1">
+              <button class="sv-btn sv-btn-primary sv-btn-sm" (click)="assessWithdrawalRisk()">Analyser</button>
+            </div>
+          </div>
+          <div *ngIf="aiRiskResult">
+            <div class="sv-risk-score-wrap">
+              <div class="sv-risk-score" [style.color]="getRiskColor(aiRiskResult.riskLevel)">
+                {{ aiRiskResult.riskScore }}<span class="sv-risk-denom">/10</span>
+              </div>
+              <div class="sv-risk-badge" [style.background]="getRiskColor(aiRiskResult.riskLevel)">{{ aiRiskResult.riskLevel }}</div>
+            </div>
+            <div class="sv-alert-item" [class]="getSeverityClass(aiRiskResult.riskLevel)" style="font-size:12px;margin-bottom:8px">
+              {{ aiRiskResult.recommendation }}
+            </div>
+            <div *ngFor="let w of aiRiskResult.warnings" class="sv-risk-warning">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+              {{ w }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+</div>

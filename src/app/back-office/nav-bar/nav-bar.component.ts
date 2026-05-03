@@ -22,6 +22,11 @@ export class NavBarComponent {
     { title: 'Management', type: 'group' },
     { title: 'Users', type: 'item', icon: 'feather icon-users', url: '/back-office/users' },
     { title: 'Crops', type: 'item', icon: 'feather icon-layers', url: '/back-office/crops' },
+    { title: 'Finance & Épargne', type: 'group' },
+    { title: 'Financial Overview', type: 'item', icon: 'feather icon-bar-chart-2', url: '/back-office/financial-overview' },
+    { title: 'Marketplace & Wallet', type: 'group' },
+    { title: 'Marketplace Admin', type: 'item', icon: 'feather icon-shopping-bag', url: '/back-office/marketplace-admin' },
+    { title: 'Wallet Admin', type: 'item', icon: 'feather icon-credit-card', url: '/back-office/wallet-admin' },
     { title: 'Settings', type: 'item', icon: 'feather icon-settings', url: '/back-office/settings' }
   ];
 }

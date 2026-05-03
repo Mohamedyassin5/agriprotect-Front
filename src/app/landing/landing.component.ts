@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, HostListener, AfterViewInit, NgZone, ElementRef
+  Component, OnInit, OnDestroy, HostListener, AfterViewInit, NgZone
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import Lenis from 'lenis';
@@ -42,6 +42,7 @@ import { CtaComponent } from '../sections/cta/cta.component';
       <ul class="navbar-links">
         <li><a href="#risk">Risk</a></li>
         <li><a href="#ai">Crops</a></li>
+        <li><a href="#epargne">Épargne</a></li>
         <li><a href="#financial">Finance</a></li>
         <li><a href="#insurance">Insurance</a></li>
       </ul>
@@ -67,7 +68,7 @@ import { CtaComponent } from '../sections/cta/cta.component';
     </div>
 
     <div class="section-divider"></div>
-    <div class="section-wrapper">
+    <div class="section-wrapper" id="epargne">
       <app-epargne-section></app-epargne-section>
     </div>
 
@@ -247,7 +248,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  @HostListener('window:scroll', ['$event'])
+  @HostListener('window:scroll')
   onScroll(): void {
     this.navScrolled = window.scrollY > window.innerHeight * 0.85;
   }
