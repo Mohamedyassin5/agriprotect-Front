@@ -30,6 +30,18 @@ export class UserService {
     return this.http.put(`${this.apiUrl}/users/${id}`, data);
   }
 
+  getUserById(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/${id}`);
+  }
+
+  toggleUserStatus(id: string, status: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/users/${id}/status`, { status }, { responseType: 'text' });
+  }
+
+  deleteUser(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/users/${id}`);
+  }
+
   changePassword(data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/users/me/password`, data, { responseType: 'text' });
   }

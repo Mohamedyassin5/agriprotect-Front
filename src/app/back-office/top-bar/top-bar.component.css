@@ -73,7 +73,7 @@
         width: 100% !important;
         justify-content: center;
     }
-    
+
     .mobile-menu {
         left: 20px !important;
     }
@@ -167,4 +167,26 @@
     align-items: center !important;
     padding: 15px 20px !important;
     background: #1b4332 !important;
+}
+
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    position: absolute;
+    right: 0;
+    top: 100%;
+}
+
+.text-danger {
+    color: #ff4d4d !important;
+}
+
+.dropdown-item:hover.text-danger {
+    background: rgba(255, 77, 77, 0.05) !important;
 }

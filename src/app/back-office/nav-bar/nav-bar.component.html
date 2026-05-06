@@ -14,9 +14,11 @@
           <label>{{item.title}}</label>
         </li>
         <li *ngIf="item.type === 'item'" class="nav-item" routerLinkActive="active">
-          <a [routerLink]="item.url" class="nav-link">
+          <a [routerLink]="item.action ? null : item.url" 
+             (click)="item.action === 'logout' ? onLogout() : null"
+             class="nav-link cursor-pointer">
             <span class="pcoded-micon"><i [class]="item.icon"></i></span>
-            <span class="pcoded-mtext">{{item.title}}</span>
+            <span class="pcoded-mtext" [class.text-danger]="item.action === 'logout'">{{item.title}}</span>
           </a>
         </li>
       </ng-container>

@@ -1,0 +1,152 @@
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+  <div>
+    <h4 class="page-title">Référentiels Cultures</h4>
+    <span class="page-subtitle">Données agronomiques de référence pour le calcul des primes</span>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <button class="btn btn-outline-sync" (click)="syncAgridata()" [disabled]="syncing">
+      <i class="feather" [ngClass]="syncing ? 'icon-loader spin' : 'icon-refresh-cw'"></i>
+      {{ syncing ? 'Synchronisation…' : 'Sync Agridata.tn' }}
+    </button>
+    <button class="btn btn-add" (click)="openAdd()">
+      <i class="feather icon-plus"></i> Nouvelle culture
+    </button>
+  </div>
+</div>
+
+<!-- Alerts -->
+<div *ngIf="successMsg" class="alert-success"><i class="feather icon-check-circle"></i> {{ successMsg }}</div>
+<div *ngIf="error" class="alert-error"><i class="feather icon-alert-circle"></i> {{ error }}</div>
+
+<!-- Loading -->
+<div *ngIf="loading" class="loading-state">
+  <div class="spinner"></div><p>Chargement des cultures…</p>
+</div>
+
+<!-- Table -->
+<div *ngIf="!loading" class="card">
+  <div class="card-body p-0">
+
+    <div *ngIf="crops.length === 0" class="empty-state">
+      <i class="feather icon-layers"></i>
+      <p>Aucune culture de référence trouvée.</p>
+      <p class="text-muted" style="font-size:12px">
+        Ajoutez-en une manuellement ou lancez la synchronisation Agridata.
+      </p>
+    </div>
+
+    <div *ngIf="crops.length > 0" class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Culture</th>
+            <th>Année</th>
+            <th>Rendement réf.</th>
+            <th>Prix réf.</th>
+            <th>Taux prime</th>
+            <th>Mis à jour</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let crop of crops">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span class="crop-icon">🌾</span>
+                <span class="crop-type-badge">{{ crop.cropType }}</span>
+              </div>
+            </td>
+            <td><strong>{{ crop.referenceYear }}</strong></td>
+            <td>
+              <span class="metric-val">{{ crop.referenceYield | number:'1.2-2' }}</span>
+              <span class="metric-unit"> t/ha</span>
+            </td>
+            <td>
+              <span class="metric-val">{{ crop.referencePrice | number:'1.2-2' }}</span>
+              <span class="metric-unit"> TND/t</span>
+            </td>
+            <td>
+              <span class="rate-pill">{{ (crop.basePremiumRate * 100) | number:'1.1-2' }}%</span>
+            </td>
+            <td class="text-muted small">{{ crop.updatedAt | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm btn-edit" (click)="openEdit(crop)" title="Modifier">
+                <i class="feather icon-edit-2"></i> Modifier
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Modal Ajout / Édition ── -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <div class="modal-header-custom">
+      <div class="modal-title-wrap">
+        <span class="modal-icon">{{ isEdit ? '✏️' : '🌱' }}</span>
+        <h5>{{ isEdit ? 'Modifier la culture' : 'Nouvelle culture de référence' }}</h5>
+      </div>
+      <button class="btn-close-modal" (click)="closeModal()">
+        <i class="feather icon-x"></i>
+      </button>
+    </div>
+
+    <div class="modal-body-custom">
+
+      <div class="form-group">
+        <label>Type de culture <span class="required">*</span></label>
+        <input type="text" class="form-control" [(ngModel)]="currentCrop.cropType"
+               placeholder="Ex : Blé dur, Tomate, Olivier…" />
+        <span class="form-hint">Nom exact de la culture agricole</span>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Année de référence <span class="required">*</span></label>
+          <input type="number" class="form-control" [(ngModel)]="currentCrop.referenceYear"
+                 min="2000" max="2099" />
+        </div>
+        <div class="form-group">
+          <label>Taux prime de base (%) <span class="required">*</span></label>
+          <input type="number" class="form-control" [(ngModel)]="basePremiumRatePct"
+                 step="0.1" min="0" max="100" placeholder="1.2" />
+          <span class="form-hint">Ex : 1.2% sera stocké en 0.012</span>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Rendement référence <span class="required">*</span></label>
+          <div class="input-unit-wrap">
+            <input type="number" class="form-control" [(ngModel)]="currentCrop.referenceYield"
+                   step="0.1" min="0" />
+            <span class="input-unit">t/ha</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Prix référence <span class="required">*</span></label>
+          <div class="input-unit-wrap">
+            <input type="number" class="form-control" [(ngModel)]="currentCrop.referencePrice"
+                   step="0.01" min="0" />
+            <span class="input-unit">TND/t</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer-custom">
+      <button class="btn btn-cancel" (click)="closeModal()">Annuler</button>
+      <button class="btn btn-save" (click)="save()" [disabled]="saving || !currentCrop.cropType">
+        <i class="feather" [ngClass]="saving ? 'icon-loader spin' : 'icon-save'"></i>
+        {{ saving ? 'Sauvegarde…' : (isEdit ? 'Mettre à jour' : 'Ajouter la culture') }}
+      </button>
+    </div>
+
+  </div>
+</div>

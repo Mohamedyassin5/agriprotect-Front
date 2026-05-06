@@ -1,0 +1,236 @@
+<div class="dashboard-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">🧠 Tableau de Bord IA</h1>
+    <p class="page-subtitle">Analyse croisée comptabilité + épargne — Insights et actions prioritaires</p>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-spinner" *ngIf="isLoading">Chargement du tableau de bord IA…</div>
+
+  <!-- Empty / Error -->
+  <div class="empty-state" *ngIf="!isLoading && !dashboard">
+    <div class="empty-icon">{{ dashboardError() ? '⚠️' : '📊' }}</div>
+    <div style="color:#1b4332;font-weight:700;font-size:16px">
+      {{ dashboardError() ? 'Chargement échoué' : 'Données insuffisantes' }}
+    </div>
+    <div style="color:#52b788;margin-top:6px;font-size:13px">
+      {{ dashboardError() || 'Ajoutez des écritures comptables et créez un compte épargne pour activer ce tableau de bord.' }}
+    </div>
+    <button *ngIf="dashboardError()"
+      style="margin-top:14px;padding:8px 20px;background:#40916c;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600"
+      (click)="loadDashboard()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading && dashboard">
+
+    <!-- Top Row: Health Score + Key Metrics -->
+    <div class="top-row">
+
+      <!-- Health Score -->
+      <div class="health-card">
+        <div class="health-label">Score de santé financière</div>
+        <div class="health-score" [style.color]="'white'">{{ dashboard.financialHealthScore }}</div>
+        <div class="health-level">{{ dashboard.healthLevel }}</div>
+        <div class="health-desc">sur 100 points</div>
+      </div>
+
+      <!-- Key Metrics Grid -->
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-value" style="color:#2d6a4f">{{ dashboard.monthlyIncome | number:'1.0-0' }}</div>
+          <div class="metric-label">Revenus / mois (TND)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color:#b45309">{{ dashboard.monthlyExpenses | number:'1.0-0' }}</div>
+          <div class="metric-label">Dépenses / mois (TND)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color:#40916c">{{ dashboard.monthlySavings | number:'1.0-0' }}</div>
+          <div class="metric-label">Épargne / mois (TND)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">{{ dashboard.savingsBalance | number:'1.0-0' }}</div>
+          <div class="metric-label">Solde épargne (TND)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" [style.color]="getTrendColor(dashboard.profitabilityTrend)">{{ dashboard.profitabilityTrend }}</div>
+          <div class="metric-label">Tendance rentabilité</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">{{ dashboard.emergencyFundCoverage | number:'1.1-1' }}</div>
+          <div class="metric-label">Mois fonds d'urgence</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Insights -->
+    <div style="margin-bottom:24px" *ngIf="dashboard.keyInsights?.length">
+      <div class="section-title">💡 Insights clés</div>
+      <div class="insights-grid">
+        <div class="insight-card" [class]="getSeverityClass(insight.severity)" *ngFor="let insight of dashboard.keyInsights">
+          <div class="insight-icon">
+            {{ insight.icon === 'HEALTH' ? '🏥' : insight.icon === 'SAVINGS' ? '💰' : insight.icon === 'EMERGENCY' ? '🛡️' : insight.icon === 'TREND' ? '📈' : '💡' }}
+          </div>
+          <div>
+            <div class="insight-title">{{ insight.title }}</div>
+            <div class="insight-desc">{{ insight.description }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prioritized Actions -->
+    <div class="actions-section" *ngIf="dashboard.prioritizedActions?.length">
+      <div class="section-title">🎯 Actions prioritaires</div>
+      <div class="action-list">
+        <div class="action-item" *ngFor="let action of dashboard.prioritizedActions">
+          <div class="action-priority" [style.background]="getPriorityColor(action.priority)">{{ action.priority }}</div>
+          <div class="action-text">{{ action.action }}</div>
+          <div class="action-impact">
+            <span>{{ action.category }}</span>
+            <span style="margin-left:8px">Impact: {{ action.impact }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E-WALLET & FONDS D'URGENCE ──────────────────────────── -->
+    <div class="wallet-section" *ngIf="wallet()">
+      <div class="section-title">💳 E-Wallet & Fonds d'urgence</div>
+
+      <div class="wallet-grid">
+
+        <!-- Solde disponible -->
+        <div class="wallet-bal-card wallet-available">
+          <div class="wbal-label">SOLDE DISPONIBLE</div>
+          <div class="wbal-amount">{{ wallet()!.availableBalance | number:'1.0-0' }} <span class="wbal-currency">TND</span></div>
+          <div class="wbal-sub">Total portefeuille : {{ wallet()!.totalBalance | number:'1.0-0' }} TND</div>
+          <button class="btn-wallet-action" (click)="goToWallet()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 10h.01"/></svg>
+            Gérer mon wallet
+          </button>
+        </div>
+
+        <!-- Fonds d'urgence -->
+        <div class="wallet-bal-card wallet-emergency">
+          <div class="wbal-label">FONDS D'URGENCE</div>
+          <div class="wbal-amount">{{ wallet()!.emergencyFundBalance | number:'1.0-0' }} <span class="wbal-currency">TND</span></div>
+          <div class="wbal-sub">Objectif : {{ wallet()!.emergencyTargetAmount | number:'1.0-0' }} TND</div>
+
+          <!-- Barre de progression -->
+          <div class="ew-progress-track">
+            <div class="ew-progress-fill" [style.width.%]="clampPct(wallet()!.emergencyProgressPct)"></div>
+          </div>
+          <div class="ew-progress-meta">
+            <span>{{ clampPct(wallet()!.emergencyProgressPct) | number:'1.0-0' }}% atteint</span>
+            <span class="ew-resilience-badge" [style.background]="resilienceColor(wallet()!.emergencyResilienceLevel)">
+              {{ wallet()!.emergencyResilienceLevel }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Lien avec le dashboard IA -->
+        <div class="wallet-insight-card">
+          <div class="wi-title">🔗 Analyse croisée</div>
+          <div class="wi-row">
+            <span class="wi-label">Couverture urgence</span>
+            <span class="wi-val" [style.color]="dashboard.emergencyFundCoverage >= 3 ? '#10b981' : '#f59e0b'">
+              {{ dashboard.emergencyFundCoverage | number:'1.1-1' }} mois
+            </span>
+          </div>
+          <div class="wi-row">
+            <span class="wi-label">Objectif minimum</span>
+            <span class="wi-val">3 mois</span>
+          </div>
+          <div class="wi-row">
+            <span class="wi-label">Manque estimé</span>
+            <span class="wi-val" style="color:#ef4444" *ngIf="dashboard.emergencyFundCoverage < 3">
+              {{ (3 - dashboard.emergencyFundCoverage) * dashboard.monthlyExpenses | number:'1.0-0' }} TND
+            </span>
+            <span class="wi-val" style="color:#10b981" *ngIf="dashboard.emergencyFundCoverage >= 3">✓ Objectif atteint</span>
+          </div>
+          <div class="wi-row">
+            <span class="wi-label">Épargne mensuelle</span>
+            <span class="wi-val" style="color:#40916c">{{ dashboard.monthlySavings | number:'1.0-0' }} TND</span>
+          </div>
+          <button class="btn-configure-ef" (click)="goToWallet()">
+            Configurer le fonds d'urgence →
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Si wallet non chargé : invitation -->
+    <div class="wallet-invite" *ngIf="!wallet()">
+      <div class="wi-icon">💳</div>
+      <div>
+        <div class="wi-invite-title">Connectez votre E-Wallet</div>
+        <div class="wi-invite-sub">Activez le E-Wallet pour une analyse croisée complète de votre situation financière.</div>
+      </div>
+      <button class="btn-wallet-action" (click)="goToWallet()">Accéder au wallet</button>
+    </div>
+
+    <!-- Cashflow Optimizer -->
+    <div class="optimizer-section">
+      <div class="section-title">⚡ Optimiseur de flux de trésorerie</div>
+
+      <button class="btn-load" (click)="loadOptimizer()" *ngIf="!cashflowOptimizer && !optimizerLoading">
+        Lancer l'optimiseur IA
+      </button>
+      <div class="loading-small" *ngIf="optimizerLoading">Analyse en cours…</div>
+
+      <div class="optimizer-card" *ngIf="cashflowOptimizer">
+        <div class="optimizer-summary">
+          <div class="opt-stat">
+            <span class="opt-value">{{ cashflowOptimizer.currentMonthlyNet | number:'1.0-0' }} TND</span>
+            <span class="opt-label">Flux net actuel</span>
+          </div>
+          <div class="opt-stat">
+            <span class="opt-value improvement">{{ cashflowOptimizer.optimizedMonthlyNet | number:'1.0-0' }} TND</span>
+            <span class="opt-label">Flux net optimisé</span>
+          </div>
+          <div class="opt-stat">
+            <span class="opt-value improvement">+{{ cashflowOptimizer.potentialImprovement | number:'1.0-0' }} TND</span>
+            <span class="opt-label">Amélioration potentielle</span>
+          </div>
+          <div class="opt-stat">
+            <span class="opt-value">{{ cashflowOptimizer.idealSavingsAllocation | number:'1.0-0' }} TND</span>
+            <span class="opt-label">Épargne idéale</span>
+          </div>
+          <div class="opt-stat">
+            <span class="opt-value">{{ cashflowOptimizer.idealExpensesCeiling | number:'1.0-0' }} TND</span>
+            <span class="opt-label">Plafond dépenses</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px;font-size:14px;font-weight:700;color:#1b4332">Suggestions d'optimisation:</div>
+        <div class="suggestion-list">
+          <div class="suggestion-item" *ngFor="let s of cashflowOptimizer.suggestions">
+            <div>
+              <div class="sug-category">{{ s.category }}</div>
+              <div class="sug-desc">{{ s.justification }}</div>
+              <div style="font-size:11px;color:#74c69d;margin-top:2px">
+                {{ s.currentAmount | number:'1.0-0' }} → {{ s.suggestedAmount | number:'1.0-0' }} TND/mois
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div class="sug-saving">+{{ s.potentialSaving | number:'1.0-0' }}</div>
+              <div class="sug-saving-label">TND économisés</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="optimizer-strategy" *ngIf="cashflowOptimizer.overallStrategy">
+          💡 {{ cashflowOptimizer.overallStrategy }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

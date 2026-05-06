@@ -1,0 +1,43 @@
+<div class="cw-root">
+  <header class="cw-shell-header">
+    <div class="cw-brand">
+      <div class="cw-logo">Agri</div>
+      <div class="cw-brand-text">
+        <span class="cw-app-name">Crédit agricole</span>
+        <span class="cw-app-sub">Workflow dossiers &amp; remboursements</span>
+      </div>
+    </div>
+
+    <nav class="cw-nav" aria-label="Module crédit">
+      <a
+        *ngFor="let item of nav"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.linkExact }"
+        class="cw-nav-link"
+      >
+        <span class="cw-nav-ico" [attr.data-icon]="item.icon"></span>
+        {{ item.label }}
+      </a>
+    </nav>
+
+    <div class="cw-header-right">
+      <button type="button" class="cw-notif" aria-label="Notifications">
+        <span class="cw-notif-dot"></span>
+      </button>
+      <div class="cw-user">
+        <div class="cw-avatar">{{ (userName() || '?').charAt(0).toUpperCase() }}</div>
+        <div class="cw-user-meta">
+          <span class="cw-user-name">{{ userName() }}</span>
+          <span class="cw-user-email">{{ userEmail() }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="cw-main">
+    <router-outlet />
+  </main>
+
+  <app-cw-toast-stack />
+</div>

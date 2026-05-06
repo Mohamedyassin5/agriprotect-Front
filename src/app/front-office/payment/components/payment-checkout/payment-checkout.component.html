@@ -1,0 +1,144 @@
+<div class="checkout-page">
+
+  <!-- Loading skeleton -->
+  <div *ngIf="loading" class="skeleton-wrap">
+    <div class="skeleton-header"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-btn"></div>
+  </div>
+
+  <!-- Main content -->
+  <div *ngIf="!loading" class="checkout-layout">
+
+    <!-- LEFT : Récapitulatif commande -->
+    <div class="summary-panel">
+      <div class="summary-badge">{{ pageIcon }} {{ pageTitle }}</div>
+
+      <div class="policy-tag">
+        <span class="policy-label">N° Police</span>
+        <span class="policy-value">{{ paymentData?.policyNumber }}</span>
+      </div>
+
+      <div class="amount-display">
+        <div class="amount-row" *ngIf="paymentData?.penaltyAmount && paymentData!.penaltyAmount > 0">
+          <span>Prime de base</span>
+          <span>{{ paymentData?.baseAmount | number:'1.2-2' }} TND</span>
+        </div>
+        <div class="amount-row penalty" *ngIf="paymentData?.penaltyAmount && paymentData!.penaltyAmount > 0">
+          <span>⚠️ Pénalité de retard</span>
+          <span>+ {{ paymentData?.penaltyAmount | number:'1.2-2' }} TND</span>
+        </div>
+        <div class="amount-divider" *ngIf="paymentData?.penaltyAmount && paymentData!.penaltyAmount > 0"></div>
+        <div class="amount-total">
+          <span>Total à payer</span>
+          <span class="total-value">{{ paymentData?.totalAmount | number:'1.2-2' }}
+            <small>{{ paymentData?.currency?.toUpperCase() }}</small>
+          </span>
+        </div>
+      </div>
+
+      <div class="mode-chip">
+        <span>Mode :</span>
+        <strong>{{ paymentData?.paymentMode }}</strong>
+      </div>
+
+      <div class="security-note">
+        <span class="lock-icon">🔒</span>
+        <span>Paiement sécurisé via Stripe. Vos données bancaires ne sont jamais stockées.</span>
+      </div>
+    </div>
+
+    <!-- RIGHT : Formulaire de paiement -->
+    <div class="payment-panel">
+
+      <!-- Tabs approche -->
+      <div class="approach-tabs">
+        <button
+          [class.active]="activeApproach === 'embedded'"
+          (click)="switchApproach('embedded')"
+          class="approach-tab">
+          <span class="tab-icon">💳</span>
+          <div class="tab-text">
+            <span class="tab-title">Carte bancaire</span>
+            <span class="tab-sub">Payer sans quitter l'app</span>
+          </div>
+        </button>
+        <button
+          [class.active]="activeApproach === 'checkout'"
+          (click)="switchApproach('checkout')"
+          class="approach-tab">
+          <span class="tab-icon">🔗</span>
+          <div class="tab-text">
+            <span class="tab-title">Stripe Checkout</span>
+            <span class="tab-sub">Page sécurisée Stripe</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- ── APPROACH 1 : Stripe.js embedded ── -->
+      <div *ngIf="activeApproach === 'embedded'" class="form-section">
+        <div class="form-field">
+          <label class="field-label">Informations de carte</label>
+          <div #cardElement class="stripe-card-element"></div>
+        </div>
+
+        <div class="card-brands">
+          <span title="Visa">VISA</span>
+          <span title="Mastercard">MC</span>
+          <span title="American Express">AMEX</span>
+        </div>
+
+        <div *ngIf="error" class="error-msg">
+          <span>⚠️</span> {{ error }}
+        </div>
+
+        <button
+          (click)="payWithStripeJs()"
+          [disabled]="processing"
+          class="btn-pay">
+          <span *ngIf="!processing">
+            Payer {{ paymentData?.totalAmount | number:'1.2-2' }} {{ paymentData?.currency?.toUpperCase() }}
+          </span>
+          <span *ngIf="processing" class="paying-state">
+            <span class="spinner-sm"></span> Traitement en cours...
+          </span>
+        </button>
+      </div>
+
+      <!-- ── APPROACH 2 : Stripe Checkout redirect ── -->
+      <div *ngIf="activeApproach === 'checkout'" class="form-section checkout-redirect">
+        <div class="redirect-info">
+          <div class="redirect-icon">🔐</div>
+          <h3>Paiement via Stripe Checkout</h3>
+          <p>
+            Vous serez redirigé vers la page de paiement sécurisée de Stripe.
+            Tous les moyens de paiement sont acceptés (carte, Apple Pay, Google Pay...).
+          </p>
+          <ul class="payment-methods-list">
+            <li>💳 Carte Visa / Mastercard / AMEX</li>
+            <li>📱 Apple Pay & Google Pay</li>
+            <li>🏦 Virement SEPA</li>
+          </ul>
+        </div>
+
+        <div *ngIf="error" class="error-msg">
+          <span>⚠️</span> {{ error }}
+        </div>
+
+        <button
+          (click)="redirectToStripeCheckout()"
+          [disabled]="processing"
+          class="btn-pay btn-checkout">
+          <span *ngIf="!processing">
+            Continuer vers Stripe → {{ paymentData?.totalAmount | number:'1.2-2' }} {{ paymentData?.currency?.toUpperCase() }}
+          </span>
+          <span *ngIf="processing" class="paying-state">
+            <span class="spinner-sm"></span> Redirection...
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

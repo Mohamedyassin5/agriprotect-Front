@@ -1,0 +1,178 @@
+<div class="risk-analyzer-card animate-in">
+  <div class="card-header">
+    <div class="header-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        <path d="M12 8v4"></path>
+        <path d="M12 16h.01"></path>
+      </svg>
+    </div>
+    <div class="header-info">
+      <h3>Analyseur de Risque</h3>
+      <p>Évaluation prédictive basée sur les indicateurs météo et financiers</p>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <form (ngSubmit)="onScan()" #riskForm="ngForm">
+      <div class="input-grid">
+        
+        <!-- Financial & Location Section -->
+        <div class="input-section">
+          <label class="section-label">Indicateurs Financiers & Localisation</label>
+          <div class="fields-row">
+            <div class="field-group">
+              <label for="region">Region</label>
+              <select id="region" name="region" [(ngModel)]="formData.Region" class="custom-select">
+                <option *ngFor="let r of regions" [value]="r">{{r}}</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="size">Land Size (Surface/Ha)</label>
+              <input type="text" id="size" name="size" [(ngModel)]="formData.Land_Size" required placeholder="Ex: 150">
+            </div>
+            <div class="field-group">
+              <label for="revenue">Revenue (TND)</label>
+              <input type="number" id="revenue" name="revenue" [(ngModel)]="formData.Revenue" required>
+            </div>
+          </div>
+          <div class="fields-row" style="margin-top: 15px;">
+            <div class="field-group">
+              <label for="expenses">Expenses (TND)</label>
+              <input type="number" id="expenses" name="expenses" [(ngModel)]="formData.Expenses" required>
+            </div>
+            <div class="field-group">
+              <label for="profit">Net Profit (TND)</label>
+              <input type="number" id="profit" name="profit" [(ngModel)]="formData.Net_Profit" required>
+            </div>
+            <div class="field-group">
+              <label for="debt">Debt to Equity Ratio</label>
+              <input type="number" id="debt" name="debt" [(ngModel)]="formData.Debt_to_Equity" required step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <!-- Weather Section -->
+        <div class="input-section">
+          <label class="section-label">Conditions Météorologiques</label>
+          <div class="fields-row">
+            <div class="field-group">
+              <label for="temp">Avg Temperature (°C)</label>
+              <input type="number" id="temp" name="temp" [(ngModel)]="formData.Avg_Temperature" required step="0.1">
+            </div>
+            <div class="field-group">
+              <label for="rain">Rainfall (mm)</label>
+              <input type="number" id="rain" name="rain" [(ngModel)]="formData.Rainfall" required>
+            </div>
+            <div class="field-group">
+              <label for="drought">Drought Index</label>
+              <input type="number" id="drought" name="drought" [(ngModel)]="formData.Drought_Index" required step="0.01">
+            </div>
+            <div class="field-group">
+              <label for="flood">Flood Risk Score</label>
+              <input type="number" id="flood" name="flood" [(ngModel)]="formData.Flood_Risk_Score" required step="0.01">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-predict" [disabled]="isScanning || !riskForm.form.valid">
+          <span *ngIf="!isScanning">Analyser & Classifier le Risque</span>
+          <div *ngIf="isScanning" class="loader"></div>
+        </button>
+      </div>
+    </form>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-box animate-in">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Results Modal-style Card -->
+    <div *ngIf="scanResult" class="results-overlay animate-in">
+      <div class="results-modal">
+        <div class="modal-header">
+          <h4>Résultat de la Classification</h4>
+          <button class="btn-close" (click)="scanResult = null">&times;</button>
+        </div>
+        
+        <div class="modal-content">
+          <div class="risk-summary">
+            <div class="gauge-container">
+              <svg viewBox="0 0 100 100" class="gauge">
+                <circle cx="50" cy="50" r="40" class="gauge-bg"></circle>
+                <circle cx="50" cy="50" r="40" class="gauge-fill" 
+                  [style.stroke-dashoffset]="251 - (251 * getRiskScore(scanResult.prediction) / 100)"
+                  [ngClass]="getRiskClass(scanResult.prediction)"></circle>
+              </svg>
+              <div class="gauge-text">
+                <span class="gauge-value">{{ scanResult.prediction }}</span>
+                <span class="gauge-label">RISQUE</span>
+              </div>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <span class="metric-label">Accuracy</span>
+                <span class="metric-value">{{ (scanResult.metrics.accuracy * 100).toFixed(0) }}%</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">F1-Score</span>
+                <span class="metric-value">{{ (scanResult.metrics.f1 * 100).toFixed(0) }}%</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">Confidence</span>
+                <span class="metric-value">{{ (scanResult.confidence * 100).toFixed(0) }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="analysis-report">
+            <p><strong>Rapport de l'Analyse :</strong> Votre exploitation a été classifiée avec un niveau de risque <strong>{{ scanResult.prediction }}</strong>.</p>
+            <p class="report-hint">Cette prédiction est basée sur les variables environnementales de la région <strong>{{ formData.Region }}</strong> et vos flux financiers actuels.</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-done" (click)="scanResult = null">Terminer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parameter Guide -->
+    <div class="parameter-guide animate-in">
+      <div class="guide-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <h4>Guide des Paramètres d'Estimation</h4>
+      </div>
+      
+      <div class="guide-grid">
+        <div class="guide-item high-risk">
+          <h5>🚩 Risque Élevé (Forte)</h5>
+          <ul>
+            <li><strong>Sécheresse :</strong> Drought Index > 8.0</li>
+            <li><strong>Inondation :</strong> Risk Score > 7.0</li>
+            <li><strong>Pluie :</strong> Rainfall < 100 mm</li>
+            <li><strong>Finance :</strong> Bénéfice Net négatif</li>
+          </ul>
+        </div>
+        
+        <div class="guide-item low-risk">
+          <h5>✅ Risque Faible (Faible)</h5>
+          <ul>
+            <li><strong>Sécheresse :</strong> Drought Index < 2.0</li>
+            <li><strong>Inondation :</strong> Risk Score < 1.0</li>
+            <li><strong>Pluie :</strong> Rainfall 400 - 600 mm</li>
+            <li><strong>Finance :</strong> Dette / Capitaux < 0.4</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

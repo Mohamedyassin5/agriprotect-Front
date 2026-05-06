@@ -1,0 +1,203 @@
+<!-- farmer-mes-remboursements.component.html -->
+<div class="remb-page">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">💰 Mes Remboursements</h1>
+      <p class="page-subtitle">Suivez vos demandes et leur état de traitement</p>
+    </div>
+    <button (click)="creerDemande()" class="btn-create">
+      <i class="fas fa-plus"></i> Nouvelle demande
+    </button>
+  </div>
+
+  <!-- ═══ SUCCÈS ANNULATION ═══ -->
+  <div *ngIf="annulationSuccess" class="alert alert-success">
+    <i class="fas fa-check-circle"></i> {{ annulationSuccess }}
+  </div>
+
+  <!-- ═══ ERREUR ═══ -->
+  <div *ngIf="error" class="alert alert-error">
+    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    <button class="btn-close-inline" (click)="error = null">✕</button>
+  </div>
+
+  <!-- ═══ LOADING ═══ -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de vos demandes…</p>
+  </div>
+
+  <!-- ═══ EMPTY STATE ═══ -->
+  <div *ngIf="!loading && remboursements.length === 0" class="empty-state">
+    <div class="empty-icon">📭</div>
+    <p><strong>Aucune demande de remboursement</strong></p>
+    <p class="empty-sub">
+      Créez une demande à partir d'un sinistre validé par votre expert.
+    </p>
+    <button (click)="creerDemande()" class="btn-create-empty">
+      <i class="fas fa-plus"></i> Créer une demande
+    </button>
+  </div>
+
+  <!-- ═══ TABLEAU ═══ -->
+  <div *ngIf="!loading && remboursements.length > 0" class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">Mes demandes ({{ remboursements.length }})</h2>
+      <button class="btn-refresh-list" (click)="loadRemboursements()" title="Actualiser">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+    </div>
+
+    <!-- ═══ HINT SCROLL (visible seulement sur petits écrans) ═══ -->
+    <div class="scroll-hint">
+      <i class="fas fa-arrows-alt-h"></i>
+      Faites glisser pour voir toutes les colonnes
+    </div>
+
+    <!-- ═══ WRAPPER SCROLLABLE ═══ -->
+    <div class="table-wrapper">
+      <table class="remb-table">
+        <thead>
+          <tr>
+            <th>Date soumission</th>
+            <th>Montant dommages</th>
+            <th>Franchise</th>   
+            <th>Primes restantes</th> 
+            <th>Montant final</th>
+            <th>Date paiement</th>
+            <th>Statut</th>
+            <th>Motif / Info</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of remboursements"
+              class="table-row"
+              [class.row-attente]="r.statut === 'EN_ATTENTE'"
+              [class.row-annule]="r.statut === 'ANNULE'">
+
+            <!-- Date soumission -->
+            <td class="date-cell">{{ r.createdAt | date:'dd/MM/yyyy' }}</td>
+
+            <!-- Montant dommages -->
+            <td class="amount">{{ r.montantDommagesDeclares | number:'1.2-2' }} TND</td>
+
+            <!-- Franchise -->
+            <td class="amount text-orange">− {{ r.montantFranchise | number:'1.2-2' }} TND</td>
+
+          <!-- ═══ PRIMES RESTANTES DUES ═══ -->
+<td class="amount">
+  <ng-container *ngIf="r.primesRestantesDues != null && r.primesRestantesDues > 0">
+    <span class="text-orange">
+      − {{ r.primesRestantesDues | number:'1.2-2' }} TND
+    </span>
+    <ng-container *ngIf="r.moisRestants != null && r.primeParMois != null">
+      <span class="detail-info">
+        <br>
+        <small>({{ r.moisRestants }} mois × {{ r.primeParMois | number:'1.2-2' }} TND)</small>
+      </span>
+    </ng-container>
+  </ng-container>
+  <ng-container *ngIf="r.primesRestantesDues == null || r.primesRestantesDues === 0">
+    <span class="text-muted">—</span>
+  </ng-container>
+</td>
+
+            <!-- Montant final -->
+            <td class="amount-final-cell">
+              <strong
+                [class.text-green]="r.statut === 'PAYE'"
+                [class.text-muted]="r.statut === 'ANNULE' || r.statut === 'REFUSE'">
+                {{ r.montantFinalRembourse | number:'1.2-2' }} TND
+              </strong>
+            </td>
+
+            <!-- Date paiement effectif -->
+            <td class="date-cell">
+              <span *ngIf="r.dateRemboursement">
+                {{ r.dateRemboursement | date:'dd/MM/yyyy' }}
+              </span>
+              <span *ngIf="!r.dateRemboursement" class="text-muted">—</span>
+            </td>
+
+            <!-- Statut -->
+            <td>
+              <span [class]="'status-badge ' + getStatutClass(r.statut)">
+                {{ getStatutLabel(r.statut) }}
+              </span>
+            </td>
+
+            <!-- Motif refus / avertissement / info -->
+            <td class="info-cell">
+              <span *ngIf="r.motifRefus"
+                    class="motif-text"
+                    [title]="r.motifRefus">
+                {{ r.motifRefus | slice:0:40 }}{{ r.motifRefus.length > 40 ? '…' : '' }}
+              </span>
+              <span *ngIf="!r.motifRefus && r.avertissement"
+                    class="avert-text"
+                    [title]="r.avertissement">
+                ℹ️ {{ r.avertissement | slice:0:40 }}{{ r.avertissement.length > 40 ? '…' : '' }}
+              </span>
+              <span *ngIf="!r.motifRefus && !r.avertissement" class="text-muted">—</span>
+            </td>
+
+            <!-- Actions -->
+            <td class="actions-cell">
+
+              <!-- Annuler si EN_ATTENTE -->
+              <button
+                *ngIf="peutAnnuler(r)"
+                class="btn-annuler"
+                (click)="annuler(r)"
+                [disabled]="annulationEnCours === r.id"
+                title="Annuler cette demande">
+                <span *ngIf="annulationEnCours !== r.id">
+                  <i class="fas fa-times-circle"></i> Annuler
+                </span>
+                <span *ngIf="annulationEnCours === r.id" class="btn-loading-sm">
+                  <div class="spinner spinner-xs"></div>
+                </span>
+              </button>
+
+              <!-- Infos si PAYE -->
+              <span *ngIf="r.statut === 'PAYE'"
+                    class="info-paid"
+                    title="Versé sur votre compte épargne">
+                💳 Versé
+              </span>
+
+              <!-- Rien pour REFUSE / ANNULE -->
+              <span *ngIf="r.statut === 'REFUSE' || r.statut === 'ANNULE'"
+                    class="text-muted">—</span>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══ LÉGENDE STATUTS ═══ -->
+    <div class="legend">
+      <span class="legend-item">
+        <span class="status-badge badge-pending">⏳ En attente</span>
+        Validation admin en cours
+      </span>
+      <span class="legend-item">
+        <span class="status-badge badge-paid">💳 Payé</span>
+        Versé sur votre compte épargne
+      </span>
+      <span class="legend-item">
+        <span class="status-badge badge-refused">❌ Refusé</span>
+        Voir le motif
+      </span>
+      <span class="legend-item">
+        <span class="status-badge badge-cancelled">🚫 Annulé</span>
+        Annulé par vous
+      </span>
+    </div>
+  </div>
+
+</div>

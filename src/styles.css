@@ -1044,7 +1044,7 @@ section {
 
 .fo-main {
   flex: 1;
-  margin-left: 276px !important; /* 12 (margin) + 240 (sidebar) + 24 (gap) */
+  margin-left: 296px !important; /* 12 (margin) + 260 (sidebar) + 24 (gap) */
   transition: all var(--fo-transition);
   display: flex;
   flex-direction: column;
@@ -1069,7 +1069,7 @@ section {
 .fo-topbar {
   position: fixed;
   top: 12px;
-  left: 276px !important;
+  left: 296px !important;
   right: 12px;
   width: auto !important;
   z-index: 1000;
@@ -1232,7 +1232,7 @@ section {
   top: 12px !important;
   left: 12px !important;
   height: calc(100vh - 24px) !important;
-  width: 240px !important;
+  width: 260px !important;
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(20px) !important;
@@ -1287,7 +1287,7 @@ section {
   margin-left: 12px;
   font-family: var(--fo-font-display);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 24px;
   color: #1a3d1a;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -1356,7 +1356,7 @@ section {
 
 .fo-nav-label {
   font-family: var(--fo-font-mono);
-  font-size: 10px;
+  font-size: 12px;
   color: #2D6A4F;
   font-weight: 600;
   opacity: 0.7;
@@ -1436,8 +1436,8 @@ section {
 }
 
 .fo-nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   color: inherit;
   transition: all 0.3s;
   display: flex;
@@ -1449,7 +1449,7 @@ section {
 
 .fo-nav-text {
   font-family: var(--fo-font-display);
-  font-size: 13px;
+  font-size: 15px;
   white-space: nowrap;
   transition: opacity 0.3s;
 }
@@ -1506,7 +1506,8 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at center, #080f08 0%, #040904 100%);
+  background: url('/loginback.jpg') no-repeat center center;
+  background-size: cover;
   padding: 20px;
   position: relative;
   overflow: hidden;

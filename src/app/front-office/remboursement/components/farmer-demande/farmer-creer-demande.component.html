@@ -1,0 +1,333 @@
+<div class="container">
+  <div class="row-center">
+    <div class="form-card">
+
+      <!-- ═══ HEADER ═══ -->
+      <div class="card-header">
+        <h3>
+          <i class="fas fa-file-invoice-dollar"></i>
+          Créer une demande de remboursement
+        </h3>
+        <p class="header-sub">
+          Sélectionnez un sinistre validé pour estimer et soumettre votre demande
+        </p>
+      </div>
+
+      <div class="card-body">
+
+        <!-- ═══ SUCCÈS ═══ -->
+        <div *ngIf="success && resultat" class="result-panel">
+          <div class="result-icon">✅</div>
+          <h4>Demande enregistrée !</h4>
+
+          <div class="result-statut" [ngClass]="{
+            'statut-paye':    resultat.statut === 'PAYE',
+            'statut-attente': resultat.statut === 'EN_ATTENTE',
+            'statut-refuse':  resultat.statut === 'REFUSE'
+          }">
+            {{ getStatutResultatLabel() }}
+          </div>
+
+          <div class="result-amount">
+            {{ resultat.montantFinalRembourse | number:'1.2-2' }} TND
+          </div>
+
+          <!-- Infos contrat dans le résultat -->
+          <div *ngIf="resultat.policyNumber" class="result-policy">
+            <i class="fas fa-file-contract"></i>
+            Contrat n° {{ resultat.policyNumber }}
+          </div>
+
+          <p class="result-redirect">
+            <i class="fas fa-spinner fa-spin"></i>
+            Redirection dans 3 secondes…
+          </p>
+        </div>
+
+        <!-- ═══ LOADING ═══ -->
+        <div *ngIf="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Chargement des sinistres approuvés…</p>
+        </div>
+
+        <!-- ═══ AUCUN SINISTRE ═══ -->
+        <div *ngIf="!loading && !success && sinistres.length === 0" class="empty-state">
+          <div class="empty-icon">🌾</div>
+          <p><strong>Aucun sinistre éligible disponible.</strong></p>
+          <p class="empty-sub">
+            Vos sinistres doivent avoir le statut
+            <code>VALIDE</code> ou <code>RESOLU</code>
+            et leur quota de dommages doit avoir été évalué par un expert.
+          </p>
+          <button class="btn btn-outline" (click)="loadSinistres()">
+            <i class="fas fa-redo"></i> Réessayer
+          </button>
+        </div>
+
+        <!-- ═══ FORMULAIRE ═══ -->
+        <ng-container *ngIf="!loading && !success && sinistres.length > 0">
+
+          <!-- ─── Erreur soumission ───────────────────────────────────────── -->
+          <div *ngIf="error" class="alert alert-error">
+            <span class="alert-icon">🚫</span>
+            <div class="alert-body">
+              <strong class="alert-title">Demande refusée</strong>
+              <span class="alert-message" style="white-space: pre-line;">{{ error }}</span>
+            </div>
+            <button class="btn-close" (click)="error = null">✕</button>
+          </div>
+
+          <!-- ─── Sélection sinistre ─────────────────────────────────────── -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-list"></i>
+              Sinistre à indemniser
+            </label>
+            <select
+              [(ngModel)]="selectedSinistreId"
+              (change)="onSinistreSelected()"
+              name="sinistreId"
+              class="form-select"
+              [disabled]="submitting">
+              <option value="">— Choisir un sinistre —</option>
+              <option *ngFor="let s of sinistres" [value]="s.id">
+                {{ s.cropType }} · {{ s.dateCatastrophe | date:'dd/MM/yyyy' }}
+                · [{{ s.typeSinistre }}]
+                · {{ s.quotaRemboursement }}%
+              </option>
+            </select>
+          </div>
+
+          <!-- ─── Détails du sinistre sélectionné ───────────────────────── -->
+          <div *ngIf="selectedSinistre" class="sinistre-details">
+            <div class="details-grid">
+
+              <div class="detail-item">
+                <span class="detail-label">Culture</span>
+                <span class="detail-value">{{ selectedSinistre.cropType }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">Type sinistre</span>
+                <span class="detail-value">{{ selectedSinistre.typeSinistre }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">Date sinistre</span>
+                <span class="detail-value">
+                  {{ selectedSinistre.dateCatastrophe | date:'dd/MM/yyyy' }}
+                </span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">Quota expert</span>
+                <span class="detail-value badge-quota">
+                  {{ selectedSinistre.quotaRemboursement }}%
+                </span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label">Statut</span>
+                <span [class]="'detail-value badge '
+                    + getStatusBadgeClass(selectedSinistre.statut)">
+                  {{ getStatusLabel(selectedSinistre.statut) }}
+                </span>
+              </div>
+
+            </div>
+
+            <div *ngIf="selectedSinistre.description" class="detail-description">
+              <span class="detail-label">Description</span>
+              <p>{{ selectedSinistre.description }}</p>
+            </div>
+          </div>
+
+          <!-- ─── Panneau simulation ─────────────────────────────────────── -->
+          <div *ngIf="selectedSinistre" class="simulation-panel">
+
+            <div class="sim-header">
+              <span class="sim-title">📊 Estimation du remboursement</span>
+              <button
+                class="btn-refresh"
+                (click)="lancerSimulation()"
+                [disabled]="simulating"
+                title="Recalculer l'estimation">
+                <i class="fas fa-sync-alt" [class.spinning]="simulating"></i>
+              </button>
+            </div>
+
+            <!-- Calcul en cours -->
+            <div *ngIf="simulating" class="sim-loading">
+              <div class="spinner spinner-sm"></div>
+              <span>Calcul en cours…</span>
+            </div>
+
+            <!-- Erreur simulation -->
+            <div *ngIf="!simulating && simulationError" class="sim-error">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>
+                <strong>Estimation indisponible</strong>
+                <p>{{ simulationError }}</p>
+                <p *ngIf="!simulationBloquante" class="sim-error-sub">
+                  Vous pouvez quand même soumettre votre demande.
+                  Un conseiller calculera l'indemnité manuellement.
+                </p>
+                <p *ngIf="simulationBloquante" class="sim-error-sub sim-error-bloquant">
+                  ⛔ Cette erreur bloque la soumission. Réglez le problème indiqué avant de continuer.
+                </p>
+              </div>
+            </div>
+
+            <!-- Résultat simulation -->
+            <div *ngIf="!simulating && simulation" class="sim-result">
+
+              <!-- Infos contrat -->
+              <div *ngIf="simulation.policyNumber" class="sim-contract-info">
+                <i class="fas fa-file-contract"></i>
+                Contrat <strong>{{ simulation.policyNumber }}</strong>
+                &nbsp;·&nbsp;
+                <span>
+                  {{ simulation.moisPayes }} mois payé(s) sur {{ (simulation.moisPayes || 0) + (simulation.moisRestants || 0) }}
+                </span>
+                <span *ngIf="simulation.primeParMois">
+                  &nbsp;·&nbsp; {{ simulation.primeParMois | number:'1.2-2' }} TND/mois
+                </span>
+              </div>
+
+              <!-- Décomposition du calcul -->
+              <div class="sim-breakdown">
+
+                <!-- 1. Dommages déclarés (quota × valeur assurée) -->
+                <div class="sim-row">
+                  <span>Dommages estimés (quota {{ selectedSinistre.quotaRemboursement }}%)</span>
+                  <span class="amount">
+                    {{ simulation.montantDommagesDeclares | number:'1.2-2' }} TND
+                  </span>
+                </div>
+
+                <!-- 2. Franchise -->
+                <div class="sim-row deduction">
+                  <span>− Franchise contractuelle</span>
+                  <span class="text-orange">
+                    − {{ simulation.montantFranchise | number:'1.2-2' }} TND
+                  </span>
+                </div>
+
+                <!-- 3. Montant remboursable avant règles (taux couverture appliqué) -->
+                <div class="sim-row">
+                  <span>Montant remboursable (taux couverture)</span>
+                  <span class="amount">
+                    {{ simulation.montantRemboursableAvantRegles | number:'1.2-2' }} TND
+                  </span>
+                </div>
+
+                <!-- 4. Primes restantes dues (FIX 1 — déduit si résiliation en cours) -->
+                <div *ngIf="hasPrimesDeduites()" class="sim-row deduction">
+                  <span>
+                    − Primes restantes dues
+                    <span *ngIf="simulation.moisRestants">
+                      ({{ simulation.moisRestants }} mois × {{ simulation.primeParMois | number:'1.2-2' }} TND)
+                    </span>
+                  </span>
+                  <span class="text-orange">
+                    − {{ simulation.primesRestantesDues | number:'1.2-2' }} TND
+                  </span>
+                </div>
+
+                <!-- 5. Pénalité résiliation (FIX 2 — 30% si résiliation dans les 6 mois) -->
+                <div *ngIf="hasPenaliteResiliation()" class="sim-row deduction">
+                  <span>− Pénalité résiliation anticipée (30%)</span>
+                  <span class="text-red">
+                    − {{ simulation.penaliteResiliation | number:'1.2-2' }} TND
+                  </span>
+                </div>
+
+                <!-- 6. Plafond contractuel (si atteint) -->
+                <div *ngIf="hasPlafondApplique()" class="sim-row deduction">
+                  <span>Plafond contractuel appliqué</span>
+                  <span class="text-orange">
+                    plafonné à {{ simulation.montantFinalRembourse | number:'1.2-2' }} TND
+                  </span>
+                </div>
+
+                <!-- 7. Coefficient prorata (affiché si ≠ 1) -->
+                <div
+                  *ngIf="simulation.coefficientProrata && simulation.coefficientProrata !== 1"
+                  class="sim-row deduction">
+                  <span>Coefficient prorata temporis</span>
+                  <span class="text-orange">× {{ simulation.coefficientProrata | number:'1.4-4' }}</span>
+                </div>
+
+                <!-- TOTAL FINAL -->
+                <div class="sim-row sim-total">
+                  <span><strong>Montant estimé final</strong></span>
+                  <span class="amount-final">
+                    {{ simulation.montantFinalRembourse | number:'1.2-2' }} TND
+                  </span>
+                </div>
+
+              </div>
+
+              <!-- Indication du flux de traitement
+                   SEUIL_AUTO_VERSEMENT = 500 TND (@Value backend) -->
+              <div class="sim-flux" [ngClass]="isAutoVersement() ? 'flux-auto' : 'flux-admin'">
+                <i class="fas" [ngClass]="isAutoVersement() ? 'fa-bolt' : 'fa-clock'"></i>
+                <div>
+                  <strong>
+                    {{ isAutoVersement() ? '⚡ Versement automatique' : '👤 Validation conseiller requise' }}
+                  </strong>
+                  <p>
+                    <ng-container *ngIf="isAutoVersement()">
+                      Montant ≤ {{ SEUIL_AUTO_VERSEMENT }} TND →
+                      votre compte épargne sera crédité immédiatement après soumission.
+                    </ng-container>
+                    <ng-container *ngIf="!isAutoVersement()">
+                      Montant > {{ SEUIL_AUTO_VERSEMENT }} TND →
+                      votre demande sera examinée par un conseiller (2–5 jours ouvrés).
+                    </ng-container>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Avertissement backend (anti-fraude alerte, plafonnement…)
+                   Les récapitulatifs [SIMULATION] techniques sont filtrés par getAvertissementUtilisateur() -->
+              <div *ngIf="getAvertissementUtilisateur()" class="sim-warning">
+                <i class="fas fa-info-circle"></i>
+                <span>{{ getAvertissementUtilisateur() }}</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ─── Boutons d'action ───────────────────────────────────────── -->
+          <div class="action-row">
+
+            <button
+              class="btn btn-success"
+              (click)="submitRemboursement()"
+              [disabled]="!canSubmit()">
+              <ng-container *ngIf="!submitting">
+                <i class="fas fa-paper-plane"></i>
+                Soumettre la demande
+              </ng-container>
+              <ng-container *ngIf="submitting">
+                <div class="spinner spinner-sm"></div>
+                Envoi en cours…
+              </ng-container>
+            </button>
+
+            <button
+              class="btn btn-secondary"
+              (click)="goBack()"
+              [disabled]="submitting">
+              <i class="fas fa-arrow-left"></i>
+              Retour
+            </button>
+
+          </div>
+
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

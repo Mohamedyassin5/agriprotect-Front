@@ -1,0 +1,81 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-cover"></div>
+    <div class="profile-info-main">
+      <div class="avatar-wrapper">
+        <img [src]="user.avatar" alt="Avatar" class="profile-avatar">
+        <div class="avatar-edit">
+          <i class="feather icon-camera"></i>
+        </div>
+      </div>
+      <div class="user-meta">
+        <h2 class="user-name">{{ user.fullName }}</h2>
+        <span class="user-role-badge">{{ user.role }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <div class="content-card info-card">
+      <div class="card-header">
+        <h3>Informations Personnelles</h3>
+        <button class="btn-edit" (click)="onUpdateProfile()">
+          <i class="feather icon-edit-2"></i> Modifier
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nom Complet</label>
+            <p>{{ user.fullName }}</p>
+          </div>
+          <div class="info-item">
+            <label>Adresse Email</label>
+            <p>{{ user.email }}</p>
+          </div>
+          <div class="info-item">
+            <label>Rôle</label>
+            <p>{{ user.role }}</p>
+          </div>
+          <div class="info-item">
+            <label>Date d'inscription</label>
+            <p>01 Mai 2026</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-card settings-card">
+      <div class="card-header">
+        <h3>Paramètres de Sécurité</h3>
+      </div>
+      <div class="card-body">
+        <div class="settings-list">
+          <div class="setting-item">
+            <div class="setting-info">
+              <i class="feather icon-lock"></i>
+              <div class="setting-text">
+                <span class="setting-title">Changer le mot de passe</span>
+                <span class="setting-desc">Mettez à jour votre mot de passe pour plus de sécurité</span>
+              </div>
+            </div>
+            <button class="btn-action">Mettre à jour</button>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <i class="feather icon-shield"></i>
+              <div class="setting-text">
+                <span class="setting-title">Double Authentification</span>
+                <span class="setting-desc">Ajoutez une couche de protection supplémentaire</span>
+              </div>
+            </div>
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="customSwitch1">
+              <label class="custom-control-label" for="customSwitch1"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

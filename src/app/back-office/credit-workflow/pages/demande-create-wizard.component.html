@@ -1,0 +1,62 @@
+<section class="cw-page">
+  <div class="cw-page-head">
+    <div>
+      <h1>Nouvelle demande</h1>
+      <p class="cw-lead">Assistant en 3 étapes — aligné sur les règles métier.</p>
+    </div>
+    <a routerLink="/back-office/credit/demandes" class="cw-btn cw-btn-ghost">Retour</a>
+  </div>
+
+  <div class="cw-steps-indicator">
+    <div class="cw-st" [class.active]="step >= 1" [class.on]="step === 1">1 · Projet</div>
+    <div class="cw-st-sep"></div>
+    <div class="cw-st" [class.active]="step >= 2" [class.on]="step === 2">2 · Calendrier</div>
+    <div class="cw-st-sep"></div>
+    <div class="cw-st" [class.active]="step >= 3" [class.on]="step === 3">3 · Validation</div>
+  </div>
+
+  <form class="cw-card cw-wizard" [formGroup]="form" (ngSubmit)="submit()">
+    <div *ngIf="step === 1" class="cw-grid-form">
+      <div class="cw-field">
+        <label>ID agriculteur *</label>
+        <input type="number" formControlName="agriculteurId" placeholder="Ex. 42" />
+        <small class="cw-error" *ngIf="form.controls.agriculteurId.touched && form.controls.agriculteurId.invalid">Requis, &gt; 0</small>
+      </div>
+      <div class="cw-field">
+        <label>Montant demandé (TND) *</label>
+        <input type="number" formControlName="montantDemande" placeholder="Ex. 25000" />
+        <small class="cw-error" *ngIf="form.controls.montantDemande.touched && form.controls.montantDemande.invalid">Montant obligatoire</small>
+      </div>
+    </div>
+
+    <div *ngIf="step === 2" class="cw-grid-form">
+      <div class="cw-field">
+        <label>Date de la demande *</label>
+        <input type="date" formControlName="dateDemande" />
+      </div>
+      <div class="cw-field cw-span-2">
+        <label>Description</label>
+        <textarea rows="4" formControlName="description" placeholder="Culture, équipement, saison…"></textarea>
+      </div>
+    </div>
+
+    <div *ngIf="step === 3" class="cw-review">
+      <h2>Récapitulatif</h2>
+      <dl>
+        <div><dt>Agriculteur</dt><dd>{{ form.value.agriculteurId }}</dd></div>
+        <div><dt>Montant</dt><dd>{{ form.value.montantDemande | number : '1.0-0' }} TND</dd></div>
+        <div><dt>Date</dt><dd>{{ form.value.dateDemande }}</dd></div>
+        <div><dt>Description</dt><dd>{{ form.value.description || '—' }}</dd></div>
+      </dl>
+      <p class="cw-hint">Statut initial côté serveur : <strong>NOUVELLE</strong></p>
+    </div>
+
+    <div class="cw-wizard-actions">
+      <button type="button" class="cw-btn cw-btn-ghost" (click)="back()" [disabled]="step === 1">Précédent</button>
+      <button type="button" class="cw-btn cw-btn-primary" (click)="next()" *ngIf="step < 3">Suivant</button>
+      <button type="submit" class="cw-btn cw-btn-primary" *ngIf="step === 3" [disabled]="submitting">
+        {{ submitting ? 'Envoi…' : 'Créer la demande' }}
+      </button>
+    </div>
+  </form>
+</section>

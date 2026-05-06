@@ -160,7 +160,7 @@
               <p>Enroll your face for instant, secure authentication.</p>
             </div>
 
-            <div class="biometric-container">
+            <div class="biometric-container" *ngIf="showEnrollmentForm()">
               <div class="scanner-frame">
                 <div class="scanner-line"></div>
                 <div class="corner t-l"></div>
@@ -187,6 +187,39 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                   </div>
                   <span>{{ faceLoading() ? 'Analyzing Bio-data...' : 'Capture Biometrics' }}</span>
+                </button>
+
+                <span class="or-divider">OR</span>
+
+                <button type="button" class="scanner-btn alt-btn" (click)="faceFileInput.click()" [disabled]="faceLoading()">
+                  <div class="btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                  </div>
+                  <span>Upload Photo</span>
+                </button>
+                <input 
+                  #faceFileInput 
+                  type="file" 
+                  (change)="onFaceFileSelected($event)" 
+                  accept="image/*" 
+                  style="display: none;">
+              </div>
+            </div>
+
+            <!-- Already Enrolled State -->
+            <div class="enrolled-state-container" *ngIf="!showEnrollmentForm()">
+              <div class="success-badge">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <h3 class="enrolled-title">Biometric Profile Active</h3>
+              <p class="enrolled-desc">Your face is successfully enrolled and protecting your account. You can use it for instant, secure login.</p>
+              
+              <div class="biometric-actions" style="margin-top: 24px;">
+                <button type="button" class="scanner-btn alt-btn" (click)="isReenrolling.set(true)">
+                  <div class="btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  </div>
+                  <span>Update Biometrics</span>
                 </button>
               </div>
             </div>

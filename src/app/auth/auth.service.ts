@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
+import { SocialAuthService } from '@abacritt/angularx-social-login';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +11,26 @@ import { Observable } from 'rxjs';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private socialAuthService = inject(SocialAuthService);
   private apiUrl = environment.apiUrl;
 
   login(credentials: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/login`, credentials);
+  }
+
+  loginWithGoogle(idToken: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/google`, { idToken });
+  }
+
+  loginWithFacebook(accessToken: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/facebook`, { accessToken });
+  }
+
+  faceLogin(email: string, image: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('image', image);
+    return this.http.post(`${this.apiUrl}/auth/face/login`, formData);
   }
 
   register(userData: any): Observable<any> {
@@ -159,6 +176,12 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('token');
+    
+    // Try to sign out from Google if possible
+    this.socialAuthService.signOut().catch(() => {
+      // Ignore if already signed out
+    });
+    
     this.router.navigate(['/auth/login']);
   }
 }

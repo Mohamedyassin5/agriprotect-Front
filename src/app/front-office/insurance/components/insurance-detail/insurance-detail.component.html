@@ -1,0 +1,134 @@
+<div class="detail-page">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des informations...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-card">
+    <span>⚠️</span>
+    <p>{{ error }}</p>
+  </div>
+
+  <ng-container *ngIf="insurance && !loading">
+
+   <!-- Header -->
+    <div class="detail-header">
+      <div>
+        <h1 class="policy-number">📋 {{ insurance.policyNumber }}</h1>
+        <span [class]="'status-badge ' + getStatusClass(insurance.status)">
+          {{ insurance.status }}
+        </span>
+      </div>
+      <div class="header-actions">
+      
+        <!-- Payment actions - CORRIGÉ avec opérateur de navigation sécurisée -->
+        <button (click)="goToPayment(insurance.id)" class="btn btn-primary" *ngIf="insurance.id">
+          💳 Payer la prime
+        </button>
+        <button (click)="goToRegularize(insurance.id)" class="btn btn-warning" *ngIf="insurance.id">
+          🔄 Régulariser
+        </button>
+      </div>
+    </div>
+
+    <div class="content-grid">
+
+      <!-- Card 1: Détails de la police -->
+      <div class="info-card">
+        <h3>Détails de la Police</h3>
+        <div class="info-row">
+          <span>Type de couverture</span>
+          <strong>{{ insurance.coverageType }}</strong>
+        </div>
+        <div class="info-row">
+          <span>Montant assuré</span>
+          <strong>{{ insurance.insuredAmount | number:'1.2-2' }} TND</strong>
+        </div>
+        <div class="info-row">
+          <span>Date de début</span>
+          <strong>{{ insurance.startDate | date:'dd/MM/yyyy' }}</strong>
+        </div>
+        <div class="info-row">
+          <span>Date de fin</span>
+          <strong>{{ insurance.endDate | date:'dd/MM/yyyy' }}</strong>
+        </div>
+      </div>
+
+      <!-- Card 2: Situation des Paiements (mise en avant) -->
+      <div class="info-card payment-situation">
+        <h3>💰 Situation des Paiements</h3>
+
+        <div class="payment-mode">
+          <span class="badge-mode">{{ insurance.paymentMode }}</span>
+        </div>
+
+        <div class="remaining-section">
+          <span class="label">Paiements restants</span>
+          <div class="big-number" [class.text-danger]="insurance.remainingPayments === 0">
+            {{ insurance.remainingPayments }}
+          </div>
+          <span class="small">sur {{ insurance.numberOfPayments }} versements</span>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getPaymentProgress()"></div>
+          </div>
+        </div>
+
+        <div class="payment-details">
+          <div class="info-row">
+            <span>Montant par versement</span>
+            <strong>{{ insurance.amountPerPayment | number:'1.2-2' }} TND</strong>
+          </div>
+          <div class="info-row">
+            <span>Prime totale</span>
+            <strong>{{ insurance.totalPremium | number:'1.2-2' }} TND</strong>
+          </div>
+          <div class="info-row" [class.text-danger]="isOverdue()">
+            <span>Pénalité actuelle</span>
+            <strong>{{ insurance.penaltyAmount | number:'1.2-2' }} TND</strong>
+          </div>
+          <div class="info-row">
+            <span>Prochaine échéance</span>
+            <strong [class.text-danger]="isOverdue()">
+              {{ insurance.nextPaymentDue | date:'dd/MM/yyyy' }}
+              <span *ngIf="isOverdue()" class="overdue-tag">EN RETARD</span>
+            </strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Historique des paiements -->
+    <div class="info-card mt-3">
+      <h3>Historique des Paiements</h3>
+      
+      <div *ngIf="payments.length === 0" class="empty-state">
+        Aucun paiement enregistré pour le moment.
+      </div>
+
+      <table *ngIf="payments.length > 0" class="payments-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Montant</th>
+            <th>Mode</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of payments">
+            <td>{{ p.paymentDate | date:'dd/MM/yyyy' }}</td>
+            <td>{{ p.amount | number:'1.2-2' }} TND</td>
+            <td>{{ p.paymentMode }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+</div>

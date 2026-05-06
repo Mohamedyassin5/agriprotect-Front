@@ -1,0 +1,71 @@
+<div class="admin-container animate-in">
+  <div class="header-section">
+    <div class="header-left">
+      <h1 class="page-title">Demandes d'Indemnisation en Attente</h1>
+      <p class="page-subtitle">Examinez les déclarations de sinistre et prenez une décision basée sur l'analyse IA.</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">Chargement des dossiers...</div>
+
+  <div *ngIf="!loading && requests.length === 0" class="empty-state">
+    <div class="empty-icon">✅</div>
+    <h4>Tout est à jour !</h4>
+    <p>Aucune demande d'indemnisation n'est en attente de traitement.</p>
+  </div>
+
+  <div *ngIf="!loading && requests.length > 0" class="requests-grid">
+    <div *ngFor="let req of requests" class="request-card">
+      
+      <div class="card-header">
+        <div class="farmer-info">
+          <h3>{{ req.farmerName }}</h3>
+          <span class="fund-badge">{{ req.fundName }}</span>
+        </div>
+        <div class="request-date">{{ req.date | date:'short' }}</div>
+      </div>
+
+      <div class="card-body">
+        <div class="amount-box">
+          <span class="label">Montant Réclamé</span>
+          <span class="value">{{ req.amount }} TND</span>
+        </div>
+
+        <div class="reason-box">
+          <span class="label">Déclaration de l'agriculteur</span>
+          <p>{{ req.reason }}</p>
+        </div>
+
+        <div class="ai-box">
+          <div class="ai-header">
+            <span class="ai-title">🤖 Analyse AgriVision IA</span>
+            <span class="ai-score" [ngClass]="getScoreClass(req.aiScore)">Fiabilité : {{ req.aiScore }}%</span>
+          </div>
+          <p class="ai-text">{{ req.aiAnalysis }}</p>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div *ngIf="processingId === req.id" class="processing-text">Traitement en cours...</div>
+        
+        <ng-container *ngIf="processingId !== req.id">
+          <!-- Action Buttons -->
+          <div class="action-buttons" *ngIf="showRefusalInputFor !== req.id">
+            <button class="btn-approve" (click)="approveRequest(req.id)">✅ Approuver</button>
+            <button class="btn-refuse" (click)="startRefusal(req.id)">❌ Refuser</button>
+          </div>
+
+          <!-- Refusal Form -->
+          <div class="refusal-form" *ngIf="showRefusalInputFor === req.id">
+            <textarea [(ngModel)]="refusalReason" placeholder="Veuillez expliquer la raison du refus..." class="form-control" rows="3"></textarea>
+            <div class="refusal-actions">
+              <button class="btn-cancel" (click)="cancelRefusal()">Annuler</button>
+              <button class="btn-confirm-refusal" (click)="submitRefusal(req.id)">Confirmer le refus</button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+    </div>
+  </div>
+</div>

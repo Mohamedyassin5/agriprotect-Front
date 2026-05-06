@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CropService, Crop } from './crop.service';
 import { AuthService } from '../../auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-crops',
@@ -15,12 +16,20 @@ export class CropsComponent implements OnInit {
   private cropService = inject(CropService);
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   crops: Crop[] = [];
   showAddForm = false;
   cropForm: FormGroup;
   isLoading = false;
   userId: string | null = null;
+  
+  // NEW: Details Modal
+  selectedCrop: Crop | null = null;
+  showDetailsModal = false;
+  showRiskReport = false;
+  isEstimating = false;
+
 
   constructor() {
     this.cropForm = this.fb.group({
@@ -57,7 +66,7 @@ export class CropsComponent implements OnInit {
         this.crops = data;
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error loading crops', err);
         this.isLoading = false;
       }
@@ -69,7 +78,7 @@ export class CropsComponent implements OnInit {
       this.isLoading = true;
       console.log('CropsComponent: Submitting crop data:', this.cropForm.value);
       this.cropService.addCrop(this.userId, this.cropForm.value).subscribe({
-        next: (newCrop) => {
+        next: (newCrop: Crop) => {
           console.log('CropsComponent: Crop saved successfully:', newCrop);
           this.crops.unshift(newCrop);
           this.showAddForm = false;
@@ -83,7 +92,7 @@ export class CropsComponent implements OnInit {
           });
           this.isLoading = false;
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('CropsComponent: Error adding crop', err);
           this.isLoading = false;
           alert('Failed to save crop. Please check the console for details.');
@@ -100,12 +109,62 @@ export class CropsComponent implements OnInit {
         next: () => {
           this.crops = this.crops.filter(c => c.id !== id);
         },
-        error: (err) => console.error('Error deleting crop', err)
+        error: (err: any) => console.error('Error deleting crop', err)
       });
     }
   }
 
   toggleAddForm(): void {
     this.showAddForm = !this.showAddForm;
+  }
+
+  // Modal Handlers
+  openCropDetails(crop: Crop): void {
+    this.selectedCrop = crop;
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedCrop = null;
+  }
+
+  askAssistant(crop: any) {
+    this.router.navigate(['/front-office/assistant'], { 
+      queryParams: { cropType: crop.cropType } 
+    });
+  }
+
+  analyzeRisk(crop: any) {
+    this.selectedCrop = crop;
+    this.showRiskReport = true;
+  }
+
+  closeRiskReport() {
+    this.showRiskReport = false;
+  }
+
+  estimateValue(crop: Crop): void {
+    if (!crop.id) return;
+    this.isEstimating = true;
+    this.cropService.estimateCropValue(crop.id).subscribe({
+      next: (updatedCrop) => {
+        this.isEstimating = false;
+        // Update the selected crop if it's the same one
+        if (this.selectedCrop && this.selectedCrop.id === updatedCrop.id) {
+          this.selectedCrop = { ...this.selectedCrop, estimatedValue: updatedCrop.estimatedValue };
+        }
+        // Update the crop in the list
+        const index = this.crops.findIndex(c => c.id === updatedCrop.id);
+        if (index !== -1) {
+          this.crops[index] = { ...this.crops[index], estimatedValue: updatedCrop.estimatedValue };
+        }
+      },
+      error: (err) => {
+        this.isEstimating = false;
+        console.error('Error estimating crop value:', err);
+        alert('Failed to estimate crop value. Please try again later.');
+      }
+    });
   }
 }

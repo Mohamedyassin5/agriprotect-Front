@@ -3,12 +3,22 @@
     <div class="header-text">
       <h1>Crops Management</h1>
       <p>Overview of all crops across the platform</p>
-      
     </div>
     <div class="header-actions">
+      <div class="stats-pills">
+        <span class="stat-pill">
+          <strong>{{ crops().length }}</strong> Total
+        </span>
+        <span class="stat-pill active-pill-stat">
+          <strong>{{ activeCropsCount() }}</strong> Active
+        </span>
+        <span class="stat-pill harvested-pill-stat">
+          <strong>{{ harvestedCropsCount() }}</strong> Harvested
+        </span>
+      </div>
       <div class="search-box">
         <i class="feather icon-search"></i>
-        <input type="text" placeholder="Search crop type..." (input)="onSearch($event)">
+        <input type="text" placeholder="Search crop or owner..." (input)="onSearch($event)">
       </div>
     </div>
   </header>
@@ -22,16 +32,17 @@
       <thead>
         <tr>
           <th>Crop Type</th>
+          <th>Owner</th>
           <th>Physical Data</th>
-          <th>Humidity Range</th>
-          <th>Temp Range</th>
+          <th>Humidity</th>
+          <th>Temp</th>
           <th>Cycle</th>
           <th>Status</th>
           <th class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let crop of filteredCrops()">
+        <tr *ngFor="let crop of filteredCrops()" [class.harvested-row]="getStatus(crop) === 'Harvested'">
           <td>
             <div class="user-cell">
               <div class="avatar-sm" style="background: #f1f3f5; color: #2D6A4F; font-size: 20px;">
@@ -42,6 +53,13 @@
                 <span class="email">{{ crop.typeterres }}</span>
               </div>
             </div>
+          </td>
+          <td>
+            <div class="owner-cell" *ngIf="crop.user">
+              <span class="owner-name">{{ crop.user.firstName }} {{ crop.user.lastName }}</span>
+              <span class="owner-email">{{ crop.user.email }}</span>
+            </div>
+            <span *ngIf="!crop.user" class="no-owner">Unknown</span>
           </td>
           <td>
             <div class="contact-cell">
@@ -63,19 +81,19 @@
           </td>
           <td>
             <div class="cycle-cell">
-              <span class="date">{{ crop.startDate | date:'mediumDate' }}</span>
+              <span class="date">{{ crop.startDate | date:'dd MMM' }}</span>
               <i class="feather icon-arrow-right"></i>
-              <span class="date">{{ crop.endDate | date:'mediumDate' }}</span>
+              <span class="date">{{ crop.endDate | date:'dd MMM' }}</span>
             </div>
           </td>
           <td>
-            <span class="role-badge" [class.harvested]="getStatus(crop) === 'Harvested'">
+            <span class="status-badge" [class.active]="getStatus(crop) === 'Active'" [class.harvested]="getStatus(crop) === 'Harvested'">
               {{ getStatus(crop) }}
             </span>
           </td>
           <td class="actions-col">
-            <button class="btn-icon" title="View Map"><i class="feather icon-map"></i></button>
-            <button class="btn-icon danger" title="Delete Crop"><i class="feather icon-trash-2"></i></button>
+            <button class="btn-icon" title="View Details" (click)="openDetail(crop)"><i class="feather icon-map"></i></button>
+            <button class="btn-icon danger" title="Delete Crop" (click)="confirmDelete(crop)"><i class="feather icon-trash-2"></i></button>
           </td>
         </tr>
       </tbody>
@@ -84,6 +102,84 @@
     <div class="empty-state" *ngIf="!isLoading() && filteredCrops().length === 0">
       <i class="feather icon-layers"></i>
       <p>No crops found matching your search.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Drawer with Map -->
+<div class="drawer-overlay" *ngIf="selectedCrop()" (click)="closeDetail()"></div>
+<div class="detail-drawer" [class.open]="selectedCrop()">
+  <div class="drawer-header">
+    <h2>Crop Details</h2>
+    <button class="btn-icon" (click)="closeDetail()">
+      <i class="feather icon-x"></i>
+    </button>
+  </div>
+
+  <div class="drawer-body" *ngIf="selectedCrop() as crop">
+    <div class="drawer-hero">
+      <div class="drawer-crop-icon">{{ getCropIcon(crop.cropType) }}</div>
+      <h3 class="drawer-title">{{ crop.cropType }}</h3>
+      <span class="drawer-subtitle">Owned by {{ crop.user?.firstName }} {{ crop.user?.lastName }}</span>
+    </div>
+
+    <div class="drawer-section">
+      <h4>Location & Land</h4>
+      <div class="map-wrapper">
+        <div id="cropMap" class="crop-map-container"></div>
+      </div>
+      <div class="location-details">
+        <div class="info-row">
+          <i class="feather icon-map-pin"></i>
+          <span>{{ crop.user?.address || 'No address provided' }}</span>
+        </div>
+        <div class="info-row">
+          <i class="feather icon-box"></i>
+          <span>{{ crop.surface }} Hectares of {{ crop.typeterres }} soil</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-section">
+      <h4>Optimal Conditions</h4>
+      <div class="conditions-grid">
+        <div class="condition-card">
+          <i class="feather icon-droplet"></i>
+          <span class="label">Humidity</span>
+          <span class="value">{{ crop.optimalHumidity }}%</span>
+          <span class="range-sub">{{ crop.minHumidity }}% - {{ crop.maxHumidity }}%</span>
+        </div>
+        <div class="condition-card">
+          <i class="feather icon-thermometer"></i>
+          <span class="label">Temperature</span>
+          <span class="value">{{ crop.averageTemperature }}°C</span>
+          <span class="range-sub">{{ crop.minTemperature }}°C - {{ crop.maxTemperature }}°C</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-section">
+      <h4>Cultivation Cycle</h4>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="dot start"></div>
+          <div class="time-info">
+            <span class="time-label">Planted</span>
+            <span class="time-date">{{ crop.startDate | date:'dd MMMM yyyy' }}</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="dot end"></div>
+          <div class="time-info">
+            <span class="time-label">Estimated Harvest</span>
+            <span class="time-date">{{ crop.endDate | date:'dd MMMM yyyy' }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

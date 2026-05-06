@@ -1,0 +1,110 @@
+<div class="incident-container">
+  <div class="page-header">
+    <h2 class="page-title">GESTION DES INCIDENTS</h2>
+    <p class="page-subtitle">Supervision des alertes météo et des déclarations de sinistres</p>
+  </div>
+
+  <div class="incident-grid">
+    <!-- Risques Météorologiques -->
+    <div class="incident-card">
+      <div class="card-header">
+        <div class="header-title">
+          <i class="feather icon-alert-triangle mr-2"></i>
+          Risques Météorologiques (IA)
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table custom-table">
+            <thead>
+              <tr>
+                <th>CULTURE</th>
+                <th>RISQUE</th>
+                <th>SÉVÉRITÉ</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let risk of risks">
+                <td>
+                  <div class="crop-info">
+                    <span class="crop-name">{{ risk.cropType }}</span>
+                    <span class="crop-date">{{ risk.detectedAt | date:'dd/MM/yyyy' }}</span>
+                    <span class="crop-time">{{ risk.detectedAt | date:'HH:mm' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="risk-badge">{{ risk.riskType }}</span>
+                </td>
+                <td>
+                  <span class="severity-badge" [ngClass]="getSeverityClass(risk.severity)">
+                    {{ risk.severity }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-outline-success btn-sm btn-action" (click)="resolveRisk(risk.id)">
+                    <i class="feather icon-check-circle mr-1"></i>
+                    Résoudre
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="risks.length === 0 && !loadingRisks">
+                <td colspan="4" class="text-center py-4 text-muted">Aucun risque détecté</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Déclarations de Sinistres -->
+    <div class="incident-card">
+      <div class="card-header">
+        <div class="header-title">
+          <i class="feather icon-shield mr-2"></i>
+          Déclarations de Sinistres
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table custom-table">
+            <thead>
+              <tr>
+                <th>AGRICULTEUR</th>
+                <th>CULTURE</th>
+                <th>TYPE & QUOTA</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of sinistres">
+                <td>
+                  <div class="user-info">
+                    <span class="user-email">{{ s.userEmail }}</span>
+                    <span class="decl-date">{{ s.createdAt | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </td>
+                <td>{{ s.cropType }}</td>
+                <td>
+                  <div class="quota-info">
+                    <span class="type-badge">{{ s.typeSinistre }}</span>
+                    <span class="quota-text">Quota IA: {{ s.quotaRemboursement }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <button class="btn btn-outline-success btn-sm btn-action" (click)="resolveSinistre(s.id)">
+                    <i class="feather icon-check-circle mr-1"></i>
+                    Clôturer
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="sinistres.length === 0 && !loadingSinistres">
+                <td colspan="4" class="text-center py-4 text-muted">Aucune déclaration en attente</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

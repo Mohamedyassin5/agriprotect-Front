@@ -1,0 +1,157 @@
+.incident-container {
+  padding: 2rem;
+  background: transparent;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  color: #5c6c7b;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 1.25rem;
+}
+
+.page-subtitle {
+  color: #8da1b5;
+  font-size: 0.9rem;
+}
+
+.incident-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.incident-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: 1px solid #f0f4f8;
+}
+
+.card-header {
+  padding: 1.25rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.header-title {
+  font-weight: 600;
+  color: #2d3e50;
+  display: flex;
+  align-items: center;
+}
+
+.header-title i {
+  color: #10b981;
+}
+
+.card-body {
+  padding: 0;
+}
+
+.custom-table {
+  margin-bottom: 0;
+}
+
+.custom-table thead th {
+  background: #f9fafb;
+  color: #8da1b5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: none;
+  border-bottom: 1px solid #f0f4f8;
+  padding: 1rem 1.5rem;
+}
+
+.custom-table tbody td {
+  padding: 1.25rem 1.5rem;
+  vertical-align: middle;
+  color: #4b5563;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.crop-info, .user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.crop-name, .user-email {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.crop-date, .crop-time, .decl-date {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.risk-badge {
+  background: #fffbeb;
+  color: #d97706;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.severity-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.badge-danger { background-color: #fee2e2; color: #ef4444; }
+.badge-warning { background-color: #fef3c7; color: #f59e0b; }
+.badge-info { background-color: #e0f2fe; color: #0ea5e9; }
+
+.btn-action {
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.btn-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.type-badge {
+  background: #fee2e2;
+  color: #ef4444;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.quota-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.quota-text {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 1200px) {
+  .incident-grid {
+    grid-template-columns: 1fr;
+  }
+}

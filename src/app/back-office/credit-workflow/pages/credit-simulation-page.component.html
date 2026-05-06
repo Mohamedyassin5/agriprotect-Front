@@ -1,0 +1,61 @@
+<section class="cw-page">
+  <div class="cw-page-head">
+    <div>
+      <h1>Simulateur de mensualités</h1>
+      <p class="cw-lead">Calcul local immédiat + classement backend (offres multiples).</p>
+    </div>
+    <a routerLink="/back-office/credit" class="cw-btn cw-btn-ghost">Tableau</a>
+  </div>
+
+  <div class="cw-grid-sim">
+    <form class="cw-card" [formGroup]="form">
+      <h2>Paramètres</h2>
+      <div class="cw-field">
+        <label>Montant (TND)</label>
+        <input type="number" formControlName="montant" />
+      </div>
+      <div class="cw-field">
+        <label>Taux annuel (%)</label>
+        <input type="number" step="0.1" formControlName="tauxInteret" />
+      </div>
+      <div class="cw-field">
+        <label>Durée (mois)</label>
+        <input type="number" formControlName="dureeMois" />
+      </div>
+      <div class="cw-field">
+        <label>Frais (simulation serveur)</label>
+        <input type="number" formControlName="frais" />
+      </div>
+
+      <div class="cw-highlight">
+        <span>Mensualité estimée (locale)</span>
+        <strong>{{ mensualiteLocale | number : '1.2-2' }} TND</strong>
+      </div>
+
+      <button type="button" class="cw-btn cw-btn-primary" (click)="runBackendRanking()" [disabled]="loading">
+        {{ loading ? 'Calcul serveur…' : 'Lancer la simulation serveur' }}
+      </button>
+    </form>
+
+    <div class="cw-card" *ngIf="ranking?.rankedOffers?.length">
+      <h2>Résultat serveur</h2>
+      <p class="cw-muted">Critère : {{ ranking.criteria || '—' }}</p>
+      <table class="cw-mini-table">
+        <thead>
+          <tr>
+            <th>Mensualité</th>
+            <th>Coût total</th>
+            <th>Intérêts</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of ranking.rankedOffers">
+            <td>{{ o.mensualite | number : '1.2-2' }}</td>
+            <td>{{ o.totalCost | number : '1.2-2' }}</td>
+            <td>{{ o.totalInterets | number : '1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

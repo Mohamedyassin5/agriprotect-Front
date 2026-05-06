@@ -1,0 +1,431 @@
+<!-- =========================================================
+     CERTIFICAT D'ASSURANCE — AgriProtect
+     Multilingual: FR | EN | AR  (@print-ready)
+     ========================================================= -->
+
+<div class="cert-page" [dir]="isRtl ? 'rtl' : 'ltr'" [class.rtl]="isRtl">
+
+  <!-- ── Loading ── -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ lang === 'AR' ? 'جارٍ التحميل...' : lang === 'EN' ? 'Loading...' : 'Chargement...' }}</p>
+  </div>
+
+  <!-- ── Error ── -->
+  <div *ngIf="error" class="error-card">⚠️ {{ error }}</div>
+
+  <ng-container *ngIf="policy && !loading">
+
+    <!-- ── Lang switcher + Print ── -->
+    <div class="print-actions no-print">
+      <div class="lang-switcher">
+        <button (click)="switchLang('FR')" [class.active]="lang === 'FR'" class="lang-btn">🇫🇷 FR</button>
+        <button (click)="switchLang('EN')" [class.active]="lang === 'EN'" class="lang-btn">🇬🇧 EN</button>
+        <button (click)="switchLang('AR')" [class.active]="lang === 'AR'" class="lang-btn">🇹🇳 AR</button>
+      </div>
+      <button class="btn-print" (click)="print()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        {{ t['printBtn'] }}
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         CERTIFICAT DOCUMENT
+         ══════════════════════════════════════════════════════ -->
+    <article class="cert-document">
+
+      <!-- ── En-tête ── -->
+      <header class="cert-header">
+        <div class="cert-brand">
+          <div class="brand-logo">🌾</div>
+          <div class="brand-text">
+            <span class="brand-name">{{ t['brand'] }}</span>
+            <span class="brand-tagline">{{ t['tagline'] }}</span>
+          </div>
+        </div>
+        <div class="cert-meta">
+          <h1 class="cert-title">{{ t['title'] }}</h1>
+          <p class="cert-number">N° {{ certNumber }}</p>
+          <div class="cert-dates">
+            <span class="date-issued">
+              {{ t['issuedOn'] }}
+              {{ today | date:(lang === 'EN' ? 'MMMM d, yyyy' : 'dd/MM/yyyy') }}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="cert-divider"></div>
+
+      <!-- ── Bannière statut ── -->
+      <div class="cert-status-banner"
+           [class.banner-active]="policy.status === 'ACTIVE'"
+           [class.banner-pending]="policy.status === 'PENDING_SIGNATURE'"
+           [class.banner-overdue]="policy.status === 'OVERDUE'"
+           [class.banner-suspended]="policy.status === 'SUSPENDED'">
+        <span class="status-dot"></span>
+        <span>{{ statusLabel }}</span>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+           SECTION 1 — Informations de la police
+           ═══════════════════════════════════════════ -->
+      <section class="cert-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">📋</span>
+          <span>{{ t['policeInfo'] }}</span>
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">{{ t['policyNumber'] }}</span>
+            <span class="info-value mono">{{ policy.policyNumber }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">{{ t['coverageType'] }}</span>
+            <span class="info-value">
+              <span class="coverage-pill coverage-{{ policy.coverageType | lowercase }}">
+                {{ coverageLabel }}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">{{ t['insuredAmount'] }}</span>
+            <span class="info-value highlight">{{ insuredAmount | number:'1.2-2' }} {{ t['currency'] }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">{{ t['annualPremium'] }}</span>
+            <span class="info-value">{{ policy.premiumAmount | number:'1.2-2' }} {{ t['currency'] }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">{{ t['startDate'] }}</span>
+            <span class="info-value">{{ policy.startDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">{{ t['endDate'] }}</span>
+            <span class="info-value">{{ policy.endDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="cert-divider thin"></div>
+
+      <!-- ═══════════════════════════════════════════
+           SECTION 2 — Détails des paiements (NOUVEAU)
+           ═══════════════════════════════════════════ -->
+      <section class="cert-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">💳</span>
+          <span>{{ t['paymentInfo'] }}</span>
+        </h2>
+        <div class="payment-grid">
+
+          <!-- Prime par échéance -->
+          <div class="payment-item">
+            <div class="payment-icon">📅</div>
+            <div class="payment-details">
+              <span class="payment-label">{{ t['amountPerPayment'] }}</span>
+              <span class="payment-value">
+                {{ policy.amountPerPayment | number:'1.2-2' }} {{ t['currency'] }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Total échéances -->
+          <div class="payment-item">
+            <div class="payment-icon">🔢</div>
+            <div class="payment-details">
+              <span class="payment-label">{{ t['numberOfPayments'] }}</span>
+              <span class="payment-value">{{ policy.numberOfPayments }}</span>
+            </div>
+          </div>
+
+          <!-- Échéances honorées -->
+          <div class="payment-item payment-item--green">
+            <div class="payment-icon">✅</div>
+            <div class="payment-details">
+              <span class="payment-label">{{ t['paymentsMade'] }}</span>
+              <span class="payment-value text-green">{{ paymentsMade }}</span>
+            </div>
+          </div>
+
+          <!-- Échéances restantes -->
+          <div class="payment-item"
+               [class.payment-item--orange]="policy.remainingPayments > 0">
+            <div class="payment-icon">⏳</div>
+            <div class="payment-details">
+              <span class="payment-label">{{ t['remainingPayments'] }}</span>
+              <span class="payment-value"
+                    [class.text-orange]="policy.remainingPayments > 0"
+                    [class.text-green]="policy.remainingPayments === 0">
+                {{ policy.remainingPayments }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Barre de progression des paiements -->
+        <div class="progress-container" *ngIf="policy.numberOfPayments">
+          <div class="progress-labels">
+            <span class="progress-label-text">{{ t['paymentsMade'] }}</span>
+            <span class="progress-fraction">
+              {{ paymentsMade }} / {{ policy.numberOfPayments }}
+            </span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill"
+                 [style.width.%]="(paymentsMade / (policy.numberOfPayments || 1)) * 100">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="cert-divider thin"></div>
+
+      <!-- ═══════════════════════════════════════════
+           SECTION 3 — Garanties & Seuils
+           ═══════════════════════════════════════════ -->
+      <section class="cert-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">💰</span>
+          <span>{{ t['guarantees'] }}</span>
+        </h2>
+        <div class="guarantees-grid">
+          <div class="guarantee-card card-green">
+            <div class="g-icon">🛡️</div>
+            <div class="g-label">{{ t['coverageRate'] }}</div>
+            <div class="g-value">{{ rates.coverageRate * 100 | number:'1.0-0' }}%</div>
+            <div class="g-desc">{{ t['damages'] }}</div>
+          </div>
+          <div class="guarantee-card card-orange">
+            <div class="g-icon">⚖️</div>
+            <div class="g-label">{{ t['franchise'] }}</div>
+            <div class="g-value">{{ franchiseAmount | number:'1.2-2' }} {{ t['currency'] }}</div>
+            <div class="g-desc">{{ rates.franchiseRate * 100 | number:'1.0-0' }}% {{ t['insuredOf'] }}</div>
+          </div>
+          <div class="guarantee-card card-blue">
+            <div class="g-icon">📊</div>
+            <div class="g-label">{{ t['cap'] }}</div>
+            <div class="g-value">{{ maxReimbursement | number:'1.2-2' }} {{ t['currency'] }}</div>
+            <div class="g-desc">{{ rates.plafondRate * 100 | number:'1.0-0' }}% {{ t['insuredOf'] }}</div>
+          </div>
+          <div class="guarantee-card card-purple">
+            <div class="g-icon">⏱️</div>
+            <div class="g-label">{{ t['threshold'] }}</div>
+            <div class="g-value">{{ partialThreshold | number:'1.2-2' }} {{ t['currency'] }}</div>
+            <div class="g-desc">30% {{ t['insuredOf'] }}</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="cert-divider thin"></div>
+
+      <!-- ═══════════════════════════════════════════
+           SECTION 4 — Sinistres couverts
+           ═══════════════════════════════════════════ -->
+      <section class="cert-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">🌩️</span>
+          <span>{{ t['coveredClaims'] }}</span>
+        </h2>
+        <div class="covered-types">
+          <div class="type-badge" *ngFor="let type of coveredTypes">
+            <span class="type-icon">{{ type.icon }}</span>
+            <span>{{ type.key }}</span>
+          </div>
+        </div>
+        <p class="covered-note">{{ t['otherExcluded'] }}</p>
+      </section>
+
+      <div class="cert-divider thin"></div>
+
+      <!-- ═══════════════════════════════════════════
+           SECTION 5 — Processus de remboursement (NOUVEAU)
+           ═══════════════════════════════════════════ -->
+      <section class="cert-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">🔄</span>
+          <span>{{ t['reimbursementSummary'] }}</span>
+        </h2>
+
+        <div class="flow-grid">
+          <!-- Versement automatique -->
+          <div class="flow-step flow-step--green">
+            <div class="flow-badge">≤ {{ SEUIL_AUTO_VERSEMENT }} {{ t['currency'] }}</div>
+            <div class="flow-icon">⚡</div>
+            <div class="flow-title">{{ t['autoPayLabel'] }}</div>
+            <div class="flow-desc">
+              {{ lang === 'AR'
+                ? 'دفع فوري على حساب التوفير'
+                : lang === 'EN'
+                  ? 'Instant credit to savings account'
+                  : 'Versement immédiat sur compte épargne' }}
+            </div>
+          </div>
+
+          <!-- Validation admin -->
+          <div class="flow-step flow-step--orange">
+            <div class="flow-badge">> {{ SEUIL_AUTO_VERSEMENT }} {{ t['currency'] }}</div>
+            <div class="flow-icon">👨‍💼</div>
+            <div class="flow-title">{{ t['adminValidLabel'] }}</div>
+            <div class="flow-desc">
+              {{ lang === 'AR'
+                ? 'مراجعة إدارية قبل الدفع'
+                : lang === 'EN'
+                  ? 'Admin review before payment'
+                  : 'Validation administrative avant versement' }}
+            </div>
+          </div>
+
+          <!-- Déductions -->
+          <div class="flow-step flow-step--red">
+            <div class="flow-badge">⚠️</div>
+            <div class="flow-icon">➖</div>
+            <div class="flow-title">{{ t['deductionLabel'] }}</div>
+            <div class="flow-desc">{{ t['remainingPremDeduction'] }}</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="cert-divider thin"></div>
+
+      <!-- ═══════════════════════════════════════════
+           SECTION 6 — Conditions de remboursement
+           ═══════════════════════════════════════════ -->
+      <section class="cert-section">
+        <h2 class="section-heading">
+          <span class="heading-icon">📜</span>
+          <span>{{ t['conditions'] }}</span>
+        </h2>
+
+        <!-- Clause 1 — Franchise -->
+        <div class="clause-card">
+          <div class="clause-header">
+            <span class="clause-number">01</span>
+            <span class="clause-title">{{ t['clause1Title'] }}</span>
+          </div>
+          <p class="clause-body">{{ callClause('clause1Body', rates.franchiseRate * 100, franchiseAmount) }}</p>
+        </div>
+
+        <!-- Clause 2 — Taux/plafond -->
+        <div class="clause-card">
+          <div class="clause-header">
+            <span class="clause-number">02</span>
+            <span class="clause-title">{{ t['clause2Title'] }}</span>
+          </div>
+          <p class="clause-body">{{ callClause('clause2Body', rates.coverageRate * 100, maxReimbursement) }}</p>
+        </div>
+
+        <!-- Clause 3 — Délai déclaration -->
+        <div class="clause-card">
+          <div class="clause-header">
+            <span class="clause-number">03</span>
+            <span class="clause-title">{{ t['clause3Title'] }}</span>
+          </div>
+          <p class="clause-body">{{ callClause('clause3Body', partialThreshold) }}</p>
+        </div>
+
+        <!-- Clause 4 — Carence (alerte) -->
+        <div class="clause-card clause-card--alert">
+          <div class="clause-header">
+            <span class="clause-number alert">04</span>
+            <span class="clause-title">{{ t['clause4Title'] }}</span>
+          </div>
+          <p class="clause-body">{{ callClause('clause4Body', JOURS_CARENCE) }}</p>
+        </div>
+
+        <!-- Clause 5 — Fréquence -->
+        <div class="clause-card clause-card--alert">
+          <div class="clause-header">
+            <span class="clause-number alert">05</span>
+            <span class="clause-title">{{ t['clause6Title'] }}</span>
+          </div>
+          <p class="clause-body">{{ callClause('clause6Body', MAX_REMBOURSEMENTS_AN) }}</p>
+        </div>
+
+        <!-- Clause 6 — Micro-remboursement -->
+        <div class="clause-card">
+          <div class="clause-header">
+            <span class="clause-number">06</span>
+            <span class="clause-title">{{ t['clause7Title'] }}</span>
+          </div>
+          <p class="clause-body">{{ callClause('clause7Body', SEUIL_AUTO_VERSEMENT) }}</p>
+        </div>
+
+        <!-- Clause 7 — Carence post-remboursement -->
+        <div class="clause-card clause-card--alert">
+          <div class="clause-header">
+            <span class="clause-number alert">07</span>
+            <span class="clause-title">{{ t['clause8Title'] }}</span>
+          </div>
+          <p class="clause-body">{{ callClause('clause8Body', MOIS_CARENCE_POST_REMB) }}</p>
+        </div>
+
+        <!-- Clause 8 — Période de validité du contrat -->
+        <div class="clause-card clause-card--alert">
+          <div class="clause-header">
+            <span class="clause-number alert">08</span>
+            <span class="clause-title">{{ t['clause9Title'] }}</span>
+          </div>
+          <p class="clause-body">
+            {{ t['clause9Body'] }}
+            <span *ngIf="policy?.startDate && policy?.endDate">
+              <br><strong>{{ policy.startDate | date:'dd/MM/yyyy' }} → {{ policy.endDate | date:'dd/MM/yyyy' }}</strong>
+            </span>
+          </p>
+        </div>
+
+      </section>
+
+      <div class="cert-divider thin"></div>
+
+      <!-- ── Pied de page ── -->
+      <footer class="cert-footer">
+        <div class="footer-left">
+          <p class="footer-company">{{ t['footerCompany'] }}</p>
+          <p class="footer-address">{{ t['footerAddress'] }}</p>
+          <p class="footer-legal">{{ t['footerLegal'] }}</p>
+        </div>
+
+        <div class="footer-right">
+          <div class="footer-seal">
+            <div class="seal-ring">
+              <div class="seal-inner">
+                <span class="seal-logo">🌾</span>
+                <span class="seal-text">{{ t['certifiedLabel'] }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Signature électronique ── -->
+          <div class="signature-block"
+               *ngIf="policy.signedAt || policy.signatureImage || policy.signedByName; else unsignedTpl">
+            <img *ngIf="policy.signatureImage"
+                 [src]="policy!.signatureImage"
+                 class="signature-img" alt="Signature" />
+            <div class="signature-line" *ngIf="!policy.signatureImage"></div>
+            <p class="signature-name">{{ policy.signedByName ?? t['footerSign'] }}</p>
+            <p class="signature-title">{{ t['signatoryTitle'] }}</p>
+            <p class="signature-date">
+              {{ t['signedOn'] }} {{ policy.signedAt | date:(lang === 'EN' ? 'MMMM d, yyyy' : 'dd/MM/yyyy') }}
+            </p>
+          </div>
+
+          <ng-template #unsignedTpl>
+            <div class="signature-block unsigned">
+              <div class="signature-line"></div>
+              <p class="signature-name">{{ t['footerSign'] }}</p>
+              <p class="signature-title pending-sign">{{ t['statusPending'] }}</p>
+            </div>
+          </ng-template>
+        </div>
+      </footer>
+
+    </article>
+  </ng-container>
+</div>

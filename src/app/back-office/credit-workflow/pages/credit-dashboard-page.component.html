@@ -1,0 +1,92 @@
+<section class="cw-page">
+  <div class="cw-page-head">
+    <div>
+      <h1>Tableau de bord crédit</h1>
+      <p class="cw-lead">Vue portefeuille, risques et tendances de remboursement.</p>
+    </div>
+    <div class="cw-page-actions">
+      <button type="button" class="cw-btn cw-btn-ghost" (click)="refresh()">Actualiser</button>
+      <button type="button" class="cw-btn cw-btn-outline" (click)="markOverdue()">Mettre à jour retards</button>
+      <a routerLink="/back-office/credit/demandes/nouvelle" class="cw-btn cw-btn-primary">Nouvelle demande</a>
+    </div>
+  </div>
+
+  <div class="cw-skeleton-grid" *ngIf="loading">
+    <div class="cw-skel cw-skel-kpi" *ngFor="let _ of [1,2,3,4]"></div>
+    <div class="cw-skel cw-skel-chart"></div>
+    <div class="cw-skel cw-skel-chart"></div>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div class="cw-kpi-grid">
+      <article class="cw-kpi">
+        <span class="cw-kpi-label">Encours total</span>
+        <strong class="cw-kpi-value">{{ formatMoney(kpis?.totalOutstanding) }}</strong>
+        <span class="cw-kpi-hint">Portefeuille actif</span>
+      </article>
+      <article class="cw-kpi">
+        <span class="cw-kpi-label">Taux de recouvrement</span>
+        <strong class="cw-kpi-value">{{ formatPct(kpis?.collectionRate) }}</strong>
+        <span class="cw-kpi-hint">Collection</span>
+      </article>
+      <article class="cw-kpi">
+        <span class="cw-kpi-label">PAR 30</span>
+        <strong class="cw-kpi-value">{{ formatPct(kpis?.par30Ratio) }}</strong>
+        <span class="cw-kpi-hint">Retard &gt; 30j</span>
+      </article>
+      <article class="cw-kpi cw-kpi-warn">
+        <span class="cw-kpi-label">Indicateur défaut (proxy)</span>
+        <strong class="cw-kpi-value">{{ formatPct(kpis?.defaultRatioProxy) }}</strong>
+        <span class="cw-kpi-hint">Surveillance risque</span>
+      </article>
+    </div>
+
+    <div class="cw-grid-2">
+      <div class="cw-card">
+        <div class="cw-card-head">
+          <h2>Répartition des demandes</h2>
+          <span class="cw-tag">Statuts</span>
+        </div>
+        <div *ngIf="!donutChart.series?.length" class="cw-empty">Aucune donnée à afficher pour le moment.</div>
+        <apx-chart
+          *ngIf="donutChart.series?.length"
+          [series]="donutChart.series"
+          [chart]="donutChart.chart"
+          [labels]="donutChart.labels"
+          [colors]="donutChart.colors"
+          [plotOptions]="donutChart.plotOptions"
+          [legend]="donutChart.legend"
+        ></apx-chart>
+      </div>
+
+      <div class="cw-card">
+        <div class="cw-card-head">
+          <h2>Tendance encours (indicatif)</h2>
+          <span class="cw-tag">Démo visuelle</span>
+        </div>
+        <apx-chart
+          [series]="areaChart.series"
+          [chart]="areaChart.chart"
+          [xaxis]="areaChart.xaxis"
+          [dataLabels]="areaChart.dataLabels"
+          [colors]="areaChart.colors"
+          [stroke]="areaChart.stroke"
+          [fill]="areaChart.fill"
+          [yaxis]="areaChart.yaxis"
+        ></apx-chart>
+      </div>
+    </div>
+
+    <div class="cw-card cw-card-alerts" *ngIf="alerts.length">
+      <div class="cw-card-head">
+        <h2>Alertes portefeuille</h2>
+      </div>
+      <ul class="cw-alert-list">
+        <li *ngFor="let a of alerts">
+          <span class="cw-pill" *ngIf="a.code">{{ a.code }}</span>
+          {{ a.message }}
+        </li>
+      </ul>
+    </div>
+  </ng-container>
+</section>

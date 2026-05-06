@@ -1,0 +1,76 @@
+<section class="cw-page">
+  <div class="cw-page-head">
+    <div>
+      <h1>Demandes de crédit</h1>
+      <p class="cw-lead">Filtrez, suivez et ouvrez chaque dossier.</p>
+    </div>
+    <a routerLink="/back-office/credit/demandes/nouvelle" class="cw-btn cw-btn-primary">Nouvelle demande</a>
+  </div>
+
+  <div class="cw-filters cw-card">
+    <div class="cw-field">
+      <label>Statut</label>
+      <select [(ngModel)]="statut" (ngModelChange)="load()">
+        <option value="">Tous</option>
+        <option value="NOUVELLE">NOUVELLE</option>
+        <option value="EN_COURS_INSTRUCTION">EN_COURS_INSTRUCTION</option>
+        <option value="ACCEPTEE">ACCEPTEE</option>
+        <option value="REJETEE">REJETEE</option>
+        <option value="ANNULEE">ANNULEE</option>
+        <option value="ARCHIVEE">ARCHIVEE</option>
+      </select>
+    </div>
+    <div class="cw-field">
+      <label>Date début</label>
+      <input type="date" [(ngModel)]="dateFrom" (change)="load()" />
+    </div>
+    <div class="cw-field">
+      <label>Date fin</label>
+      <input type="date" [(ngModel)]="dateTo" (change)="load()" />
+    </div>
+    <div class="cw-field cw-field-grow">
+      <label>Recherche (agriculteur / description)</label>
+      <input type="search" [(ngModel)]="qAgri" (ngModelChange)="load()" placeholder="Ex. 12 ou blé" />
+    </div>
+    <button type="button" class="cw-btn cw-btn-ghost" (click)="resetFilters()">Réinitialiser</button>
+  </div>
+
+  <div class="cw-skeleton-table" *ngIf="loading">
+    <div class="cw-skel-line" *ngFor="let _ of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <div class="cw-card cw-table-card" *ngIf="!loading && rows.length === 0">
+    <div class="cw-empty">
+      <h3>Aucune demande</h3>
+      <p>Créez une première demande pour démarrer le workflow.</p>
+      <a routerLink="/back-office/credit/demandes/nouvelle" class="cw-btn cw-btn-primary">Créer une demande</a>
+    </div>
+  </div>
+
+  <div class="cw-card cw-table-card" *ngIf="!loading && rows.length">
+    <table class="cw-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Agriculteur</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows">
+          <td class="mono">#{{ r.id }}</td>
+          <td>{{ r.dateDemande }}</td>
+          <td>{{ r.agriculteurId }}</td>
+          <td>{{ r.montantDemande | number : '1.0-0' }} TND</td>
+          <td><span [class]="badgeClass(r.statut)">{{ r.statut }}</span></td>
+          <td class="cw-td-actions">
+            <a class="cw-link" [routerLink]="['/back-office/credit/demandes', r.id]">Ouvrir →</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

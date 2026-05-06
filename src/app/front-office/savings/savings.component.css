@@ -1,0 +1,489 @@
+/* ── Page Layout ── */
+.sv-page {
+  padding: 28px 32px;
+  max-width: 1120px;
+  margin: 0 auto;
+  font-family: 'Outfit', sans-serif;
+}
+
+.sv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+.sv-breadcrumb { font-size: 12px; color: #74c69d; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.sv-title { font-size: 24px; font-weight: 800; color: #1b4332; margin: 0; }
+
+/* ── Error Banner ── */
+.sv-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fde8e8;
+  color: #c0392b;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c0392b;
+}
+.sv-error-close { margin-left: auto; background: none; border: none; color: #c0392b; font-size: 16px; cursor: pointer; padding: 0; line-height: 1; }
+
+/* ── Loading Dots ── */
+.sv-loading { display: flex; gap: 6px; justify-content: center; padding: 48px 0; }
+.sv-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #40916c;
+  animation: sv-bounce 1.2s infinite ease-in-out;
+}
+.sv-dot:nth-child(1) { animation-delay: -0.32s; }
+.sv-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes sv-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ── No Account ── */
+.sv-no-account {
+  background: #f0faf4;
+  border: 2px dashed #74c69d;
+  border-radius: 16px;
+  padding: 52px 40px;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.sv-no-account-icon { margin-bottom: 16px; display: flex; justify-content: center; }
+.sv-no-account h3 { color: #1b4332; font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+.sv-no-account p { color: #52b788; font-size: 14px; margin: 0 0 28px; }
+.sv-create-form { text-align: left; }
+
+/* ── Tabs ── */
+.sv-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid #e8f5e9;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.sv-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  background: transparent;
+  color: #74c69d;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  border-radius: 6px 6px 0 0;
+}
+.sv-tab:hover { color: #40916c; background: #f0faf4; }
+.sv-tab.sv-tab-active { color: #1b4332; border-bottom-color: #2d6a4f; background: #f0faf4; }
+
+/* ── Balance Hero ── */
+.sv-balance-hero {
+  background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+  border-radius: 16px;
+  padding: 28px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 20px;
+  color: white;
+}
+.sv-balance-left {}
+.sv-balance-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.65; margin-bottom: 6px; }
+.sv-balance-amount { font-size: 42px; font-weight: 800; line-height: 1; margin-bottom: 12px; }
+.sv-balance-currency { font-size: 20px; font-weight: 400; opacity: 0.8; }
+.sv-balance-sub { display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: 0.85; }
+.sv-account-name { font-weight: 600; }
+.sv-status-pill {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+}
+.sv-status-active { background: rgba(255,255,255,0.2); color: #d8f3dc; }
+.sv-status-frozen { background: rgba(100,180,255,0.25); color: #90caf9; }
+.sv-status-closed { background: rgba(255,100,100,0.25); color: #ffcdd2; }
+
+.sv-balance-right { display: flex; gap: 32px; }
+.sv-balance-stat { text-align: center; }
+.sv-balance-stat-value { font-size: 24px; font-weight: 800; }
+.sv-balance-stat-label { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+
+/* ── Card ── */
+.sv-card {
+  background: #fff;
+  border: 1px solid #e8f5e9;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 6px rgba(27,67,50,0.05);
+  margin-bottom: 16px;
+}
+.sv-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sv-card-title { font-size: 15px; font-weight: 700; color: #1b4332; }
+.sv-card-subtitle { font-size: 12px; color: #52b788; }
+
+/* ── Progress ── */
+.sv-progress-row { margin-bottom: 0; }
+.sv-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #52b788;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.sv-progress-track { background: #e8f5e9; border-radius: 99px; overflow: hidden; }
+.sv-progress-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+
+/* ── Account Info ── */
+.sv-account-info { display: flex; flex-direction: column; gap: 10px; }
+.sv-info-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0faf4; }
+.sv-info-row:last-child { border-bottom: none; }
+.sv-info-label { color: #52b788; }
+.sv-info-value { font-weight: 600; color: #1b4332; }
+
+/* ── Toolbar ── */
+.sv-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sv-section-title { font-size: 15px; font-weight: 700; color: #1b4332; }
+
+/* ── Filter Pills ── */
+.sv-filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.sv-pill {
+  padding: 5px 16px; border-radius: 20px;
+  border: 1.5px solid #b7e4c7; background: white;
+  color: #40916c; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Outfit', sans-serif;
+}
+.sv-pill:hover { background: #f0faf4; border-color: #40916c; }
+.sv-pill.sv-pill-active { background: #1b4332; color: white; border-color: #1b4332; }
+
+/* ── KPI Strip ── */
+.sv-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.sv-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-left: 5px solid transparent;
+  background: #fff;
+}
+.sv-kpi-card-icon {
+  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sv-kpi-body { display: flex; flex-direction: column; }
+.sv-kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; font-weight: 600; }
+.sv-kpi-value { font-size: 21px; font-weight: 800; }
+
+/* Deposit — green */
+.sv-kpi-card--deposit {
+  border-left-color: #1b7a47;
+  background: linear-gradient(135deg, #f0faf4 0%, #fff 100%);
+}
+.sv-kpi-card--deposit .sv-kpi-card-icon { background: #d4f0e0; color: #1b7a47; }
+.sv-kpi-card--deposit .sv-kpi-label { color: #2d9a5f; }
+.sv-kpi-card--deposit .sv-kpi-value { color: #1b7a47; }
+
+/* Withdrawal — red */
+.sv-kpi-card--withdrawal {
+  border-left-color: #c0392b;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+}
+.sv-kpi-card--withdrawal .sv-kpi-card-icon { background: #fde8e6; color: #c0392b; }
+.sv-kpi-card--withdrawal .sv-kpi-label { color: #b0391e; }
+.sv-kpi-card--withdrawal .sv-kpi-value { color: #c0392b; }
+
+/* Balance — teal (positive) */
+.sv-kpi-card--balance {
+  border-left-color: #0097a7;
+  background: linear-gradient(135deg, #f0fbfc 0%, #fff 100%);
+}
+.sv-kpi-card--balance .sv-kpi-card-icon { background: #d0f0f4; color: #0097a7; }
+.sv-kpi-card--balance .sv-kpi-label { color: #00838f; }
+.sv-kpi-card--balance .sv-kpi-value { color: #0097a7; }
+
+/* Balance — negative override */
+.sv-kpi-card--balance.sv-kpi-card--balance-neg {
+  border-left-color: #c0392b;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+}
+.sv-kpi-card--balance.sv-kpi-card--balance-neg .sv-kpi-card-icon { background: #fde8e6; color: #c0392b; }
+.sv-kpi-card--balance.sv-kpi-card--balance-neg .sv-kpi-label { color: #b0391e; }
+.sv-kpi-card--balance.sv-kpi-card--balance-neg .sv-kpi-value { color: #c0392b; }
+
+/* Operations count — indigo/neutral */
+.sv-kpi-card--count {
+  border-left-color: #5c6bc0;
+  background: linear-gradient(135deg, #f3f4fb 0%, #fff 100%);
+}
+.sv-kpi-card--count .sv-kpi-card-icon { background: #e3e5f7; color: #5c6bc0; }
+.sv-kpi-card--count .sv-kpi-label { color: #5c6bc0; }
+.sv-kpi-card--count .sv-kpi-value { color: #3949ab; }
+
+/* ── Table ── */
+.sv-table-wrap {
+  border: 1px solid #e8f5e9;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.sv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.sv-table thead tr { background: #f0faf4; }
+.sv-table th {
+  padding: 11px 14px;
+  text-align: left;
+  color: #2d6a4f;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-bottom: 1px solid #d8f3dc;
+}
+.sv-table td { padding: 11px 14px; border-bottom: 1px solid #f0faf4; color: #1b4332; }
+.sv-data-row { transition: background 0.15s; }
+.sv-data-row:hover { background: #f9fffe; }
+.sv-data-row:last-child td { border-bottom: none; }
+.sv-col-right { text-align: right; }
+.sv-cell-muted { color: #74c69d; }
+
+/* ── Type Tags ── */
+.sv-type-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.sv-tag-deposit { background: #d8f3dc; color: #1b4332; }
+.sv-tag-withdrawal { background: #fff0e6; color: #b0391e; }
+
+/* ── Amount Cells ── */
+.sv-amount-cell { font-weight: 700; }
+.sv-amount-deposit { color: #1b7a47; }
+.sv-amount-withdrawal { color: #b0391e; }
+
+/* ── Form Panel ── */
+.sv-form-panel {
+  background: #f9fffe;
+  border: 1px solid #d8f3dc;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.sv-form-panel-title { font-size: 14px; font-weight: 700; color: #1b4332; margin-bottom: 16px; }
+.sv-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.sv-field { display: flex; flex-direction: column; gap: 5px; }
+.sv-field-full { grid-column: 1 / -1; }
+.sv-label { font-size: 12px; font-weight: 600; color: #1b4332; }
+.sv-input {
+  padding: 9px 13px;
+  border: 1.5px solid #b7e4c7;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  color: #1b4332;
+  background: white;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  width: 100%;
+}
+.sv-input:focus { border-color: #40916c; }
+.sv-form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+.sv-edit-form { margin-top: 16px; }
+
+/* ── Buttons ── */
+.sv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.sv-btn-primary { background: #1b4332; color: white; }
+.sv-btn-primary:hover { background: #2d6a4f; }
+.sv-btn-primary:disabled { background: #74c69d; cursor: not-allowed; }
+.sv-btn-ghost { background: #e8f5e9; color: #1b4332; border: 1px solid #d8f3dc; }
+.sv-btn-ghost:hover { background: #d8f3dc; }
+.sv-btn-danger { background: #fff0e6; color: #b0391e; border: 1px solid #ffd5c0; }
+.sv-btn-danger:hover { background: #ffd5c0; }
+.sv-btn-sm { padding: 6px 12px; font-size: 12px; }
+.sv-btn-full { width: 100%; justify-content: center; }
+.sv-btn-group { display: flex; gap: 6px; }
+
+/* ── Icon Buttons ── */
+.sv-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid #d8f3dc;
+  background: white;
+  color: #40916c;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sv-icon-btn:hover { background: #e8f5e9; }
+.sv-icon-collect { color: #2d6a4f; border-color: #b7e4c7; }
+.sv-icon-danger { color: #b0391e; border-color: #ffd5c0; }
+.sv-icon-danger:hover { background: #fff0e6; }
+
+/* ── Goals Grid ── */
+.sv-goals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.sv-goal-card {
+  background: #fff;
+  border: 1px solid #e8f5e9;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 6px rgba(27,67,50,0.04);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.sv-goal-card:hover { box-shadow: 0 4px 16px rgba(27,67,50,0.1); transform: translateY(-2px); }
+.sv-goal-achieved { border-color: #52b788; background: #f0faf4; }
+.sv-goal-archived { opacity: 0.65; transform: none !important; box-shadow: none !important; }
+.sv-goal-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.sv-goal-name { font-size: 14px; font-weight: 700; color: #1b4332; flex: 1; }
+.sv-goal-badge { background: #d8f3dc; color: #1b4332; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.sv-badge-archived { background: #e0e0e0; color: #555; }
+.sv-goal-actions { display: flex; gap: 5px; margin-left: 8px; }
+.sv-goal-amounts { display: flex; align-items: baseline; gap: 4px; }
+.sv-goal-current { font-size: 20px; font-weight: 800; color: #2d6a4f; }
+.sv-goal-target { font-size: 13px; color: #74c69d; }
+.sv-goal-footer { display: flex; justify-content: space-between; font-size: 11px; color: #52b788; margin-top: 4px; flex-wrap: wrap; gap: 4px; }
+.sv-goal-pct { font-weight: 700; color: #2d6a4f; }
+.sv-goal-remain { color: #74c69d; }
+.sv-goal-date { color: #aaa; }
+.sv-goal-meta { font-size: 11px; color: #b7e4c7; margin-top: 6px; }
+
+/* ── Archived Section ── */
+.sv-archived-section { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e8f5e9; }
+.sv-archived-title { font-size: 13px; font-weight: 700; color: #52b788; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+
+/* ── Section Cards (Analytics) ── */
+.sv-section-card {
+  background: #fff;
+  border: 1px solid #e8f5e9;
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 6px rgba(27,67,50,0.04);
+}
+.sv-section-card-header { font-size: 15px; font-weight: 700; color: #1b4332; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.sv-alert-count { background: #c0392b; color: white; font-size: 11px; font-weight: 700; border-radius: 10px; padding: 1px 7px; }
+.sv-alert-ok { display: flex; align-items: center; gap: 8px; color: #40916c; font-size: 13px; }
+.sv-alert-item { padding: 11px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+.alert-critical { background: #fde8e8; color: #c0392b; border-left: 4px solid #c0392b; }
+.alert-high { background: #fff3e8; color: #b45309; border-left: 4px solid #f3a835; }
+.alert-medium { background: #fffde8; color: #856404; border-left: 4px solid #f3c835; }
+.alert-low { background: #e8f5e9; color: #2d6a4f; border-left: 4px solid #40916c; }
+.sv-rec-saving { font-size: 11px; margin-top: 3px; opacity: 0.75; }
+
+/* ── Simulator ── */
+.sv-sim-row { display: flex; gap: 10px; align-items: flex-end; }
+.sv-sim-result { margin-top: 14px; padding: 14px; border-radius: 8px; font-size: 13px; }
+.sv-sim-ok { background: #d8f3dc; color: #1b4332; }
+.sv-sim-deny { background: #fde8e8; color: #c0392b; }
+
+/* ── Empty State ── */
+.sv-empty { text-align: center; padding: 52px 20px; color: #74c69d; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 14px; }
+
+/* ── AI Grid ── */
+.sv-ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.sv-ai-full { grid-column: 1 / -1; }
+.sv-ai-card {
+  background: linear-gradient(135deg, #f0faf4, #e8f5e9);
+  border: 1px solid #b7e4c7;
+  border-radius: 14px;
+  padding: 22px;
+}
+.sv-ai-title { font-size: 14px; font-weight: 700; color: #1b4332; margin-bottom: 10px; }
+.sv-ai-meta { font-size: 12px; color: #52b788; margin-bottom: 16px; }
+
+/* ── Goal Predictions ── */
+.sv-prediction-row { padding: 14px 0; border-bottom: 1px solid #d8f3dc; }
+.sv-prediction-row:last-child { border-bottom: none; }
+.sv-prediction-header { display: flex; justify-content: space-between; align-items: center; }
+.sv-prediction-name { font-size: 13px; color: #1b4332; }
+.sv-pred-status { font-size: 10px; font-weight: 700; color: white; padding: 2px 8px; border-radius: 10px; }
+.sv-prediction-stats { display: flex; justify-content: space-between; font-size: 11px; color: #52b788; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.sv-prediction-detail { font-size: 11px; color: #74c69d; margin-top: 4px; }
+
+/* ── Scenarios ── */
+.sv-scenarios { margin-top: 16px; padding-top: 16px; border-top: 1px solid #d8f3dc; }
+.sv-scenarios-title { font-size: 12px; font-weight: 700; color: #1b4332; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.07em; }
+.sv-scenario-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #e8f5e9; color: #2d6a4f; }
+.sv-scenario-row:last-child { border-bottom: none; }
+.sv-scenario-name { font-weight: 700; }
+
+/* ── Smart Plan ── */
+.sv-plan-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #d8f3dc; }
+.sv-plan-row:last-child { border-bottom: none; }
+.sv-plan-month { font-size: 13px; font-weight: 600; color: #1b4332; }
+.sv-plan-note { font-size: 11px; color: #74c69d; margin-top: 2px; }
+.sv-plan-right { text-align: right; }
+.sv-plan-amount { font-size: 14px; font-weight: 700; color: #2d6a4f; }
+.sv-plan-pct { font-size: 11px; color: #52b788; }
+
+/* ── Emergency Fund ── */
+.sv-emergency-score { font-size: 44px; font-weight: 900; text-align: center; line-height: 1; margin: 16px 0 4px; }
+.sv-emergency-unit { font-size: 16px; font-weight: 400; color: #52b788; }
+.sv-protection-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; color: white; margin: 8px auto 16px; display: block; width: fit-content; margin: 6px auto 16px; }
+.sv-emergency-rows { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.sv-emergency-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #d8f3dc; color: #2d6a4f; }
+.sv-emergency-row:last-child { border-bottom: none; }
+
+/* ── Risk Score ── */
+.sv-risk-score-wrap { text-align: center; margin-bottom: 14px; }
+.sv-risk-score { font-size: 44px; font-weight: 900; display: inline-block; }
+.sv-risk-denom { font-size: 18px; font-weight: 400; color: #74c69d; }
+.sv-risk-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; color: white; margin-top: 4px; }
+.sv-risk-warning { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #b45309; padding: 3px 0; }

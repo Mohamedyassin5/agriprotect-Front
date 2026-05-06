@@ -101,16 +101,16 @@
       <p>Add your first cultivation unit above.</p>
     </div>
 
-    <div *ngFor="let crop of crops" class="fo-crop-card glass-panel-compact animate-in">
+    <div *ngFor="let crop of crops" class="fo-crop-card glass-panel-compact animate-in" (click)="openCropDetails(crop)">
       <div class="crop-header">
         <div class="crop-main-info">
           <div class="crop-icon-box">🌿</div>
           <div class="crop-title-group">
             <span class="crop-name">{{ crop.cropType }}</span>
-            <span class="crop-id">ID: {{ crop.id?.substring(0,8) }}</span>
+            <span *ngIf="crop.estimatedValue" class="crop-id" style="color: #2d6a4f; font-weight: 600;">~{{ crop.estimatedValue | number:'1.0-0' }} TND</span>
           </div>
         </div>
-        <button class="delete-btn-subtle" (click)="deleteCrop(crop.id!)">
+        <button class="delete-btn-subtle" (click)="$event.stopPropagation(); deleteCrop(crop.id!)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
       </div>
@@ -148,4 +148,194 @@
       </div>
     </div>
   </div>
+
+  <!-- Crop Details Modal -->
+  <div class="fo-modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+    <div class="fo-modal-card glass-panel animate-modal" (click)="$event.stopPropagation()" *ngIf="selectedCrop">
+      <div class="modal-header">
+        <div class="header-main">
+          <div class="modal-icon">🌿</div>
+          <div class="title-wrap">
+            <h2>{{ selectedCrop.cropType }} Details</h2>
+            <p>Complete cultivation parameters & health monitoring</p>
+          </div>
+        </div>
+        <button class="close-btn" (click)="closeDetailsModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="details-grid">
+          <!-- Col 1: Core Timeline -->
+          <div class="details-section">
+            <h4 class="section-title">Cultivation Timeline</h4>
+            <div class="data-row">
+              <div class="data-item">
+                <span class="label">Start Date</span>
+                <span class="value">{{ selectedCrop.startDate | date:'fullDate' }}</span>
+              </div>
+              <div class="data-item">
+                <span class="label">Projected Harvest</span>
+                <span class="value">{{ selectedCrop.endDate | date:'fullDate' }}</span>
+              </div>
+            </div>
+            <div class="progress-container">
+              <span class="label">Growth Cycle Estimates</span>
+              <div class="cycle-bar">
+                <div class="cycle-fill" style="width: 65%"></div>
+              </div>
+              <span class="hint">Remaining approx. 45 days until projected harvest</span>
+            </div>
+          </div>
+
+          <!-- Col 2: Environment -->
+          <div class="details-section">
+            <h4 class="section-title">Environmental Thresholds</h4>
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <span class="m-label">Humidity Scope</span>
+                <div class="m-range">
+                  <span class="m-limit">{{ selectedCrop.minHumidity }}%</span>
+                  <div class="m-track"><div class="m-optimal" [style.left.%]="selectedCrop.minHumidity" [style.width.%]="selectedCrop.maxHumidity - selectedCrop.minHumidity"></div></div>
+                  <span class="m-limit">{{ selectedCrop.maxHumidity }}%</span>
+                </div>
+                <span class="m-current">Target Optimal: {{ selectedCrop.optimalHumidity }}%</span>
+              </div>
+              <div class="metric-card">
+                <span class="m-label">Temperature Scope</span>
+                <div class="m-range">
+                  <span class="m-limit">{{ selectedCrop.minTemperature }}°C</span>
+                  <div class="m-track"><div class="m-optimal orange" [style.left.%]="(selectedCrop.minTemperature/50)*100" [style.width.%]="((selectedCrop.maxTemperature - selectedCrop.minTemperature)/50)*100"></div></div>
+                  <span class="m-limit">{{ selectedCrop.maxTemperature }}°C</span>
+                </div>
+                <span class="m-current">Current Average: {{ selectedCrop.averageTemperature }}°C</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Live Weather Section -->
+
+        <div class="weather-section glass-panel-inner animate-in mt-4">
+          <div class="weather-header">
+            <span class="weather-icon">🌤️</span>
+            <h4>MÉTÉO EN DIRECT</h4>
+          </div>
+          <div class="weather-grid">
+            <div class="w-item">
+              <span class="w-val">18.5°C</span>
+              <span class="w-label">TEMP.</span>
+            </div>
+            <div class="w-item">
+              <span class="w-val">79%</span>
+              <span class="w-label">HUMIDITÉ</span>
+            </div>
+            <div class="w-item">
+              <span class="w-val">1.8</span>
+              <span class="w-label">VENT KM/H</span>
+            </div>
+            <div class="w-item">
+              <span class="w-val">0mm</span>
+              <span class="w-label">PLUIE</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="technical-footer mt-4">
+          <div class="tech-item">
+            <span class="t-key">Soil Topology</span>
+            <span class="t-val">{{ selectedCrop.typeterres }} Structure</span>
+          </div>
+          <div class="tech-item">
+            <span class="t-key">Surface Coverage</span>
+            <span class="t-val">{{ selectedCrop.surface }} Hectares</span>
+          </div>
+          <div class="tech-item estimate-item">
+            <span class="t-key">AI Estimated Value</span>
+            <div *ngIf="selectedCrop.estimatedValue" class="t-val highlight-value">
+              {{ selectedCrop.estimatedValue | number:'1.2-2' }} TND
+            </div>
+          </div>
+        </div>
+
+        <!-- Premium AI Analysis Button -->
+        <button class="fo-btn fo-btn-ai-premium full-width mt-4" (click)="analyzeRisk(selectedCrop)">
+          <span class="sparkle">✨</span>
+          Analyser les risques via IA
+        </button>
+      </div>
+      
+      <div class="modal-footer">
+
+
+        <button class="fo-btn fo-btn-secondary" (click)="closeDetailsModal()">Close Overview</button>
+        <button class="fo-btn fo-btn-primary" (click)="askAssistant(selectedCrop)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Ask Assistant about this Crop
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Diagnostic Report Modal (as seen in screenshot) -->
+  <div class="fo-modal-overlay ai-report-overlay" *ngIf="showRiskReport" (click)="closeRiskReport()">
+    <div class="ai-report-card animate-modal" (click)="$event.stopPropagation()">
+      <div class="ai-report-header">
+        <div class="ai-badge">
+          <span class="sparkle">✨</span> Intelligence Artificielle
+        </div>
+        <button class="ai-close-btn" (click)="closeRiskReport()">×</button>
+        <h2 class="ai-report-title">Rapport de Diagnostic : {{ selectedCrop?.cropType }}</h2>
+        <p class="ai-report-subtitle">Analyse des conditions climatiques actuelles vs Seuils de sécurité.</p>
+      </div>
+
+      <div class="ai-report-body">
+        <div class="ai-report-grid">
+          <!-- Left: Current Weather -->
+          <div class="ai-weather-column">
+            <h3 class="ai-column-title">Relevé Météo Actuel</h3>
+            
+            <div class="ai-metric-item">
+              <div class="ai-metric-icon temp">🌡️</div>
+              <div class="ai-metric-content">
+                <span class="ai-m-label">TEMPÉRATURE</span>
+                <span class="ai-m-val">18.5°C</span>
+                <span class="ai-m-sub">Seuils: {{ selectedCrop?.minTemperature }}° - {{ selectedCrop?.maxTemperature }}°</span>
+              </div>
+            </div>
+
+            <div class="ai-metric-item">
+              <div class="ai-metric-icon hum">💧</div>
+              <div class="ai-metric-content">
+                <span class="ai-m-label">HUMIDITÉ</span>
+                <span class="ai-m-val">79%</span>
+                <span class="ai-m-sub">Seuils: {{ selectedCrop?.minHumidity }}% - {{ selectedCrop?.maxHumidity }}%</span>
+              </div>
+            </div>
+
+            <div class="ai-metric-item">
+              <div class="ai-metric-icon wind">💨</div>
+              <div class="ai-metric-content">
+                <span class="ai-m-label">VENT & CIEL</span>
+                <span class="ai-m-val">1.8 km/h</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Threats/Status -->
+          <div class="ai-status-column">
+            <h3 class="ai-column-title">Menaces Détectées</h3>
+            
+            <div class="ai-status-result animate-in">
+              <div class="ai-status-icon-shield">🛡️</div>
+              <h4 class="ai-status-title text-success">Conditions Optimales</h4>
+              <p class="ai-status-desc">Aucune menace détectée. Votre culture évolue dans un environnement sécurisé.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+

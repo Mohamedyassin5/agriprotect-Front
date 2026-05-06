@@ -18,7 +18,7 @@ export class TopbarComponent implements OnInit {
   userProfileImage = computed(() => {
     const profile = this.userProfile();
     if (profile?.profileImage) {
-      return `http://localhost:8081/agri/uploads/profiles/${profile.profileImage}`;
+      return `http://localhost:8081/agri/users/images/${profile.profileImage}`;
     }
     return null;
   });

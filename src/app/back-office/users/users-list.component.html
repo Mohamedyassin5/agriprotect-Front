@@ -3,9 +3,19 @@
     <div class="header-text">
       <h1>Users Management</h1>
       <p>Overview of all registered users in the platform</p>
-      
     </div>
     <div class="header-actions">
+      <div class="stats-pills">
+        <span class="stat-pill">
+          <strong>{{ users().length }}</strong> Total
+        </span>
+        <span class="stat-pill active-pill-stat">
+          <strong>{{ activeUsersCount() }}</strong> Active
+        </span>
+        <span class="stat-pill inactive-pill-stat">
+          <strong>{{ inactiveUsersCount() }}</strong> Inactive
+        </span>
+      </div>
       <div class="search-box">
         <i class="feather icon-search"></i>
         <input type="text" placeholder="Search by name or email..." (input)="onSearch($event)">
@@ -23,17 +33,22 @@
         <tr>
           <th>User</th>
           <th>Contact & Address</th>
+          <th>Status</th>
           <th>Trust Score</th>
+          <th>Face ID</th>
           <th>Role</th>
+          <th>Joined</th>
           <th class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of filteredUsers()">
+        <tr *ngFor="let user of filteredUsers()" [class.inactive-row]="user.status !== 'ACTIVE'">
           <td>
             <div class="user-cell">
               <div class="avatar-sm" [style.background]="getTrustColor(user.score || 0) + '22'" [style.color]="getTrustColor(user.score || 0)">
-                {{ getInitials(user) }}
+                <img *ngIf="user.profileImage" [src]="user.profileImage.startsWith('http') ? user.profileImage : '/agri/users/images/' + user.profileImage" 
+                     class="avatar-img" (error)="user.profileImage = ''">
+                <span *ngIf="!user.profileImage">{{ getInitials(user) }}</span>
               </div>
               <div class="user-meta">
                 <span class="full-name">{{ user.firstName }} {{ user.lastName }}</span>
@@ -48,6 +63,12 @@
             </div>
           </td>
           <td>
+            <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.inactive]="user.status !== 'ACTIVE'">
+              <span class="status-dot"></span>
+              {{ user.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>
             <div class="score-cell">
               <div class="score-bar">
                 <div class="score-fill" [style.width]="(user.score || 0) + '%'" [style.background]="getTrustColor(user.score || 0)"></div>
@@ -56,11 +77,29 @@
             </div>
           </td>
           <td>
-            <span class="role-badge">{{ user.role || 'USER' }}</span>
+            <span class="face-badge" [class.enrolled]="user.faceEnabled">
+              <svg *ngIf="user.faceEnabled" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <svg *ngIf="!user.faceEnabled" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              {{ user.faceEnabled ? 'Enrolled' : 'Not set' }}
+            </span>
+          </td>
+          <td>
+            <span class="role-badge" [class.admin-role]="user.role === 'ADMIN'">{{ user.role || 'USER' }}</span>
+          </td>
+          <td>
+            <span class="date-text">{{ user.createdAt | date:'dd MMM yyyy' }}</span>
           </td>
           <td class="actions-col">
-            <button class="btn-icon" title="View Details"><i class="feather icon-eye"></i></button>
-            <button class="btn-icon danger" title="Delete User"><i class="feather icon-trash-2"></i></button>
+            <button class="btn-icon" title="View Details" (click)="openDetail(user)"><i class="feather icon-eye"></i></button>
+            <button 
+              class="btn-icon" 
+              [class.toggle-active]="user.status === 'ACTIVE'" 
+              [class.toggle-inactive]="user.status !== 'ACTIVE'"
+              [title]="user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'"
+              (click)="toggleStatus(user)">
+              <i class="feather" [class.icon-toggle-right]="user.status === 'ACTIVE'" [class.icon-toggle-left]="user.status !== 'ACTIVE'"></i>
+            </button>
+            <button class="btn-icon danger" title="Delete User" (click)="confirmDelete(user)"><i class="feather icon-trash-2"></i></button>
           </td>
         </tr>
       </tbody>
@@ -70,5 +109,90 @@
       <i class="feather icon-users"></i>
       <p>No users found matching your search.</p>
     </div>
+  </div>
+</div>
+
+<!-- Detail Drawer -->
+<div class="drawer-overlay" *ngIf="selectedUser()" (click)="closeDetail()"></div>
+<div class="detail-drawer" [class.open]="selectedUser()">
+  <div class="drawer-header">
+    <h2>User Details</h2>
+    <button class="btn-icon" (click)="closeDetail()">
+      <i class="feather icon-x"></i>
+    </button>
+  </div>
+
+  <div class="drawer-body" *ngIf="selectedUser() as user">
+    <div class="drawer-avatar-section">
+      <div class="drawer-avatar" [style.border-color]="getTrustColor(user.score || 0)">
+        <img *ngIf="user.profileImage" [src]="user.profileImage.startsWith('http') ? user.profileImage : '/agri/users/images/' + user.profileImage" 
+             class="avatar-img" (error)="user.profileImage = ''">
+        <span *ngIf="!user.profileImage">{{ getInitials(user) }}</span>
+      </div>
+      <h3 class="drawer-name">{{ user.firstName }} {{ user.lastName }}</h3>
+      <span class="drawer-email">{{ user.email }}</span>
+      <div class="drawer-badges">
+        <span class="role-badge" [class.admin-role]="user.role === 'ADMIN'">{{ user.role }}</span>
+        <span class="status-badge" [class.active]="user.status === 'ACTIVE'" [class.inactive]="user.status !== 'ACTIVE'">
+          <span class="status-dot"></span>
+          {{ user.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-info-grid">
+      <div class="info-item">
+        <span class="info-label">Phone</span>
+        <span class="info-value">{{ user.phoneNumber || '—' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Address</span>
+        <span class="info-value">{{ user.address || '—' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Trust Score</span>
+        <span class="info-value score-highlight" [style.color]="getTrustColor(user.score || 0)">{{ user.score || 0 }}%</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Face ID</span>
+        <span class="info-value">{{ user.faceEnabled ? '✅ Enrolled' : '❌ Not enrolled' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Member Since</span>
+        <span class="info-value">{{ user.createdAt | date:'dd MMMM yyyy, HH:mm' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Last Updated</span>
+        <span class="info-value">{{ user.updatedAt | date:'dd MMMM yyyy, HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-actions">
+      <button 
+        class="drawer-action-btn"
+        [class.activate-btn]="user.status !== 'ACTIVE'"
+        [class.deactivate-btn]="user.status === 'ACTIVE'"
+        (click)="toggleStatus(user)">
+        {{ user.status === 'ACTIVE' ? 'Deactivate Account' : 'Activate Account' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" *ngIf="userToDelete()" (click)="cancelDelete()"></div>
+<div class="delete-modal" *ngIf="userToDelete()">
+  <div class="modal-icon">
+    <i class="feather icon-alert-triangle"></i>
+  </div>
+  <h3>Delete User</h3>
+  <p>Are you sure you want to delete <strong>{{ userToDelete()?.firstName }} {{ userToDelete()?.lastName }}</strong>? This action cannot be undone.</p>
+  <div class="modal-actions">
+    <button class="modal-btn cancel" (click)="cancelDelete()">Cancel</button>
+    <button class="modal-btn delete" (click)="deleteUser()">Delete</button>
   </div>
 </div>

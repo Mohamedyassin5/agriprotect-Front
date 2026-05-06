@@ -16,7 +16,9 @@ export interface Crop {
   startDate: string;
   endDate: string;
   typeterres: string;
+  estimatedValue?: number;
   createdAt?: string;
+  user?: any;
 }
 
 @Injectable({
@@ -40,5 +42,9 @@ export class CropService {
 
   getAllCrops(): Observable<Crop[]> {
     return this.http.get<Crop[]>(this.apiUrl);
+  }
+
+  estimateCropValue(id: string): Observable<Crop> {
+    return this.http.post<Crop>(`${this.apiUrl}/${id}/estimate-value`, {});
   }
 }

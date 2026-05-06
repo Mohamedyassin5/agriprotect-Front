@@ -1,0 +1,229 @@
+<div class="fo-page animate-in">
+
+  <div class="fo-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+    <div>
+      <h1 class="fo-page-title">Déclarer un Sinistre</h1>
+      <p class="fo-page-subtitle">Soumettez une déclaration officielle suite à un incident sur l'une de vos cultures.</p>
+    </div>
+    <button class="btn-action btn-outline" (click)="openHistoryModal()">
+      <span class="btn-icon">📁</span>
+      Historique des Sinistres
+    </button>
+  </div>
+
+  <div *ngIf="loadingCrops" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de vos cultures...</p>
+  </div>
+
+  <div *ngIf="!loadingCrops && myCrops.length === 0" class="empty-state">
+    <div class="empty-icon">🌾</div>
+    <h4>Aucune culture disponible</h4>
+    <p>Vous devez d'abord ajouter une culture avant de pouvoir déclarer un sinistre.</p>
+  </div>
+
+  <div *ngIf="!loadingCrops && myCrops.length > 0" class="premium-layout">
+    
+    <!-- LEFT COLUMN: AI Info & Tips -->
+    <div class="info-column">
+      <div class="ai-transparency-card">
+        <div class="ai-card-header">
+          <div class="ai-icon-large">🤖</div>
+          <h3>L'Intelligence Artificielle à votre service</h3>
+        </div>
+        <p class="ai-card-desc">Notre IA experte AgriVision analyse vos réclamations en temps réel pour une prise en charge accélérée.</p>
+        
+        <div class="ai-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Analyse Visuelle Instantanée</strong>
+            <p>L'IA scrute votre photo pour détecter le type et la gravité des dommages.</p>
+          </div>
+        </div>
+        <div class="ai-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Évaluation du Quota</strong>
+            <p>Calcul automatique de la perte basée sur la surface et les données historiques.</p>
+          </div>
+        </div>
+        <div class="ai-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Auto-Validation</strong>
+            <p>Si la réclamation est approuvée par l'IA, le sinistre est officiellement acté sans attente.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tips-card">
+        <h4>💡 Conseils pour la photo</h4>
+        <ul>
+          <li>Prenez la photo de jour avec une bonne luminosité.</li>
+          <li>Assurez-vous que les dommages (feuilles, sol, fruits) soient bien visibles et nets.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: The Form -->
+    <div class="form-column">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon">🚨</div>
+          <div>
+            <h3>Dossier de Déclaration</h3>
+            <p>Remplissez les informations ci-dessous avec précision.</p>
+          </div>
+        </div>
+
+        <div class="form-body">
+          <div class="input-group">
+            <label>Culture concernée *</label>
+            <select [(ngModel)]="selectedCropId" class="clean-input">
+              <option value="" disabled selected>-- Sélectionnez la culture affectée --</option>
+              <option *ngFor="let crop of myCrops" [value]="crop.id">
+                {{ crop.cropType }} ({{ crop.surface }} ha)
+              </option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Date exacte de la catastrophe *</label>
+            <input type="date" [(ngModel)]="claimDate" class="clean-input">
+          </div>
+          
+          <div class="input-group">
+            <label>Description détaillée des dégâts</label>
+            <textarea [(ngModel)]="claimDescription" class="clean-input" rows="4" placeholder="Ex: Suite aux fortes grêles de la nuit dernière, la majorité des tiges sont cassées..."></textarea>
+          </div>
+
+          <div class="input-group">
+            <label>Preuve visuelle (Photo du champ) *</label>
+            <div class="file-dropzone">
+              <div class="drop-icon">📸</div>
+              <span class="drop-text">Cliquez ou glissez une image ici</span>
+              <input type="file" (change)="onFileSelected($event)" class="hidden-file-input" accept="image/*">
+            </div>
+            <div class="file-selected-name" *ngIf="selectedFile">Fichier sélectionné : {{ selectedFile.name }}</div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-submit-premium" (click)="submitSinistre()" [disabled]="isSubmittingClaim || !selectedFile || !selectedCropId">
+              {{ isSubmittingClaim ? 'Analyse en cours...' : '🚀 Soumettre à l\'IA' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= RESULT MODAL ================= -->
+<div class="modal-backdrop" *ngIf="showResultModal && sinistreResult">
+  <div class="premium-modal modal-md">
+    <div class="modal-inner">
+      
+      <div class="modal-top" [ngClass]="sinistreResult.statut === 'VALIDE' ? 'banner-emerald' : 'banner-indigo'">
+        <div class="top-content">
+          <span class="ai-pill" [ngClass]="sinistreResult.statut === 'VALIDE' ? 'success-pill' : ''">✅ Décision IA Instantanée</span>
+          <h2>Résultat du Traitement</h2>
+          <p>Le statut de votre dossier est : <strong>{{ sinistreResult.statut }}</strong></p>
+        </div>
+        <button class="btn-close-white" (click)="closeResultModal()">✕</button>
+      </div>
+
+      <div class="modal-body-pad">
+        
+        <div class="result-highlight" *ngIf="sinistreResult.quotaRemboursement !== undefined">
+          <div class="result-score">
+            <span class="rs-label">Quota Alloué</span>
+            <span class="rs-value" [class.success-text]="sinistreResult.quotaRemboursement > 0">{{ (sinistreResult.quotaRemboursement * 100).toFixed(0) }}%</span>
+          </div>
+          <div class="result-details">
+            <span class="rd-label">Diagnostic de l'Intelligence Artificielle :</span>
+            <p class="rd-text">{{ sinistreResult.description }}</p>
+          </div>
+        </div>
+
+        <div class="result-notice" *ngIf="sinistreResult.statut === 'VALIDE'">
+          <span class="rn-icon">💡</span>
+          <p>Ce sinistre est validé. Vous pouvez désormais vous rendre dans la rubrique <strong>Mes Réclamations</strong> pour demander une indemnisation financière.</p>
+        </div>
+
+        <div class="result-notice notice-danger" *ngIf="sinistreResult.statut !== 'VALIDE'">
+          <span class="rn-icon">⚠️</span>
+          <p>Ce sinistre n'a pas été validé par l'IA. Vous pouvez éventuellement déposer une contestation dans vos réclamations.</p>
+        </div>
+
+      </div>
+
+      <div class="modal-bottom">
+        <button class="btn-action btn-dark w-full" (click)="closeResultModal()">Terminer</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= HISTORY MODAL ================= -->
+<div class="modal-backdrop" *ngIf="showHistoryModal">
+  <div class="premium-modal modal-xl">
+    <div class="modal-inner">
+      
+      <div class="modal-top banner-indigo">
+        <div class="top-content">
+          <span class="ai-pill">Archives</span>
+          <h2>Historique de vos Sinistres</h2>
+          <p>Retrouvez toutes vos déclarations passées et les décisions de l'IA.</p>
+        </div>
+        <button class="btn-close-white" (click)="closeHistoryModal()">✕</button>
+      </div>
+
+      <div class="modal-body-pad" style="background: #f8fafc;">
+        <div *ngIf="isLoadingHistory" style="text-align: center; padding: 40px; color: #64748b; font-weight: 700;">
+          ⏳ Chargement de l'historique...
+        </div>
+        
+        <div *ngIf="!isLoadingHistory && claimHistory.length === 0" style="text-align: center; padding: 60px; color: #94a3b8;">
+          <div style="font-size: 3rem; margin-bottom: 10px;">📁</div>
+          <p style="font-size: 1.1rem; font-weight: 700;">Aucun sinistre déclaré pour le moment.</p>
+        </div>
+
+        <div class="history-grid" *ngIf="!isLoadingHistory && claimHistory.length > 0" style="display: grid; gap: 20px;">
+          <div class="history-card" *ngFor="let claim of claimHistory" style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+            
+            <div class="hc-header" [ngClass]="claim.statut === 'VALIDE' ? 'bg-emerald-light' : 'bg-slate-light'" style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+              <div class="hc-title" style="display: flex; gap: 10px; align-items: baseline;">
+                <strong style="font-size: 1.1rem; color: #0f172a;">{{ claim.cropType }}</strong>
+                <span class="hc-date" style="font-size: 0.8rem; color: #64748b;">{{ claim.dateCatastrophe | date:'dd MMM yyyy' }}</span>
+              </div>
+              <span class="status-badge" [ngClass]="claim.statut === 'VALIDE' ? 'badge-success' : 'badge-pending'">
+                {{ claim.statut }}
+              </span>
+            </div>
+            
+            <div class="hc-body" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+              <div class="hc-row" style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0;">
+                <span style="color: #64748b; font-size: 0.9rem; font-weight: 700; text-transform: uppercase;">Type détecté</span>
+                <strong style="color: #0f172a;">{{ claim.typeSinistre }}</strong>
+              </div>
+              <div class="hc-row" style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0;">
+                <span style="color: #64748b; font-size: 0.9rem; font-weight: 700; text-transform: uppercase;">Quota Alloué</span>
+                <strong [ngStyle]="{'color': claim.quotaRemboursement > 0 ? '#10b981' : '#0f172a'}" style="font-size: 1.2rem;">
+                  {{ (claim.quotaRemboursement * 100).toFixed(0) }}%
+                </strong>
+              </div>
+              <div class="hc-log" style="background: #1e293b; padding: 15px; border-radius: 12px; margin-top: 5px;">
+                <small style="color: #cbd5e1; display: block; margin-bottom: 8px; font-weight: 700;">Journal IA :</small>
+                <pre style="margin: 0; color: #a5b4fc; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; line-height: 1.5;">{{ claim.description }}</pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

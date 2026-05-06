@@ -1,16 +1,25 @@
 /* Premium Sidebar Styles */
-.navbar-wrapper {
-    background: #1b4332 !important; /* Deep Forest Green */
+.navbar-wrapper, 
+.navbar-content,
+:host,
+:host ::ng-deep .pcoded-navbar {
+    background: #1b4332 !important; /* Deep Forest Green - Total Sidebar */
     box-shadow: 4px 0 25px rgba(0, 0, 0, 0.05);
+    border: none !important;
+}
+
+.navbar-content {
+    background: #1b4332 !important;
 }
 
 .pcoded-inner-navbar {
     padding-top: 20px !important;
+    background: #1b4332 !important;
 }
 
 .pcoded-inner-navbar li > a {
     color: rgba(255, 255, 255, 0.7) !important;
-    font-size: 14px !important;
+    font-size: 15px !important;
     font-weight: 500 !important;
     padding: 12px 25px !important;
     margin: 4px 12px !important;
@@ -31,19 +40,20 @@
 
 .pcoded-inner-navbar li.pcoded-menu-caption {
     padding: 25px 30px 10px !important;
+    background: #1b4332 !important;
 }
 
 .pcoded-inner-navbar li.pcoded-menu-caption label {
     color: rgba(255, 255, 255, 0.4) !important;
     font-family: 'DM Mono', monospace !important;
-    font-size: 11px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
     letter-spacing: 0.15em !important;
     text-transform: uppercase !important;
 }
 
 .pcoded-micon {
-    font-size: 18px !important;
+    font-size: 20px !important;
     margin-right: 15px !important;
     transition: transform 0.3s ease !important;
 }
@@ -55,19 +65,27 @@
 /* User Profile Section in Sidebar */
 .main-menu-header {
     padding: 25px 20px !important;
-    background: rgba(0, 0, 0, 0.1) !important; /* Slightly distinct but flush */
+    background: #153125 !important; /* Slightly darker green for depth */
 }
 
 .user-details span {
     color: #ffffff !important;
     font-weight: 600 !important;
-    font-size: 15px !important;
+    font-size: 16px !important;
     display: block;
 }
 
 .user-email-label {
     color: rgba(255, 255, 255, 0.4) !important;
-    font-size: 11px !important;
+    font-size: 13px !important;
     font-weight: 400 !important;
     margin-top: 2px;
+}
+
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.text-danger {
+    color: #ff6b6b !important;
 }

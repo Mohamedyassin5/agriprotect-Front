@@ -1,0 +1,666 @@
+<div class="ac-page">
+
+  <!-- ── Page Header ── -->
+  <div class="ac-header">
+    <div>
+      <h1 class="ac-title">Budget & Comptabilité</h1>
+      <p class="ac-subtitle">Écritures, budgets et analyses financières de votre exploitation</p>
+    </div>
+  </div>
+
+  <!-- ── Tab Bar ── -->
+  <div class="ac-tabs">
+    <button class="ac-tab" [class.active]="activeTab==='ecritures'" (click)="setTab('ecritures')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Écritures
+    </button>
+    <button class="ac-tab" [class.active]="activeTab==='budgets'" (click)="setTab('budgets')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Budgets
+    </button>
+    <button class="ac-tab" [class.active]="activeTab==='analytiques'" (click)="setTab('analytiques')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytiques
+    </button>
+    <button class="ac-tab" [class.active]="activeTab==='ia'" (click)="setTab('ia')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      IA
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB : ÉCRITURES
+  ══════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'ecritures'">
+
+    <!-- KPI Strip — Toutes -->
+    <div class="kpi-strip" *ngIf="entries.length > 0 && !entryFilter.type">
+      <div class="kpi-card kpi-income">
+        <div class="kpi-label">Total Revenus</div>
+        <div class="kpi-value">+{{ totalIncome | number:'1.0-0' }} TND</div>
+        <div class="kpi-count">{{ entries.length }} écriture(s)</div>
+      </div>
+      <div class="kpi-card kpi-expense">
+        <div class="kpi-label">Total Dépenses</div>
+        <div class="kpi-value">-{{ totalExpense | number:'1.0-0' }} TND</div>
+      </div>
+      <div class="kpi-card" [class.kpi-net-positive]="netResult >= 0" [class.kpi-net-negative]="netResult < 0">
+        <div class="kpi-label">Résultat Net</div>
+        <div class="kpi-value">{{ netResult >= 0 ? '+' : '' }}{{ netResult | number:'1.0-0' }} TND</div>
+      </div>
+      <div class="kpi-card kpi-neutral">
+        <div class="kpi-label">Opérations</div>
+        <div class="kpi-value">{{ entries.length }}</div>
+      </div>
+    </div>
+
+    <!-- KPI Strip — Revenus uniquement -->
+    <div class="kpi-strip" *ngIf="entries.length > 0 && entryFilter.type === 'INCOME'">
+      <div class="kpi-card kpi-income">
+        <div class="kpi-label">Total Revenus</div>
+        <div class="kpi-value">+{{ totalIncome | number:'1.0-0' }} TND</div>
+        <div class="kpi-count">{{ entries.length }} entrée(s)</div>
+      </div>
+      <div class="kpi-card kpi-income">
+        <div class="kpi-label">Revenu Moyen</div>
+        <div class="kpi-value">{{ avgEntryAmount | number:'1.0-0' }} TND</div>
+      </div>
+      <div class="kpi-card kpi-income">
+        <div class="kpi-label">Plus Grande Vente</div>
+        <div class="kpi-value">{{ maxEntryAmount | number:'1.0-0' }} TND</div>
+      </div>
+      <div class="kpi-card kpi-income">
+        <div class="kpi-label">Plus Petite Vente</div>
+        <div class="kpi-value">{{ minEntryAmount | number:'1.0-0' }} TND</div>
+      </div>
+    </div>
+
+    <!-- KPI Strip — Dépenses uniquement -->
+    <div class="kpi-strip" *ngIf="entries.length > 0 && entryFilter.type === 'EXPENSE'">
+      <div class="kpi-card kpi-expense">
+        <div class="kpi-label">Total Dépenses</div>
+        <div class="kpi-value">-{{ totalExpense | number:'1.0-0' }} TND</div>
+        <div class="kpi-count">{{ entries.length }} dépense(s)</div>
+      </div>
+      <div class="kpi-card kpi-expense">
+        <div class="kpi-label">Dépense Moyenne</div>
+        <div class="kpi-value">{{ avgEntryAmount | number:'1.0-0' }} TND</div>
+      </div>
+      <div class="kpi-card kpi-expense">
+        <div class="kpi-label">Plus Grosse Dépense</div>
+        <div class="kpi-value">{{ maxEntryAmount | number:'1.0-0' }} TND</div>
+      </div>
+      <div class="kpi-card kpi-expense">
+        <div class="kpi-label">Plus Petite Dépense</div>
+        <div class="kpi-value">{{ minEntryAmount | number:'1.0-0' }} TND</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="ac-toolbar">
+      <div class="filter-pills">
+        <button class="pill" [class.active]="!entryFilter.type" (click)="applyEntryFilter()">Toutes</button>
+        <button class="pill pill-income" [class.active]="entryFilter.type==='INCOME'" (click)="applyEntryFilter('INCOME')">↑ Revenus</button>
+        <button class="pill pill-expense" [class.active]="entryFilter.type==='EXPENSE'" (click)="applyEntryFilter('EXPENSE')">↓ Dépenses</button>
+      </div>
+      <button class="btn-add" (click)="showEntryForm = !showEntryForm; editingEntryId=null; entryForm.reset({entryType:'INCOME',category:'SALES'})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle écriture
+      </button>
+    </div>
+
+    <!-- Entry Form Panel -->
+    <div class="form-panel" *ngIf="showEntryForm">
+      <div class="form-panel-header">
+        <span>{{ editingEntryId ? 'Modifier l\'écriture' : 'Nouvelle écriture' }}</span>
+        <button class="btn-icon-close" (click)="cancelEntryForm()">✕</button>
+      </div>
+      <form [formGroup]="entryForm" (ngSubmit)="submitEntry()" class="form-grid">
+        <div class="field-group">
+          <label class="field-label">Type</label>
+          <select class="field-input" formControlName="entryType">
+            <option value="INCOME">Revenu</option>
+            <option value="EXPENSE">Dépense</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Catégorie</label>
+          <select class="field-input" formControlName="category">
+            <option *ngFor="let cat of categories" [value]="cat">{{ getCategoryLabel(cat) }}</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Montant (TND)</label>
+          <input class="field-input" type="number" formControlName="amount" placeholder="0.00">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date</label>
+          <input class="field-input" type="date" formControlName="entryDate">
+        </div>
+        <div class="field-group field-full">
+          <label class="field-label">Description</label>
+          <input class="field-input" formControlName="description" placeholder="Ex: Vente 500 kg d'olives">
+        </div>
+        <div class="form-actions field-full">
+          <button type="button" class="btn-ghost" (click)="cancelEntryForm()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="entryForm.invalid">
+            {{ editingEntryId ? 'Enregistrer' : 'Ajouter' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" *ngIf="entriesError">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      {{ entriesError }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-row" *ngIf="entriesLoading">
+      <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+    </div>
+
+    <!-- Entries Table -->
+    <div class="data-table-wrap" *ngIf="!entriesLoading && entries.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Catégorie</th>
+            <th>Description</th>
+            <th class="col-right">Montant</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of entries" class="data-row">
+            <td class="col-date">{{ entry.entryDate | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="type-tag" [class.tag-income]="entry.entryType==='INCOME'" [class.tag-expense]="entry.entryType==='EXPENSE'">
+                {{ entry.entryType === 'INCOME' ? '↑ Revenu' : '↓ Dépense' }}
+              </span>
+            </td>
+            <td><span class="cat-tag">{{ getCategoryLabel(entry.category) }}</span></td>
+            <td class="col-desc">{{ entry.description }}</td>
+            <td class="col-right col-amount" [class.amount-pos]="entry.entryType==='INCOME'" [class.amount-neg]="entry.entryType==='EXPENSE'">
+              {{ entry.entryType === 'INCOME' ? '+' : '-' }}{{ entry.amount | number:'1.2-2' }}
+            </td>
+            <td class="col-actions">
+              <button class="row-btn" (click)="editEntry(entry)">✏️</button>
+              <button class="row-btn row-btn-del" (click)="deleteEntry(entry.id)">🗑</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!entriesLoading && !entriesError && entries.length === 0">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">Aucune écriture</div>
+      <div class="empty-sub">Ajoutez vos revenus et dépenses pour commencer le suivi.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB : BUDGETS
+  ══════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'budgets'">
+
+    <!-- Toolbar -->
+    <div class="ac-toolbar">
+      <div>
+        <span class="section-label">{{ budgets.length }} budget(s)</span>
+        <span *ngIf="budgets.length > 0" class="section-sub"> · Total prévu: {{ totalBudgeted | number:'1.0-0' }} TND</span>
+      </div>
+      <button class="btn-add" (click)="showBudgetForm = !showBudgetForm; cancelBudgetForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau budget
+      </button>
+    </div>
+
+    <!-- Budget Form Panel -->
+    <div class="form-panel" *ngIf="showBudgetForm">
+      <div class="form-panel-header">
+        <span>{{ editingBudgetId ? 'Modifier le budget' : 'Créer un budget' }}</span>
+        <button class="btn-icon-close" (click)="cancelBudgetForm()">✕</button>
+      </div>
+      <form [formGroup]="budgetForm" (ngSubmit)="submitBudget()" class="form-grid">
+        <div class="field-group">
+          <label class="field-label">Période</label>
+          <select class="field-input" formControlName="periodType">
+            <option value="MONTHLY">Mensuel</option>
+            <option value="SEASONAL">Saisonnier</option>
+            <option value="YEARLY">Annuel</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Catégorie</label>
+          <select class="field-input" formControlName="category">
+            <option *ngFor="let cat of categories" [value]="cat">{{ getCategoryLabel(cat) }}</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Début</label>
+          <input class="field-input" type="date" formControlName="periodStart">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Fin</label>
+          <input class="field-input" type="date" formControlName="periodEnd">
+        </div>
+        <div class="field-group field-full">
+          <label class="field-label">Montant prévu (TND)</label>
+          <input class="field-input" type="number" formControlName="plannedAmount" placeholder="0">
+        </div>
+        <div class="form-actions field-full">
+          <button type="button" class="btn-ghost" (click)="cancelBudgetForm()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="budgetForm.invalid">
+            {{ editingBudgetId ? 'Enregistrer' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" *ngIf="budgetsError">{{ budgetsError }}</div>
+    <div class="loading-row" *ngIf="budgetsLoading">
+      <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+    </div>
+
+    <!-- Budget Cards Grid -->
+    <div class="budget-grid" *ngIf="!budgetsLoading && budgets.length > 0">
+      <div class="budget-card" *ngFor="let b of budgets">
+        <div class="budget-card-top">
+          <div>
+            <div class="budget-cat">{{ getCategoryLabel(b.category) }}</div>
+            <div class="budget-period-badge">{{ getPeriodLabel(b.periodType) }}</div>
+          </div>
+          <div class="budget-card-actions">
+            <button class="row-btn" (click)="editBudget(b)">✏️</button>
+            <button class="row-btn row-btn-del" (click)="deleteBudget(b.id)">🗑</button>
+          </div>
+        </div>
+        <div class="budget-amount">{{ b.plannedAmount | number:'1.0-0' }} <span class="budget-currency">TND</span></div>
+        <div class="budget-dates">{{ b.periodStart | date:'dd/MM/yy' }} → {{ b.periodEnd | date:'dd/MM/yy' }}</div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!budgetsLoading && !budgetsError && budgets.length === 0">
+      <div class="empty-icon">💼</div>
+      <div class="empty-title">Aucun budget défini</div>
+      <div class="empty-sub">Créez des budgets pour contrôler vos dépenses par catégorie.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB : ANALYTIQUES
+  ══════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'analytiques'">
+
+    <!-- Date Range Picker -->
+    <div class="date-range-bar">
+      <div class="field-inline">
+        <label class="field-label">Du</label>
+        <input class="field-input-sm" type="date" [(ngModel)]="analyticsFrom">
+      </div>
+      <div class="field-inline">
+        <label class="field-label">Au</label>
+        <input class="field-input-sm" type="date" [(ngModel)]="analyticsTo">
+      </div>
+      <button class="btn-primary btn-sm" (click)="loadAnalytics()">Actualiser</button>
+    </div>
+
+    <div class="loading-row" *ngIf="analyticsLoading">
+      <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+    </div>
+
+    <div *ngIf="!analyticsLoading">
+
+      <!-- Summary KPIs -->
+      <div class="kpi-strip" *ngIf="summary">
+        <div class="kpi-card kpi-income">
+          <div class="kpi-label">Revenus</div>
+          <div class="kpi-value">{{ summary.totalIncome | number:'1.0-0' }} TND</div>
+          <div class="kpi-sub">{{ summary.incomeTransactionCount }} opérations</div>
+        </div>
+        <div class="kpi-card kpi-expense">
+          <div class="kpi-label">Dépenses</div>
+          <div class="kpi-value">{{ summary.totalExpenses | number:'1.0-0' }} TND</div>
+          <div class="kpi-sub">{{ summary.expenseTransactionCount }} opérations</div>
+        </div>
+        <div class="kpi-card" [class.kpi-net-positive]="summary.netIncome >= 0" [class.kpi-net-negative]="summary.netIncome < 0">
+          <div class="kpi-label">Revenu Net</div>
+          <div class="kpi-value">{{ summary.netIncome >= 0 ? '+' : '' }}{{ summary.netIncome | number:'1.0-0' }} TND</div>
+        </div>
+      </div>
+
+      <!-- Budget vs Réel -->
+      <div class="section-card" *ngIf="budgetVsActual">
+        <div class="section-card-header">
+          <span class="section-card-title">⚖️ Budget vs Réel</span>
+          <div class="section-card-meta">
+            Total budgété: <strong>{{ budgetVsActual.totalBudgeted | number:'1.0-0' }} TND</strong> ·
+            Réel: <strong>{{ budgetVsActual.totalActual | number:'1.0-0' }} TND</strong>
+          </div>
+        </div>
+        <table class="data-table" *ngIf="budgetVsActual.comparisons?.length">
+          <thead>
+            <tr><th>Catégorie</th><th class="col-right">Budget</th><th class="col-right">Réel</th><th>Utilisation</th><th>Statut</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of budgetVsActual.comparisons" class="data-row">
+              <td><strong>{{ getCategoryLabel(c.category) }}</strong></td>
+              <td class="col-right">{{ c.budgetedAmount | number:'1.0-0' }}</td>
+              <td class="col-right">{{ c.actualAmount | number:'1.0-0' }}</td>
+              <td>
+                <div class="inline-progress">
+                  <div class="mini-track">
+                    <div class="mini-fill"
+                      [style.width.%]="c.percentageUsed > 100 ? 100 : c.percentageUsed"
+                      [style.background]="c.percentageUsed > 100 ? '#c0392b' : c.percentageUsed > 80 ? '#e07b39' : '#40916c'">
+                    </div>
+                  </div>
+                  <span class="progress-pct">{{ c.percentageUsed | number:'1.0-0' }}%</span>
+                </div>
+              </td>
+              <td><span [class]="getStatusClass(c.status)" class="status-tag">{{ c.status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Spending Breakdown -->
+      <div class="section-card" *ngIf="spendingBreakdown">
+        <div class="section-card-header">
+          <span class="section-card-title">🥧 Répartition des dépenses</span>
+          <span class="section-card-meta">Total: {{ spendingBreakdown.totalExpenses | number:'1.0-0' }} TND</span>
+        </div>
+        <div class="breakdown-list">
+          <div *ngFor="let b of spendingBreakdown.breakdown" class="breakdown-row">
+            <span class="breakdown-cat">{{ getCategoryLabel(b.category) }}</span>
+            <div class="mini-track breakdown-track">
+              <div class="mini-fill" [style.width.%]="b.percentage" style="background:#40916c"></div>
+            </div>
+            <span class="breakdown-val">{{ b.amount | number:'1.0-0' }} TND</span>
+            <span class="breakdown-pct">{{ b.percentage | number:'1.0-0' }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cashflow Forecast -->
+      <div class="section-card" *ngIf="cashflowForecast">
+        <div class="section-card-header">
+          <span class="section-card-title">📈 Prévision de trésorerie</span>
+          <span class="section-card-meta">Rev. moy: {{ cashflowForecast.averageMonthlyIncome | number:'1.0-0' }} TND · Dép. moy: {{ cashflowForecast.averageMonthlyExpenses | number:'1.0-0' }} TND</span>
+        </div>
+        <table class="data-table" *ngIf="cashflowForecast.forecasts?.length">
+          <thead><tr><th>Mois</th><th class="col-right">Rev. prévis.</th><th class="col-right">Dép. prévis.</th><th class="col-right">Net</th><th class="col-right">Cumul</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let f of cashflowForecast.forecasts" class="data-row">
+              <td>{{ f.month }}</td>
+              <td class="col-right amount-pos">{{ f.projectedIncome | number:'1.0-0' }}</td>
+              <td class="col-right amount-neg">{{ f.projectedExpenses | number:'1.0-0' }}</td>
+              <td class="col-right" [class.amount-pos]="f.projectedNetCashflow >= 0" [class.amount-neg]="f.projectedNetCashflow < 0">{{ f.projectedNetCashflow | number:'1.0-0' }}</td>
+              <td class="col-right" [class.amount-pos]="f.cumulativeCashflow >= 0" [class.amount-neg]="f.cumulativeCashflow < 0">{{ f.cumulativeCashflow | number:'1.0-0' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Overspending Alerts -->
+      <div class="section-card" *ngIf="overspendingAlerts">
+        <div class="section-card-header">
+          <span class="section-card-title">🚨 Dépassements de budget</span>
+          <span class="section-card-meta">{{ overspendingAlerts.totalAlertsCount || 0 }} alerte(s)</span>
+        </div>
+        <div class="alert-ok" *ngIf="overspendingAlerts.totalAlertsCount === 0">✅ Aucune catégorie ne dépasse son budget.</div>
+        <div class="alert-row alert-high" *ngFor="let a of overspendingAlerts.alerts">
+          <strong>{{ getCategoryLabel(a.category) }}</strong>
+          <span>Budget: {{ a.budgetedAmount | number:'1.0-0' }} TND · Réel: {{ a.actualAmount | number:'1.0-0' }} TND</span>
+          <span class="alert-delta">+{{ a.overspending | number:'1.0-0' }} TND (+{{ a.percentageOver | number:'1.0-0' }}%)</span>
+        </div>
+      </div>
+
+      <!-- Anomalies -->
+      <div class="section-card" *ngIf="anomalies">
+        <div class="section-card-header">
+          <span class="section-card-title">🔍 Transactions inhabituelles</span>
+          <span class="section-card-meta">{{ anomalies.totalAnomaliesCount || 0 }} détectée(s)</span>
+        </div>
+        <div class="alert-ok" *ngIf="anomalies.totalAnomaliesCount === 0">✅ Aucune anomalie détectée.</div>
+        <div class="alert-row alert-medium" *ngFor="let a of anomalies.anomalies">
+          <strong>{{ getCategoryLabel(a.category) }}</strong> · {{ a.entryDate | date:'dd/MM/yyyy' }}
+          <span class="amount-neg">{{ a.amount | number:'1.0-0' }} TND</span>
+          <span class="alert-sub">moy. {{ a.averageAmount | number:'1.0-0' }} · +{{ a.deviationPercentage | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB : IA
+  ══════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'ia'">
+    <div class="loading-row" *ngIf="aiLoading">
+      <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+    </div>
+
+    <div *ngIf="!aiLoading">
+      <div class="ai-grid">
+
+        <!-- ML Financial Risk Prediction (Notebook Module 2) -->
+        <div class="ai-card ai-card-wide">
+          <div class="ai-card-title">🤖 Prédiction du Risque Financier (IA Notebook)</div>
+          <p style="font-size:12px;color:#6b7280;margin-bottom:12px">
+            Modèle ML entraîné sur les données AgriRiskFin — prédit votre niveau de risque financier (Low / Medium / High).
+          </p>
+          <button class="btn-ghost btn-sm" style="margin-bottom:12px" (click)="autoFillRiskForm()" [disabled]="totalIncome===0 && totalExpense===0">
+            ↩ Pré-remplir depuis mes écritures
+          </button>
+          <form [formGroup]="mlRiskForm" (ngSubmit)="runMLRiskPrediction()" class="form-grid">
+            <div class="field-group">
+              <label class="field-label">Revenus annuels (TND)</label>
+              <input class="field-input" type="number" formControlName="revenue" placeholder="Ex: 25000">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Dépenses annuelles (TND)</label>
+              <input class="field-input" type="number" formControlName="expenses" placeholder="Ex: 18000">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Bénéfice net (TND)</label>
+              <input class="field-input" type="number" formControlName="netProfit" placeholder="Ex: 7000">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Ratio dette / fonds propres</label>
+              <input class="field-input" type="number" step="0.1" formControlName="debtToEquity" placeholder="0.5">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Température moy. (°C)</label>
+              <input class="field-input" type="number" formControlName="avgTemperature" placeholder="28">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Précipitations (mm/an)</label>
+              <input class="field-input" type="number" formControlName="rainfall" placeholder="400">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Indice de sécheresse (0–10)</label>
+              <input class="field-input" type="number" step="0.1" formControlName="droughtIndex" placeholder="3">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Score risque inondation (0–10)</label>
+              <input class="field-input" type="number" step="0.1" formControlName="floodRiskScore" placeholder="2">
+            </div>
+            <div class="form-actions field-full">
+              <button type="submit" class="btn-primary" [disabled]="mlRiskForm.invalid || mlRiskLoading">
+                {{ mlRiskLoading ? 'Analyse en cours…' : '🔍 Prédire le risque financier' }}
+              </button>
+            </div>
+          </form>
+          <div class="error-banner" *ngIf="mlRiskError" style="margin-top:12px">{{ mlRiskError }}</div>
+          <div *ngIf="mlRiskResult" style="margin-top:16px">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+              <div style="font-size:32px;font-weight:700;" [style.color]="mlRiskResult.alertColor">
+                {{ mlRiskResult.riskLevel }}
+              </div>
+              <div>
+                <div style="font-size:13px;color:#6b7280">Confiance du modèle</div>
+                <div style="font-size:20px;font-weight:600" [style.color]="mlRiskResult.alertColor">
+                  {{ mlRiskResult.confidence }}%
+                </div>
+              </div>
+            </div>
+            <div class="alert-row" [style.border-left-color]="mlRiskResult.alertColor" style="border-left:4px solid;padding:10px 12px;background:#f9fafb;border-radius:6px;font-size:13px;margin-bottom:12px">
+              {{ mlRiskResult.interpretation }}
+            </div>
+            <div *ngIf="mlRiskResult.probabilities" style="display:flex;gap:8px;flex-wrap:wrap">
+              <div *ngFor="let entry of mlRiskResult.probabilities | keyvalue"
+                   style="background:#f3f4f6;border-radius:6px;padding:6px 12px;font-size:12px">
+                <span style="font-weight:600">{{ entry.key }}</span>: {{ entry.value }}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health Score -->
+        <div class="ai-card" *ngIf="healthScore">
+          <div class="ai-card-title">🏥 Score de Santé Financière</div>
+          <div class="health-ring-wrap">
+            <div class="health-score" [style.color]="getHealthColor(healthScore.overallScore)">{{ healthScore.overallScore }}</div>
+            <div class="health-label">/ 100</div>
+            <span class="health-badge" [style.background]="getHealthColor(healthScore.overallScore)">{{ healthScore.healthLevel }}</span>
+          </div>
+          <div class="metric-list">
+            <div *ngFor="let key of ['expenseRatio','incomeRegularity','diversification','savingsRate','trendScore']">
+              <div class="metric-row" *ngIf="healthScore[key]">
+                <span class="metric-name">{{ healthScore[key].name }}</span>
+                <div class="metric-right">
+                  <div class="mini-track" style="width:80px">
+                    <div class="mini-fill" [style.width.%]="healthScore[key].score" [style.background]="getHealthColor(healthScore[key].score)"></div>
+                  </div>
+                  <strong [style.color]="getHealthColor(healthScore[key].score)">{{ healthScore[key].score }}/100</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="healthScore.recommendations?.length" class="reco-list">
+            <div *ngFor="let r of healthScore.recommendations" class="reco-item">{{ r }}</div>
+          </div>
+        </div>
+
+        <!-- Expense Forecast -->
+        <div class="ai-card" *ngIf="expenseForecast">
+          <div class="ai-card-title">📉 Prévision des Dépenses IA</div>
+          <div class="ai-summary">Total: <strong>{{ expenseForecast.totalForecastedExpenses | number:'1.0-0' }} TND</strong> sur {{ expenseForecast.forecastMonths }} mois</div>
+          <div class="forecast-table">
+            <div *ngFor="let m of expenseForecast.monthlyForecasts" class="forecast-row">
+              <span>{{ m.month }}</span>
+              <span>{{ m.projectedExpenses | number:'1.0-0' }} TND</span>
+              <span class="conf-badge">{{ m.confidence }}% confiance</span>
+            </div>
+          </div>
+          <div *ngIf="expenseForecast.categoryForecasts?.length" class="cat-forecast">
+            <div class="cat-forecast-title">Par catégorie</div>
+            <div *ngFor="let c of expenseForecast.categoryForecasts" class="cat-row">
+              <span>{{ getCategoryLabel(c.category) }}</span>
+              <span>{{ c.forecastedAmount | number:'1.0-0' }} TND</span>
+              <span class="trend-tag" [style.background]="getTrendColor(c.trend)">{{ c.trend }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profitability -->
+        <div class="ai-card" *ngIf="profitabilityTrends">
+          <div class="ai-card-title">📊 Tendance de Rentabilité</div>
+          <div class="profit-center">
+            <div class="profit-rate" [style.color]="getTrendColor(profitabilityTrends.overallTrend)">{{ profitabilityTrends.overallGrowthRate | number:'1.0-0' }}%</div>
+            <span class="trend-tag" [style.background]="getTrendColor(profitabilityTrends.overallTrend)">{{ profitabilityTrends.overallTrend }}</span>
+          </div>
+          <div class="metric-list">
+            <div class="metric-row"><span>Profit moy/mois</span><strong>{{ profitabilityTrends.averageMonthlyProfit | number:'1.0-0' }} TND</strong></div>
+            <div class="metric-row"><span>Meilleur mois</span><strong class="amount-pos">{{ profitabilityTrends.bestMonth }}</strong></div>
+            <div class="metric-row"><span>Pire mois</span><strong class="amount-neg">{{ profitabilityTrends.worstMonth }}</strong></div>
+            <div class="metric-row" *ngIf="profitabilityTrends.regression"><span>R² fiabilité</span><strong>{{ profitabilityTrends.regression.rSquared | number:'1.2-2' }}</strong></div>
+          </div>
+          <div *ngIf="profitabilityTrends.regression?.interpretation" class="reco-item">{{ profitabilityTrends.regression.interpretation }}</div>
+        </div>
+
+        <!-- Predictive Alerts -->
+        <div class="ai-card" *ngIf="predictiveAlerts">
+          <div class="ai-card-title">🔮 Alertes Budget Prédictives</div>
+          <div class="ai-summary">{{ predictiveAlerts.totalAlerts || 0 }} alerte(s)</div>
+          <div class="alert-ok" *ngIf="predictiveAlerts.totalAlerts === 0">✅ Aucun budget ne devrait être dépassé.</div>
+          <div *ngFor="let a of predictiveAlerts.alerts" class="pred-alert" [style.border-left-color]="a.severity === 'CRITICAL' ? '#c0392b' : '#e07b39'">
+            <div class="pred-alert-top">
+              <strong>{{ getCategoryLabel(a.category) }}</strong>
+              <span [class]="getSeverityClass(a.severity)" class="status-tag">{{ a.severity }}</span>
+            </div>
+            <div class="pred-alert-body">Dépensé: {{ a.spentSoFar | number:'1.0-0' }} / {{ a.budgetedAmount | number:'1.0-0' }} TND · Fin de mois prévu: <strong class="amount-neg">{{ a.projectedMonthEnd | number:'1.0-0' }}</strong></div>
+            <div class="pred-alert-reco">{{ a.recommendation }}</div>
+          </div>
+        </div>
+
+        <!-- NLP Categorizer -->
+        <div class="ai-card">
+          <div class="ai-card-title">🏷️ Catégorisation NLP</div>
+          <div class="field-group" style="margin-bottom:12px">
+            <label class="field-label">Description de la transaction</label>
+            <input class="field-input" [(ngModel)]="categorizationDesc" placeholder="Ex: Achat semences de blé certifié">
+          </div>
+          <button class="btn-primary btn-sm" (click)="categorize()" [disabled]="!categorizationDesc">Analyser</button>
+          <div *ngIf="categorizationResult" class="nlp-result">
+            <div class="nlp-cat">{{ categorizationResult.suggestedCategory }}</div>
+            <div class="nlp-conf">Confiance: {{ categorizationResult.confidenceScore | number:'1.1-1' }}%</div>
+            <div *ngIf="categorizationResult.allScores?.length" class="nlp-scores">
+              <div *ngFor="let s of $any(categorizationResult.allScores) | slice:0:5" class="nlp-row">
+                <span>{{ getCategoryLabel($any(s).category) }}</span>
+                <span>{{ $any(s).score | number:'1.1-1' }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What-If Simulator -->
+        <div class="ai-card ai-card-wide">
+          <div class="ai-card-title">🔭 Simulateur "Et si…"</div>
+          <form [formGroup]="whatIfForm" (ngSubmit)="runWhatIf()">
+            <div class="form-grid-3">
+              <div class="field-group">
+                <label class="field-label">Engrais (%)</label>
+                <input class="field-input" type="number" formControlName="fertilizerChange" placeholder="-20">
+              </div>
+              <div class="field-group">
+                <label class="field-label">Main d'œuvre (%)</label>
+                <input class="field-input" type="number" formControlName="laborChange" placeholder="10">
+              </div>
+              <div class="field-group">
+                <label class="field-label">Transport (%)</label>
+                <input class="field-input" type="number" formControlName="transportChange" placeholder="-15">
+              </div>
+              <div class="field-group">
+                <label class="field-label">Var. revenus (%)</label>
+                <input class="field-input" type="number" formControlName="incomeChangePercent" placeholder="15">
+              </div>
+              <div class="field-group">
+                <label class="field-label">Durée (mois)</label>
+                <input class="field-input" type="number" formControlName="simulationMonths">
+              </div>
+              <div class="field-group" style="display:flex;align-items:flex-end">
+                <button type="submit" class="btn-primary" style="width:100%" [disabled]="whatIfLoading">
+                  {{ whatIfLoading ? 'En cours…' : '▶ Simuler' }}
+                </button>
+              </div>
+            </div>
+          </form>
+          <div *ngIf="whatIfResult" class="whatif-result" [class.whatif-pos]="whatIfResult.verdict==='POSITIVE'" [class.whatif-neg]="whatIfResult.verdict!=='POSITIVE'">
+            <strong>{{ whatIfResult.verdict }}</strong> — Rev. actuel: {{ whatIfResult.currentMonthlyIncome | number:'1.0-0' }} TND → Simulé: <strong>{{ whatIfResult.simulatedMonthlyIncome | number:'1.0-0' }} TND</strong> · Impact: <strong>{{ whatIfResult.netImpact | number:'1.0-0' }} TND/mois</strong>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

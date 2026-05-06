@@ -1,0 +1,307 @@
+<section class="cw-page" *ngIf="!loading && demande">
+  <div class="cw-page-head">
+    <div>
+      <p class="cw-kicker">Dossier #{{ demande.id }}</p>
+      <h1>Demande crédit agricole</h1>
+      <p class="cw-lead">{{ nextActionHint() }}</p>
+    </div>
+    <div class="cw-head-actions">
+      <span [class]="badgeClass(demande.statut)">{{ demande.statut }}</span>
+      <a routerLink="/back-office/credit/demandes" class="cw-btn cw-btn-ghost">Liste</a>
+    </div>
+  </div>
+
+  <app-cw-workflow-stepper
+    [statut]="demande.statut"
+    [hasCredit]="!!credit"
+    [creditStatut]="credit?.statut ?? null"
+    [echeancesCount]="echeances.length"
+  ></app-cw-workflow-stepper>
+
+  <div class="cw-actions-bar cw-card">
+    <div class="cw-actions-title">Actions</div>
+    <div class="cw-actions-grid">
+      <button type="button" class="cw-btn cw-btn-ghost" *ngIf="canEdit()" (click)="editOpen = true">Modifier</button>
+      <button type="button" class="cw-btn cw-btn-danger-ghost" *ngIf="canDelete()" (click)="deleteDemande()">Supprimer</button>
+      <button type="button" class="cw-btn cw-btn-primary" *ngIf="canStart()" (click)="startInstruction()">Démarrer instruction</button>
+      <button type="button" class="cw-btn cw-btn-primary" *ngIf="canInstr()" (click)="finalizeOpen = true">Finaliser décision</button>
+      <button type="button" class="cw-btn cw-btn-ghost" *ngIf="canArch()" (click)="archive()">Archiver</button>
+      <button type="button" class="cw-btn cw-btn-ghost" *ngIf="canCancel()" (click)="cancelDemande()">Annuler</button>
+    </div>
+    <p class="cw-muted-mini">Les boutons désactivés par statut sont masqués pour refléter les règles backend.</p>
+  </div>
+
+  <div class="cw-layout">
+    <div class="cw-main-col">
+      <!-- Edit modal -->
+      <div class="cw-modal-backdrop" *ngIf="editOpen">
+        <div class="cw-modal">
+          <h3>Modifier la demande</h3>
+          <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="cw-modal-body">
+            <div class="cw-field">
+              <label>Date</label>
+              <input type="date" formControlName="dateDemande" />
+            </div>
+            <div class="cw-field">
+              <label>Montant</label>
+              <input type="number" formControlName="montantDemande" />
+            </div>
+            <div class="cw-field">
+              <label>Description</label>
+              <textarea rows="3" formControlName="description"></textarea>
+            </div>
+            <div class="cw-modal-actions">
+              <button type="button" class="cw-btn cw-btn-ghost" (click)="editOpen = false">Fermer</button>
+              <button type="submit" class="cw-btn cw-btn-primary">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Finalize modal -->
+      <div class="cw-modal-backdrop" *ngIf="finalizeOpen">
+        <div class="cw-modal">
+          <h3>Finaliser la décision</h3>
+          <form [formGroup]="finalizeForm" (ngSubmit)="submitFinalize()" class="cw-modal-body">
+            <div class="cw-field">
+              <label>Décision</label>
+              <select formControlName="decision">
+                <option value="ACCEPTEE">ACCEPTEE</option>
+                <option value="REFUSEE">REFUSEE</option>
+              </select>
+            </div>
+            <div class="cw-field">
+              <label>Commentaire</label>
+              <textarea rows="3" formControlName="commentaire"></textarea>
+            </div>
+            <div class="cw-modal-actions">
+              <button type="button" class="cw-btn cw-btn-ghost" (click)="finalizeOpen = false">Fermer</button>
+              <button type="submit" class="cw-btn cw-btn-primary">Valider</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Pay modal -->
+      <div class="cw-modal-backdrop" *ngIf="payTarget">
+        <div class="cw-modal">
+          <h3>Paiement échéance #{{ payTarget.numeroEcheance }}</h3>
+          <form [formGroup]="payForm" (ngSubmit)="submitPay()" class="cw-modal-body">
+            <p class="cw-muted-mini">Montant dû : {{ payTarget.montantDu | number : '1.2-2' }} TND · Déjà payé : {{ payTarget.montantPaye | number : '1.2-2' }}</p>
+            <div class="cw-field">
+              <label>Montant payé</label>
+              <input type="number" formControlName="montantPaye" />
+            </div>
+            <div class="cw-field">
+              <label>Date paiement</label>
+              <input type="date" formControlName="datePaiement" />
+            </div>
+            <div class="cw-field">
+              <label>Référence</label>
+              <input type="text" formControlName="referencePaiement" placeholder="Virement, chèque…" />
+            </div>
+            <div class="cw-modal-actions">
+              <button type="button" class="cw-btn cw-btn-ghost" (click)="payTarget = null">Fermer</button>
+              <button type="submit" class="cw-btn cw-btn-primary">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Analyse -->
+      <article class="cw-card cw-section" *ngIf="showAnalyseForm()">
+        <div class="cw-section-head">
+          <h2>Analyse de rentabilité</h2>
+          <span class="cw-tag">Scoring</span>
+        </div>
+
+        <div class="cw-score-panel" *ngIf="analyse?.scoreFinal != null">
+          <div>
+            <span class="cw-muted-mini">Score final (serveur)</span>
+            <strong>{{ analyse?.scoreFinal | number : '1.1-1' }} / 100</strong>
+          </div>
+          <ng-container *ngIf="analyse?.recommendation as rec">
+            <div class="cw-rec">
+              <span [class]="recommendationLabel(rec).cls">{{ recommendationLabel(rec).icon }} {{ recommendationLabel(rec).label }}</span>
+            </div>
+          </ng-container>
+        </div>
+
+        <form [formGroup]="analyseForm" (ngSubmit)="submitAnalyse()" class="cw-grid-form">
+          <div class="cw-field">
+            <label>Revenu brut</label>
+            <input type="number" formControlName="revenuBrut" />
+          </div>
+          <div class="cw-field">
+            <label>Coût total</label>
+            <input type="number" formControlName="coutTotal" />
+          </div>
+          <div class="cw-field cw-span-2">
+            <label>Bénéfice net (aperçu)</label>
+            <div class="cw-readonly">{{ (analyseForm.value.revenuBrut || 0) - (analyseForm.value.coutTotal || 0) | number : '1.2-2' }} TND</div>
+          </div>
+
+          <div class="cw-field cw-span-2 cw-gauge-block">
+            <label>Score prédictif (aperçu local)</label>
+            <div class="cw-gauge">
+              <div class="cw-gauge-fill" [style.width.%]="scorePreview().finalScore"></div>
+            </div>
+            <div class="cw-gauge-meta">
+              <span>{{ scorePreview().finalScore | number : '1.1-1' }} pts</span>
+              <span class="cw-risk" [ngClass]="riskLabel(scorePreview().finalScore).cls">{{ riskLabel(scorePreview().finalScore).label }}</span>
+            </div>
+            <div class="cw-rec" [ngClass]="recommendationLabel(scorePreview().recommendation).cls">
+              {{ recommendationLabel(scorePreview().recommendation).icon }} {{ recommendationLabel(scorePreview().recommendation).label }}
+            </div>
+          </div>
+
+          <div class="cw-field">
+            <label>Décision analyste</label>
+            <select formControlName="decision">
+              <option value="ACCEPTEE">ACCEPTEE</option>
+              <option value="REFUSEE">REFUSEE</option>
+              <option value="CONDITIONNELLE">CONDITIONNELLE</option>
+              <option value="EN_ATTENTE">EN_ATTENTE</option>
+              <option value="NON_EVALUEE">NON_EVALUEE</option>
+            </select>
+          </div>
+          <div class="cw-field cw-span-2">
+            <label>Commentaire</label>
+            <textarea rows="3" formControlName="commentaire"></textarea>
+          </div>
+          <div class="cw-span-2">
+            <button type="submit" class="cw-btn cw-btn-primary">{{ analyse ? 'Mettre à jour analyse' : 'Enregistrer analyse' }}</button>
+          </div>
+        </form>
+      </article>
+
+      <!-- Credit -->
+      <article class="cw-card cw-section">
+        <div class="cw-section-head">
+          <h2>Crédit</h2>
+          <span class="cw-tag" *ngIf="credit">{{ credit.statut }}</span>
+        </div>
+
+        <div *ngIf="credit" class="cw-credit-card">
+          <div class="cw-credit-grid">
+            <div><span class="lab">Référence</span><strong>{{ credit.referenceContrat }}</strong></div>
+            <div><span class="lab">Montant</span><strong>{{ credit.montant | number : '1.0-0' }} TND</strong></div>
+            <div><span class="lab">Taux</span><strong>{{ credit.tauxInteret }} %</strong></div>
+            <div><span class="lab">Durée</span><strong>{{ credit.dureeMois }} mois</strong></div>
+            <div><span class="lab">Début</span><strong>{{ credit.dateDebut }}</strong></div>
+            <div><span class="lab">Fin</span><strong>{{ credit.dateFin }}</strong></div>
+          </div>
+        </div>
+
+        <form *ngIf="canCredit()" [formGroup]="creditForm" (ngSubmit)="submitCredit()" class="cw-grid-form cw-mt">
+          <h3 class="cw-span-2">Octroyer le crédit</h3>
+          <div class="cw-field">
+            <label>Montant</label>
+            <input type="number" formControlName="montant" />
+          </div>
+          <div class="cw-field">
+            <label>Taux (%)</label>
+            <input type="number" step="0.1" formControlName="tauxInteret" />
+          </div>
+          <div class="cw-field">
+            <label>Durée (mois)</label>
+            <input type="number" formControlName="dureeMois" />
+          </div>
+          <div class="cw-field">
+            <label>Date début</label>
+            <input type="date" formControlName="dateDebut" />
+          </div>
+          <div class="cw-field">
+            <label>Assurance ID</label>
+            <input type="number" formControlName="assuranceId" />
+          </div>
+          <div class="cw-span-2">
+            <button type="submit" class="cw-btn cw-btn-primary">Créer le crédit</button>
+          </div>
+        </form>
+
+        <div *ngIf="credit" class="cw-mt">
+          <button type="button" class="cw-btn cw-btn-outline" (click)="generateSchedule()" [disabled]="echeances.length > 0">
+            Générer l'échéancier
+          </button>
+          <span class="cw-muted-mini" *ngIf="echeances.length">Échéancier déjà généré.</span>
+        </div>
+      </article>
+
+      <!-- Echeances -->
+      <article class="cw-card cw-section" *ngIf="credit">
+        <div class="cw-section-head">
+          <h2>Échéances &amp; paiements</h2>
+          <span class="cw-tag">{{ echeances.length }} lignes</span>
+        </div>
+
+        <div *ngIf="echeances.length === 0" class="cw-empty-inline">Générez l'échéancier pour voir le tableau d'amortissement.</div>
+
+        <table class="cw-table" *ngIf="echeances.length">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Capital</th>
+              <th>Intérêts</th>
+              <th>Montant dû</th>
+              <th>Payé</th>
+              <th>Statut</th>
+              <th>Retard</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of echeances">
+              <td class="mono">{{ e.numeroEcheance }}</td>
+              <td>{{ e.dateEcheance }}</td>
+              <td>{{ e.capitalDu | number : '1.2-2' }}</td>
+              <td>{{ e.interetsDu | number : '1.2-2' }}</td>
+              <td>{{ e.montantDu | number : '1.2-2' }}</td>
+              <td>{{ e.montantPaye | number : '1.2-2' }}</td>
+              <td><span [class]="echeanceClass(e.statut)">{{ e.statut }}</span></td>
+              <td>
+                <span *ngIf="e.joursRetard">{{ e.joursRetard }} j · Pén. {{ e.penalite | number : '1.2-2' }}</span>
+                <span *ngIf="!e.joursRetard">—</span>
+              </td>
+              <td class="cw-td-actions">
+                <button
+                  type="button"
+                  class="cw-btn-mini"
+                  (click)="openPay(e)"
+                  [disabled]="e.statut === 'PAYEE_A_TEMPS' || e.statut === 'PAYEE_EN_RETARD'"
+                >
+                  Payer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    </div>
+
+    <aside class="cw-side-col">
+      <div class="cw-card cw-timeline-card">
+        <h3>Journal d’activité</h3>
+        <ul class="cw-timeline">
+          <li *ngFor="let t of timeline()">
+            <div class="cw-tl-dot"></div>
+            <div class="cw-tl-body">
+              <div class="cw-tl-title">{{ t.label }}</div>
+              <div class="cw-tl-date">{{ t.at }}</div>
+              <div class="cw-tl-detail" *ngIf="t.detail">{{ t.detail }}</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<div class="cw-page" *ngIf="loading">
+  <div class="cw-detail-skeleton">
+    <div class="cw-skel-bar"></div>
+    <div class="cw-skel-bar short"></div>
+    <div class="cw-skel-panel"></div>
+  </div>
+</div>

@@ -17,6 +17,8 @@ export class UsersListComponent implements OnInit {
   searchTerm = signal('');
   isLoading = signal(true);
   errorMessage = signal('');
+  selectedUser = signal<any>(null);
+  userToDelete = signal<any>(null);
 
   filteredUsers = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
@@ -29,6 +31,14 @@ export class UsersListComponent implements OnInit {
     );
   });
 
+  activeUsersCount = computed(() => 
+    this.users().filter(u => u.status === 'ACTIVE').length
+  );
+
+  inactiveUsersCount = computed(() => 
+    this.users().filter(u => u.status !== 'ACTIVE').length
+  );
+
   ngOnInit() {
     this.fetchUsers();
   }
@@ -39,6 +49,7 @@ export class UsersListComponent implements OnInit {
 
     this.userService.getAllUsers().subscribe({
       next: (data) => {
+        console.log('DEBUG: Received users data:', data);
         const userArray = Array.isArray(data) ? data : (data as any).content || [];
         this.users.set(userArray);
         this.isLoading.set(false);
@@ -63,5 +74,60 @@ export class UsersListComponent implements OnInit {
     if (score > 80) return '#52B788';
     if (score > 50) return '#74C69D';
     return '#95D5B2';
+  }
+
+  openDetail(user: any) {
+    this.selectedUser.set(user);
+  }
+
+  closeDetail() {
+    this.selectedUser.set(null);
+  }
+
+  toggleStatus(user: any) {
+    const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    this.userService.toggleUserStatus(user.id, newStatus).subscribe({
+      next: () => {
+        // Update local state
+        const updated = this.users().map(u => 
+          u.id === user.id ? { ...u, status: newStatus } : u
+        );
+        this.users.set(updated);
+        // Also update the selected user in drawer if open
+        if (this.selectedUser()?.id === user.id) {
+          this.selectedUser.set({ ...user, status: newStatus });
+        }
+      },
+      error: (err) => {
+        console.error('Toggle status failed:', err);
+      }
+    });
+  }
+
+  confirmDelete(user: any) {
+    this.userToDelete.set(user);
+  }
+
+  cancelDelete() {
+    this.userToDelete.set(null);
+  }
+
+  deleteUser() {
+    const user = this.userToDelete();
+    if (!user) return;
+
+    this.userService.deleteUser(user.id).subscribe({
+      next: () => {
+        this.users.set(this.users().filter(u => u.id !== user.id));
+        this.userToDelete.set(null);
+        if (this.selectedUser()?.id === user.id) {
+          this.selectedUser.set(null);
+        }
+      },
+      error: (err) => {
+        console.error('Delete failed:', err);
+        this.userToDelete.set(null);
+      }
+    });
   }
 }

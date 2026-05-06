@@ -1,0 +1,127 @@
+.cw-page h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.cw-lead {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.cw-page-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.cw-btn {
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cw-btn-primary {
+  background: #059669;
+  color: #fff;
+  margin-top: 12px;
+}
+
+.cw-btn-ghost {
+  background: #fff;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.cw-grid-sim {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .cw-grid-sim {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cw-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.cw-card h2 {
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.cw-field {
+  margin-bottom: 12px;
+}
+
+.cw-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cw-field input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.cw-highlight {
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ecfdf5, #fff);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.cw-highlight span {
+  font-size: 13px;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.cw-highlight strong {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.cw-muted {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 10px;
+}
+
+.cw-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.cw-mini-table th,
+.cw-mini-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}

@@ -6,7 +6,22 @@
       <p class="auth-subtitle">Sign in to continue to AgriProtect</p>
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+    <div class="login-mode-toggle">
+      <button 
+        class="mode-btn" 
+        [class.active]="loginMode() === 'credentials'" 
+        (click)="setLoginMode('credentials')">
+        Password
+      </button>
+      <button 
+        class="mode-btn" 
+        [class.active]="loginMode() === 'face'" 
+        (click)="setLoginMode('face')">
+        Face ID
+      </button>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="loginMode() === 'credentials' ? onSubmit() : captureAndLogin()" class="auth-form">
       <div class="form-group">
         <label for="email" class="auth-label">Email</label>
         <input 
@@ -22,43 +37,99 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <div class="label-row">
-          <label for="password" class="auth-label">Password</label>
-          <a routerLink="/auth/forgot-password" class="auth-link">Forgot password?</a>
+      <!-- Password Mode -->
+      <ng-container *ngIf="loginMode() === 'credentials'">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="password" class="auth-label">Password</label>
+            <a routerLink="/auth/forgot-password" class="auth-link">Forgot password?</a>
+          </div>
+          
+          <div class="password-wrapper">
+            <input 
+              [type]="showPassword() ? 'text' : 'password'" 
+              id="password" 
+              formControlName="password" 
+              class="auth-input" 
+              placeholder="••••••••"
+              [class.has-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+            >
+            <button type="button" class="btn-toggle-pwd" (click)="togglePassword()">
+               <svg *ngIf="!showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+               </svg>
+               <svg *ngIf="showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+               </svg>
+            </button>
+          </div>
+          <div class="error-msg" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            Password is required
+          </div>
         </div>
-        
-        <div class="password-wrapper">
-          <input 
-            [type]="showPassword() ? 'text' : 'password'" 
-            id="password" 
-            formControlName="password" 
-            class="auth-input" 
-            placeholder="••••••••"
-            [class.has-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-          >
-          <button type="button" class="btn-toggle-pwd" (click)="togglePassword()">
-             <svg *ngIf="!showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-             </svg>
-             <svg *ngIf="showPassword()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-             </svg>
-          </button>
+      </ng-container>
+
+      <!-- Face ID Mode -->
+      <ng-container *ngIf="loginMode() === 'face'">
+        <div class="biometric-container">
+          <div class="scanner-frame">
+            <div class="scanner-line"></div>
+            <div class="corner t-l"></div>
+            <div class="corner t-r"></div>
+            <div class="corner b-l"></div>
+            <div class="corner b-r"></div>
+            
+            <div class="camera-mask">
+              <video #videoElement autoplay playsinline [muted]="true" class="scanner-video"></video>
+              <canvas #canvasElement style="display:none;"></canvas>
+              <div class="overlay-circle"></div>
+            </div>
+          </div>
+          <p class="face-hint">Align your face within the frame and capture.</p>
         </div>
-        <div class="error-msg" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-          Password is required
-        </div>
-      </div>
+      </ng-container>
 
       <div class="form-error" *ngIf="errorMessage()">
         {{ errorMessage() }}
       </div>
 
-      <button type="submit" class="auth-submit-btn" [disabled]="isLoading()">
-        {{ isLoading() ? 'SIGNING IN...' : 'SIGN IN' }}
+      <button type="submit" class="auth-submit-btn" [disabled]="isLoading() || (loginMode() === 'face' && !stream)">
+        <ng-container *ngIf="loginMode() === 'credentials'">
+          {{ isLoading() ? 'SIGNING IN...' : 'SIGN IN' }}
+        </ng-container>
+        <ng-container *ngIf="loginMode() === 'face'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          {{ isLoading() ? 'VERIFYING...' : 'CAPTURE & LOGIN' }}
+        </ng-container>
       </button>
+
+      <ng-container *ngIf="loginMode() === 'credentials'">
+        <div class="auth-divider">
+          <div class="line-glow"></div>
+          <span class="divider-text">OR CONTINUE WITH</span>
+          <div class="line-glow"></div>
+        </div>
+
+        <div class="social-btns-container">
+          <div class="google-btn-wrapper">
+            <asl-google-signin-button 
+              type="standard" 
+              size="large" 
+              theme="filled_black" 
+              shape="pill"
+              text="signin_with"
+            ></asl-google-signin-button>
+          </div>
+
+          <button type="button" class="facebook-btn" (click)="signInWithFB()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
+            </svg>
+            Continuer avec Facebook
+          </button>
+        </div>
+      </ng-container>
     </form>
 
     <div class="auth-footer">

@@ -1,0 +1,211 @@
+<!-- Header -->
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+  <div>
+    <h4 class="page-title">Tests & Scheduler</h4>
+    <span class="page-subtitle">Simulation des scénarios de rappel, pénalité et suspension de polices</span>
+  </div>
+  <button class="btn btn-cancel" (click)="resetAll()">
+    <i class="feather icon-refresh-ccw"></i> Réinitialiser
+  </button>
+</div>
+
+<!-- Warning banner -->
+<div class="warning-banner">
+  <i class="feather icon-alert-triangle"></i>
+  <div>
+    <strong>Environnement de test uniquement</strong>
+    <p>Ces actions modifient directement les données en base. À utiliser uniquement en développement / recette.</p>
+  </div>
+</div>
+
+<!-- Insurance ID input -->
+<div class="card input-card">
+  <div class="card-body">
+    <div class="id-input-section">
+      <div class="id-input-icon"><i class="feather icon-key"></i></div>
+      <div class="id-input-body">
+        <label class="id-label">ID de la police à tester <span class="required">*</span></label>
+        <input
+          type="text"
+          class="form-control id-input"
+          [(ngModel)]="insuranceId"
+          placeholder="Ex : e9b1add7-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        />
+        <span class="form-hint">Requis pour les 3 premiers tests. Copiez l'ID depuis la page Polices.</span>
+      </div>
+      <div class="id-status" [ngClass]="hasInsuranceId ? 'id-ok' : 'id-missing'">
+        <i class="feather" [ngClass]="hasInsuranceId ? 'icon-check-circle' : 'icon-circle'"></i>
+        {{ hasInsuranceId ? 'ID prêt' : 'ID manquant' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Test Cards Grid -->
+<div class="tests-grid">
+
+  <!-- Test 1 : Rappel 2 jours -->
+  <div class="test-card" [ngClass]="'card-' + results['reminder2days'].status">
+    <div class="test-card-header">
+      <div class="test-icon test-icon-blue"><i class="feather icon-bell"></i></div>
+      <div>
+        <h6 class="test-title">Rappel 2 jours avant</h6>
+        <p class="test-desc">Définit l'échéance à J+2 → déclenche l'envoi d'un email de rappel</p>
+      </div>
+    </div>
+    <div class="test-meta">
+      <span class="test-badge badge-info">ACTIVE → nextPayment = aujourd'hui +2j</span>
+    </div>
+    <div class="test-result" *ngIf="results['reminder2days'].status !== 'idle'">
+      <div *ngIf="results['reminder2days'].status === 'loading'" class="result-loading">
+        <div class="spinner-sm"></div> Appel en cours…
+      </div>
+      <div *ngIf="results['reminder2days'].status === 'success'" class="result-success">
+        <i class="feather icon-check-circle"></i>
+        <pre>{{ results['reminder2days'].message }}</pre>
+        <span class="result-time">{{ results['reminder2days'].timestamp }}</span>
+      </div>
+      <div *ngIf="results['reminder2days'].status === 'error'" class="result-error">
+        <i class="feather icon-x-circle"></i>
+        <pre>{{ results['reminder2days'].message }}</pre>
+      </div>
+    </div>
+    <button class="btn btn-test btn-test-blue"
+            (click)="testReminder2Days()"
+            [disabled]="!hasInsuranceId || results['reminder2days'].status === 'loading'">
+      <i class="feather" [ngClass]="results['reminder2days'].status === 'loading' ? 'icon-loader spin' : 'icon-play'"></i>
+      {{ results['reminder2days'].status === 'loading' ? 'En cours…' : 'Lancer le test' }}
+    </button>
+  </div>
+
+  <!-- Test 2 : Pénalité 7 jours -->
+  <div class="test-card" [ngClass]="'card-' + results['penalty7days'].status">
+    <div class="test-card-header">
+      <div class="test-icon test-icon-orange"><i class="feather icon-alert-circle"></i></div>
+      <div>
+        <h6 class="test-title">Pénalité 7 jours de retard</h6>
+        <p class="test-desc">Définit l'échéance à J-7 → calcule et applique une pénalité</p>
+      </div>
+    </div>
+    <div class="test-meta">
+      <span class="test-badge badge-warning">ACTIVE → nextPayment = aujourd'hui -7j</span>
+    </div>
+    <div class="test-result" *ngIf="results['penalty7days'].status !== 'idle'">
+      <div *ngIf="results['penalty7days'].status === 'loading'" class="result-loading">
+        <div class="spinner-sm"></div> Appel en cours…
+      </div>
+      <div *ngIf="results['penalty7days'].status === 'success'" class="result-success">
+        <i class="feather icon-check-circle"></i>
+        <pre>{{ results['penalty7days'].message }}</pre>
+        <span class="result-time">{{ results['penalty7days'].timestamp }}</span>
+      </div>
+      <div *ngIf="results['penalty7days'].status === 'error'" class="result-error">
+        <i class="feather icon-x-circle"></i>
+        <pre>{{ results['penalty7days'].message }}</pre>
+      </div>
+    </div>
+    <button class="btn btn-test btn-test-orange"
+            (click)="testPenalty7Days()"
+            [disabled]="!hasInsuranceId || results['penalty7days'].status === 'loading'">
+      <i class="feather" [ngClass]="results['penalty7days'].status === 'loading' ? 'icon-loader spin' : 'icon-play'"></i>
+      {{ results['penalty7days'].status === 'loading' ? 'En cours…' : 'Lancer le test' }}
+    </button>
+  </div>
+
+  <!-- Test 3 : Suspension 15 jours -->
+  <div class="test-card" [ngClass]="'card-' + results['suspend15days'].status">
+    <div class="test-card-header">
+      <div class="test-icon test-icon-red"><i class="feather icon-pause-circle"></i></div>
+      <div>
+        <h6 class="test-title">Suspension 15 jours de retard</h6>
+        <p class="test-desc">Définit l'échéance à J-15 → déclenche la suspension automatique</p>
+      </div>
+    </div>
+    <div class="test-meta">
+      <span class="test-badge badge-danger">overdue=true → nextPayment = aujourd'hui -15j</span>
+    </div>
+    <div class="test-result" *ngIf="results['suspend15days'].status !== 'idle'">
+      <div *ngIf="results['suspend15days'].status === 'loading'" class="result-loading">
+        <div class="spinner-sm"></div> Appel en cours…
+      </div>
+      <div *ngIf="results['suspend15days'].status === 'success'" class="result-success">
+        <i class="feather icon-check-circle"></i>
+        <pre>{{ results['suspend15days'].message }}</pre>
+        <span class="result-time">{{ results['suspend15days'].timestamp }}</span>
+      </div>
+      <div *ngIf="results['suspend15days'].status === 'error'" class="result-error">
+        <i class="feather icon-x-circle"></i>
+        <pre>{{ results['suspend15days'].message }}</pre>
+      </div>
+    </div>
+    <button class="btn btn-test btn-test-red"
+            (click)="testSuspend15Days()"
+            [disabled]="!hasInsuranceId || results['suspend15days'].status === 'loading'">
+      <i class="feather" [ngClass]="results['suspend15days'].status === 'loading' ? 'icon-loader spin' : 'icon-play'"></i>
+      {{ results['suspend15days'].status === 'loading' ? 'En cours…' : 'Lancer le test' }}
+    </button>
+  </div>
+
+  <!-- Run Scheduler -->
+  <div class="test-card test-card-scheduler" [ngClass]="'card-' + results['runReminder'].status">
+    <div class="test-card-header">
+      <div class="test-icon test-icon-green"><i class="feather icon-zap"></i></div>
+      <div>
+        <h6 class="test-title">Forcer l'exécution du Scheduler</h6>
+        <p class="test-desc">Lance manuellement <code>checkAndSendReminders()</code> — traite toutes les polices en attente</p>
+      </div>
+    </div>
+    <div class="test-meta">
+      <span class="test-badge badge-success">Indépendant de l'ID — s'applique à toutes les polices</span>
+    </div>
+    <div class="test-result" *ngIf="results['runReminder'].status !== 'idle'">
+      <div *ngIf="results['runReminder'].status === 'loading'" class="result-loading">
+        <div class="spinner-sm"></div> Exécution du scheduler…
+      </div>
+      <div *ngIf="results['runReminder'].status === 'success'" class="result-success">
+        <i class="feather icon-check-circle"></i>
+        <pre>{{ results['runReminder'].message }}</pre>
+        <span class="result-time">{{ results['runReminder'].timestamp }}</span>
+      </div>
+      <div *ngIf="results['runReminder'].status === 'error'" class="result-error">
+        <i class="feather icon-x-circle"></i>
+        <pre>{{ results['runReminder'].message }}</pre>
+      </div>
+    </div>
+    <button class="btn btn-test btn-test-green"
+            (click)="runSchedulerNow()"
+            [disabled]="results['runReminder'].status === 'loading'">
+      <i class="feather" [ngClass]="results['runReminder'].status === 'loading' ? 'icon-loader spin' : 'icon-zap'"></i>
+      {{ results['runReminder'].status === 'loading' ? 'Exécution…' : 'Exécuter maintenant' }}
+    </button>
+  </div>
+
+</div>
+
+<!-- Workflow guide -->
+<div class="card workflow-card">
+  <div class="card-header"><h5><i class="feather icon-git-branch me-2"></i>Workflow de test recommandé</h5></div>
+  <div class="card-body">
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <span class="step-num">1</span>
+        <div><strong>Copiez un ID</strong> depuis la page <a routerLink="/back-office/insurances">Polices</a> et collez-le ci-dessus</div>
+      </div>
+      <div class="workflow-arrow"><i class="feather icon-arrow-right"></i></div>
+      <div class="workflow-step">
+        <span class="step-num">2</span>
+        <div><strong>Lancez un test</strong> (Rappel / Pénalité / Suspension) pour modifier la police</div>
+      </div>
+      <div class="workflow-arrow"><i class="feather icon-arrow-right"></i></div>
+      <div class="workflow-step">
+        <span class="step-num">3</span>
+        <div><strong>Forcez le scheduler</strong> pour traiter immédiatement la police modifiée</div>
+      </div>
+      <div class="workflow-arrow"><i class="feather icon-arrow-right"></i></div>
+      <div class="workflow-step">
+        <span class="step-num">4</span>
+        <div><strong>Vérifiez</strong> votre boîte email et la page <a routerLink="/back-office/dashboard">Dashboard</a></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -27,8 +27,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   userProfileImage = computed(() => {
     const profile = this.userProfile();
     if (profile?.profileImage) {
-      // Use environment.apiUrl but ensure we only have one /agri
-      return `http://localhost:8081/agri/uploads/profiles/${profile.profileImage}`;
+      // Use the new endpoint we created in the backend
+      return `http://localhost:8081/agri/users/images/${profile.profileImage}`;
     }
     return null;
   });
@@ -67,6 +67,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   faceLoading = signal(false);
   faceSuccess = signal('');
   faceError = signal('');
+  isReenrolling = signal(false);
+
+  showEnrollmentForm = computed(() => {
+    const user = this.userProfile();
+    if (!user) return false;
+    return !user.faceEnabled || this.isReenrolling();
+  });
 
   ngOnInit() {
     this.loadProfile();
@@ -140,6 +147,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.errorMsg.set('');
     this.faceSuccess.set('');
     this.faceError.set('');
+    this.isReenrolling.set(false);
   }
 
   onPersonalSubmit() {
@@ -212,7 +220,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   
   async initCamera() {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }
+      });
       setTimeout(() => {
         if (this.videoElement) {
           this.videoElement.nativeElement.srcObject = this.stream;
@@ -252,13 +262,34 @@ export class ProfileComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.faceSuccess.set(res || 'Face enrolled successfully!');
           this.faceLoading.set(false);
+          const current = this.userService.currentUserProfile();
+          if (current) this.userService.currentUserProfile.set({ ...current, faceEnabled: true });
         },
         error: (err) => {
           this.faceError.set(typeof err?.error === 'string' ? err.error : 'Face enrollment failed.');
           this.faceLoading.set(false);
         }
       });
-    }, 'image/jpeg');
+    }, 'image/jpeg', 0.95);
+  }
+
+  onFaceFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (!file) return;
+
+    this.faceLoading.set(true);
+    this.userService.enrollFace(file).subscribe({
+      next: (res) => {
+        this.faceSuccess.set(res || 'Face enrolled successfully from photo!');
+        this.faceLoading.set(false);
+        const current = this.userService.currentUserProfile();
+        if (current) this.userService.currentUserProfile.set({ ...current, faceEnabled: true });
+      },
+      error: (err) => {
+        this.faceError.set(typeof err?.error === 'string' ? err.error : 'Face enrollment failed.');
+        this.faceLoading.set(false);
+      }
+    });
   }
 
   ngOnDestroy() {

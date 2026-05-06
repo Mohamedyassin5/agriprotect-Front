@@ -1,0 +1,68 @@
+<div class="subscribe-page">
+
+  <div class="page-header">
+    <h1 class="page-title">📝 Nouvelle souscription</h1>
+    <p class="page-subtitle">Choisissez votre formule d'assurance agricole</p>
+  </div>
+
+  <!-- Success state -->
+  <div *ngIf="success" class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Souscription enregistrée !</h2>
+    <p>Votre police a été créée. Un email vous sera envoyé pour la signature.</p>
+    <p class="redirect-msg">Redirection vers votre tableau de bord...</p>
+  </div>
+
+  <div *ngIf="!success" class="form-container">
+
+    <!-- Coverage selection -->
+    <div class="form-section">
+      <h2 class="section-title">1. Choisissez votre couverture</h2>
+      <div class="coverage-grid">
+        <div
+          *ngFor="let opt of coverageOptions"
+          [class.selected]="selectedCoverage === opt.value"
+          (click)="selectedCoverage = opt.value"
+          class="coverage-card">
+          <span class="cov-icon">{{ opt.icon }}</span>
+          <div class="cov-content">
+            <span class="cov-label">{{ opt.label }}</span>
+            <span class="cov-desc">{{ opt.desc }}</span>
+          </div>
+          <div class="cov-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment mode selection -->
+    <div class="form-section">
+      <h2 class="section-title">2. Mode de paiement</h2>
+      <div class="payment-modes">
+        <label
+          *ngFor="let mode of paymentModeOptions"
+          [class.selected]="selectedPaymentMode === mode.value"
+          class="payment-mode-card">
+          <input type="radio" name="paymentMode" [value]="mode.value" [(ngModel)]="selectedPaymentMode" />
+          <div class="mode-content">
+            <span class="mode-label">{{ mode.label }}</span>
+            <span class="mode-desc">{{ mode.desc }}</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error" class="error-card">⚠️ {{ error }}</div>
+
+    <!-- Submit -->
+    <button (click)="subscribe()" class="btn-submit" [disabled]="loading">
+      <span *ngIf="!loading">Confirmer la souscription</span>
+      <span *ngIf="loading">⏳ En cours...</span>
+    </button>
+
+    <p class="disclaimer">
+      ⚠️ Après la souscription, vous recevrez un email avec un lien pour signer électroniquement votre contrat.
+    </p>
+  </div>
+
+</div>

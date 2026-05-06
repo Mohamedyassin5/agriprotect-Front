@@ -1,0 +1,53 @@
+:host {
+  --primary: #16a34a; --primary-dark: #15803d;
+  --surface: #ffffff; --surface-2: #f9fafb; --border: #e5e7eb;
+  --text: #111827; --text-muted: #6b7280; --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.list-page { padding: 2rem; max-width: 1000px; margin: 0 auto; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.page-title { font-size: 1.75rem; font-weight: 700; margin: 0; }
+
+.btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; text-decoration: none; transition: all 0.15s; font-family: inherit; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: #9ca3af; }
+.btn-danger { background: #fef2f2; color: #b91c1c; border: 1.5px solid #fecaca; }
+.btn-danger:hover { background: #fee2e2; }
+
+.loading-state { display: flex; justify-content: center; padding: 3rem; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-card { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 1rem 1.25rem; border-radius: var(--radius); }
+
+.empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state p { margin: 0 0 1.5rem; }
+
+.policies-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.policy-card { background: var(--surface); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; border: 1px solid var(--border); transition: box-shadow 0.15s; }
+.policy-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+.card-left { display: flex; flex-direction: column; gap: 0.4rem; min-width: 160px; }
+.policy-num { font-family: monospace; font-weight: 700; font-size: 0.95rem; }
+
+.card-center { display: flex; gap: 2rem; flex: 1; flex-wrap: wrap; }
+.card-stat { display: flex; flex-direction: column; }
+.stat-label { font-size: 0.75rem; color: var(--text-muted); }
+.card-stat strong { font-size: 0.9rem; }
+
+.card-right { display: flex; gap: 0.5rem; align-items: center; }
+
+.status-badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; display: inline-block; }
+.badge-active { background: #dcfce7; color: #16a34a; }
+.badge-pending { background: #fef9c3; color: #854d0e; }
+.badge-overdue { background: #ffedd5; color: #c2410c; }
+.badge-suspended { background: #fee2e2; color: #b91c1c; }
+.badge-completed { background: #e0e7ff; color: #3730a3; }
+.badge-cancelled { background: #f3f4f6; color: #6b7280; }
+
+@media (max-width: 640px) { .list-page { padding: 1rem; } .card-center { gap: 1rem; } }

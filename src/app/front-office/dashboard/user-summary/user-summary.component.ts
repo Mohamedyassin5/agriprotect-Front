@@ -25,7 +25,7 @@ export class UserSummaryComponent implements OnInit {
   userProfileImage = computed(() => {
     const profile = this.user();
     if (profile?.profileImage) {
-      return `http://localhost:8081/agri/uploads/profiles/${profile.profileImage}`;
+      return `http://localhost:8081/agri/users/images/${profile.profileImage}`;
     }
     return 'assets/img/default-avatar.png';
   });

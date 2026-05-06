@@ -1,0 +1,136 @@
+<div class="fo-page animate-in">
+
+  <!-- PAGE HEADER -->
+  <div class="fo-page-header">
+    <div>
+      <h1 class="fo-page-title">Fonds de Solidarité</h1>
+      <p class="fo-page-subtitle">Protégez vos cultures grâce aux fonds mutuels agricoles.</p>
+    </div>
+  </div>
+
+  <!-- TAB NAVIGATION -->
+  <div class="tab-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'browse'" (click)="activeTab = 'browse'">
+      🌍 Explorer les Fonds
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'memberships'" (click)="activeTab = 'memberships'">
+      🛡️ Mes Adhésions
+      <span class="tab-badge" *ngIf="myMemberships.length > 0">{{ myMemberships.length }}</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement en cours...</p>
+  </div>
+
+  <!-- TAB 1: BROWSE ALL FUNDS -->
+  <div *ngIf="!loading && activeTab === 'browse'" class="funds-grid">
+    <div *ngIf="funds.length === 0" class="empty-state">
+      <div class="empty-icon">🏦</div>
+      <h4>Aucun fonds disponible</h4>
+      <p>Les fonds de solidarité seront disponibles prochainement.</p>
+    </div>
+
+    <div *ngFor="let fund of funds" class="fund-card" [class.is-member]="isMember(fund.id!)">
+      <div class="fund-card-top">
+        <div class="fund-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="fund-title-area">
+          <h3 class="fund-name">{{ fund.name }}</h3>
+          <span class="fund-culture-tag">{{ fund.cultureType }}</span>
+        </div>
+        <span *ngIf="isMember(fund.id!)" class="badge-member">✓ Membre</span>
+      </div>
+
+      <div class="fund-stats">
+        <div class="stat-chip">
+          <span class="chip-label">Score min.</span>
+          <span class="chip-val">{{ fund.minScore }}%</span>
+        </div>
+        <div class="stat-chip">
+          <span class="chip-label">Prime</span>
+          <span class="chip-val accent">{{ fund.primeAmount }} TND</span>
+        </div>
+        <div class="stat-chip">
+          <span class="chip-label">Solde</span>
+          <span class="chip-val">{{ fund.currentBalance | number:'1.0-0' }} TND</span>
+        </div>
+      </div>
+
+      <div *ngIf="isMember(fund.id!)" class="membership-mini">
+        <div class="mem-row">
+          <span>Statut adhésion</span>
+          <span class="status-pill status-active">{{ getMembershipInfo(fund.id!).status }}</span>
+        </div>
+        <div class="mem-row">
+          <span>Réduction IA</span>
+          <span class="discount-val">-{{ getMembershipInfo(fund.id!).discountPercentage || 0 }}%</span>
+        </div>
+      </div>
+
+      <div class="fund-actions">
+        <button *ngIf="!isMember(fund.id!)" class="btn-join" (click)="joinFund(fund.id!)" [disabled]="joining === fund.id">
+          {{ joining === fund.id ? 'En cours...' : '+ Rejoindre ce fonds' }}
+        </button>
+        <button *ngIf="isMember(fund.id!)" class="btn-pay" (click)="payPrime(fund.id!)" [disabled]="paying === fund.id">
+          {{ paying === fund.id ? 'Paiement...' : '💳 Payer la Prime' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: MY MEMBERSHIPS -->
+  <div *ngIf="!loading && activeTab === 'memberships'">
+    <div *ngIf="myMemberships.length === 0" class="empty-state">
+      <div class="empty-icon">🛡️</div>
+      <h4>Aucune adhésion active</h4>
+      <p>Rejoignez un fonds de solidarité pour bénéficier de protections et d'indemnisations.</p>
+      <button class="btn-join" (click)="activeTab = 'browse'" style="margin-top:16px;">Explorer les fonds →</button>
+    </div>
+
+    <div *ngIf="myMemberships.length > 0" class="memberships-list">
+      <div *ngFor="let m of myMemberships" class="membership-card">
+        <div class="mc-header">
+          <div class="mc-icon">🛡️</div>
+          <div class="mc-title-area">
+            <h3>{{ m.solidarityFund?.name }}</h3>
+            <span class="mc-culture">{{ m.solidarityFund?.cultureType }}</span>
+          </div>
+          <span class="status-pill" [ngClass]="m.status === 'ACTIVE' ? 'status-active' : 'status-inactive'">
+            {{ m.status }}
+          </span>
+        </div>
+
+        <div class="mc-details">
+          <div class="mc-stat">
+            <span class="mc-label">Date d'adhésion</span>
+            <span class="mc-value">{{ m.dateAdhesion | date:'mediumDate' }}</span>
+          </div>
+          <div class="mc-stat">
+            <span class="mc-label">Prime à payer</span>
+            <span class="mc-value highlight">
+              {{ m.currentPrimeAmount * (1 - (m.discountPercentage || 0) / 100) }} TND
+            </span>
+          </div>
+          <div class="mc-stat">
+            <span class="mc-label">Réduction IA</span>
+            <span class="mc-value discount">-{{ m.discountPercentage || 0 }}%</span>
+          </div>
+          <div class="mc-stat">
+            <span class="mc-label">Dernier paiement</span>
+            <span class="mc-value">{{ (m.lastPaymentDate | date:'shortDate') || 'Aucun' }}</span>
+          </div>
+        </div>
+
+        <div class="mc-footer">
+          <button class="btn-pay-sm" (click)="payPrime(m.solidarityFund?.id)" [disabled]="paying === m.solidarityFund?.id">
+            {{ paying === m.solidarityFund?.id ? 'Paiement...' : '💳 Payer la prime mensuelle' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

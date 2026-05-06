@@ -6,7 +6,7 @@
 /out-tsc
 /bazel-out
 /.angular
-
+/public
 # Node
 /node_modules
 npm-debug.log
@@ -34,13 +34,7 @@ package-lock.json
 *.temp
 
 # Environment / Secret files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.env
-*.env.*
+
 # If you have specific secret files like firebase config or similar
 # src/environments/environment.prod.ts
 
